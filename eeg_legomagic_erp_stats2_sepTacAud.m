@@ -170,7 +170,7 @@ for sleep=[1]
         if sleep
           ssuse=[tr.stageuse+10 23]; % not enough memory for 23, plus is it useful?
           ssuse=[tr.stageuse+10];
-%           ssuse=[12];
+          %           ssuse=[12];
           clear raw*
         else
           ssuse=tr.stageuse+10;
@@ -375,10 +375,10 @@ for sleep=[1]
                   elseif sleep==1
                     freqtest=1:4;
                     [mx,avemind1]=max(mean([squeeze(mean(abs(freqlo_tac4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1)),1)) squeeze(mean(abs(freqlo_aud4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1)),1)) squeeze(mean(abs(freqlo_ms4mscon1_first_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1)),1)) squeeze(mean(abs(freqlo_nul4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1)),1))],2));
-
-%                     % based on simulations, we found this to be indicative of the predominant frequency
-%                     [mx,avemind2]=max(mean([squeeze(abs(mean(freqlo_tac4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_aud4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_ms4mscon1_first_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_nul4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1)))],2));
-%                     freqsleep(ii)=freqtest(avemind2);
+                    
+                    %                     % based on simulations, we found this to be indicative of the predominant frequency
+                    %                     [mx,avemind2]=max(mean([squeeze(abs(mean(freqlo_tac4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_aud4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_ms4mscon1_first_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1))) squeeze(abs(mean(freqlo_nul4mscon1_chanFC_time0{1,3,12}.fourierspctrm(:,1,1:4,1),1)))],2));
+                    %                     freqsleep(ii)=freqtest(avemind2);
                     freqsleep(ii)=2;
                     freqsub(ii)=freqtest(avemind1);
                     timeind=1;
@@ -387,7 +387,7 @@ for sleep=[1]
                     timesub=avemind1;
                     timesubabs=max(1,avemind1-1);
                   end
-
+                  
                   nulang{ll,tt,ss}=angle(freqlo_tNulAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timeind));
                   tacang{ll,tt,ss}=angle(freqlo_tTacAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timeind));
                   audang{ll,tt,ss}=angle(freqlo_tAudAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timeind));
@@ -401,7 +401,7 @@ for sleep=[1]
                   ms4mscon2ang{ll,tt,ss}=angle(freqlo_ms4mscon2_first_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleep));
                   nul4mscon1ang{ll,tt,ss}=angle(freqlo_nul4mscon1_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleep));
                   nul4mscon2ang{ll,tt,ss}=angle(freqlo_nul4mscon2_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleep));
-
+                  
                   nulangIAF{ll,tt,ss}=angle(freqlo_tNulAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
                   tacangIAF{ll,tt,ss}=angle(freqlo_tTacAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
                   audangIAF{ll,tt,ss}=angle(freqlo_tAudAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
@@ -430,7 +430,7 @@ for sleep=[1]
                   ms4mscon2abs{ll,tt,ss}=abs(freqlo_ms4mscon2_first_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleepabs));
                   nul4mscon1abs{ll,tt,ss}=abs(freqlo_nul4mscon1_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleepabs));
                   nul4mscon2abs{ll,tt,ss}=abs(freqlo_nul4mscon2_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsleep(ii),timesleepabs));
-
+                  
                   nulabsIAF{ll,tt,ss}=abs(freqlo_tNulAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
                   tacabsIAF{ll,tt,ss}=abs(freqlo_tTacAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
                   audabsIAF{ll,tt,ss}=abs(freqlo_tAudAlone_chanFC_time0{ll,tt,ss}.fourierspctrm(:,1,freqsub(ii),timeind));
@@ -491,7 +491,7 @@ for sleep=[1]
               %               tacMSmT2bin{ll,tt,ss}=bin_my_angle(tacMSmT2ang{ll,tt,ss},4);
               
               % Set same power limit within participant for all data going in to same contrast
-
+              
               [sortabs,sortind]=sort([tacabs{ll,tt,ss}' audabs{ll,tt,ss}' nulabs{ll,tt,ss}' ms1abs{ll,tt,ss}' ms2abs{ll,tt,ss}']);
               numperbin=floor(length(sortabs)/4);
               for nn=2:4
@@ -513,8 +513,8 @@ for sleep=[1]
               nul4mscon1absbin{ll,tt,ss}=bin_my_abs(nul4mscon1abs{ll,tt,ss},xbin);
               ms4mscon1absbin{ll,tt,ss}=bin_my_abs(ms4mscon1abs{ll,tt,ss},xbin);
               
-%               powdist{ii,ll}=sortabs;
-
+              %               powdist{ii,ll}=sortabs;
+              
               [sortabs,sortind]=sort([tac4mscon2abs{ll,tt,ss}' aud4mscon2abs{ll,tt,ss}' nul4mscon2abs{ll,tt,ss}' ms4mscon2abs{ll,tt,ss}']);
               numperbin=floor(length(sortabs)/4);
               for nn=2:4
@@ -535,7 +535,7 @@ for sleep=[1]
               nulabsIAFbin{ll,tt,ss}=bin_my_abs(nulabsIAF{ll,tt,ss},xbin);
               ms1absIAFbin{ll,tt,ss}=bin_my_abs(ms1absIAF{ll,tt,ss},xbin);
               ms2absIAFbin{ll,tt,ss}=bin_my_abs(ms2absIAF{ll,tt,ss},xbin);
-
+              
               [sortabs,sortind]=sort([tac4mscon1absIAF{ll,tt,ss}' aud4mscon1absIAF{ll,tt,ss}' nul4mscon1absIAF{ll,tt,ss}' ms4mscon1absIAF{ll,tt,ss}']);
               numperbin=floor(length(sortabs)/4);
               for nn=2:4
@@ -545,9 +545,9 @@ for sleep=[1]
               aud4mscon1absIAFbin{ll,tt,ss}=bin_my_abs(aud4mscon1absIAF{ll,tt,ss},xbin);
               nul4mscon1absIAFbin{ll,tt,ss}=bin_my_abs(nul4mscon1absIAF{ll,tt,ss},xbin);
               ms4mscon1absIAFbin{ll,tt,ss}=bin_my_abs(ms4mscon1absIAF{ll,tt,ss},xbin);
-
-%               powIAFdist{ii,ll}=sortabs;
-
+              
+              %               powIAFdist{ii,ll}=sortabs;
+              
               [sortabs,sortind]=sort([tac4mscon2absIAF{ll,tt,ss}' aud4mscon2absIAF{ll,tt,ss}' nul4mscon2absIAF{ll,tt,ss}' ms4mscon2absIAF{ll,tt,ss}']);
               numperbin=floor(length(sortabs)/4);
               for nn=2:4
@@ -570,7 +570,7 @@ for sleep=[1]
               nul4mscon1absallbin{ll,tt,ss}=bin_my_abs(nul4mscon1abs{ll,tt,ss},xbin);
               ms4mscon1absallbin{ll,tt,ss} =bin_my_abs(ms4mscon1abs{ll,tt,ss},xbin);
             end
-
+            
             
             if binonly
               save(['absbin_' num2str(sub{ii}) '_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'*abs*bin','*abs','*absIAF');
@@ -1004,84 +1004,84 @@ for sleep=[1]
                     for bb=1:4
                       if ll<10
                         cfg=[];
-%                         cfg.trials=find(ms1bin{ll,tt,ss}(:,bb));
-%                         tlock_ms1tlock_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(ms2bin{ll,tt,ss}(:,bb));
-% %                         if ~isempty(cfg.trials)
-%                           tlock_ms2tlock_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-% %                         else
-% %                           tlock_ms2tlock_phasebin{ll,tt,ss,bb}=[];
-% %                         end
-
+                        %                         cfg.trials=find(ms1bin{ll,tt,ss}(:,bb));
+                        %                         tlock_ms1tlock_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(ms2bin{ll,tt,ss}(:,bb));
+                        % %                         if ~isempty(cfg.trials)
+                        %                           tlock_ms2tlock_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        % %                         else
+                        % %                           tlock_ms2tlock_phasebin{ll,tt,ss,bb}=[];
+                        % %                         end
+                        
                         cfg.trials=find(ms4mscon1bin{ll,tt,ss}(:,bb));
                         tlock_ms4mscon1_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                         cfg.trials=find(ms4mscon2bin{ll,tt,ss}(:,bb));
                         tlock_ms4mscon2_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-
-%                         cfg.trials=find(ms4mscon1IAFbin{ll,tt,ss}(:,bb));
-%                         tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(ms4mscon2IAFbin{ll,tt,ss}(:,bb));
-% %                         if ~isempty(cfg.trials)
-%                           tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-% %                         else
-% %                           tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=[];
-% %                         end
+                        
+                        %                         cfg.trials=find(ms4mscon1IAFbin{ll,tt,ss}(:,bb));
+                        %                         tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(ms4mscon2IAFbin{ll,tt,ss}(:,bb));
+                        % %                         if ~isempty(cfg.trials)
+                        %                           tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        % %                         else
+                        % %                           tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=[];
+                        % %                         end
                         
                         
                         cfg=[];
-%                         cfg.trials=find(ms1absbin{ll,tt,ss}(:,bb));
-%                         tlock_ms1tlock_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(ms2absbin{ll,tt,ss}(:,bb));
-%                         tlock_ms2tlock_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-
+                        %                         cfg.trials=find(ms1absbin{ll,tt,ss}(:,bb));
+                        %                         tlock_ms1tlock_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(ms2absbin{ll,tt,ss}(:,bb));
+                        %                         tlock_ms2tlock_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        
                         cfg.trials=find(ms4mscon1absbin{ll,tt,ss}(:,bb));
                         tlock_ms4mscon1_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                         cfg.trials=find(ms4mscon2absbin{ll,tt,ss}(:,bb));
-%                         if ~isempty(cfg.trials)
-                          tlock_ms4mscon2_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         else
-%                           tlock_ms4mscon2_absbin{ll,tt,ss,bb}=[];
-%                         end
-
-%                         cfg.trials=find(ms4mscon1absIAFbin{ll,tt,ss}(:,bb));
-%                         tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(ms4mscon2absIAFbin{ll,tt,ss}(:,bb));
-% %                         if ~isempty(cfg.trials)
-%                           tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-% %                         else
-% %                           tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=[];
-% %                         end
+                        %                         if ~isempty(cfg.trials)
+                        tlock_ms4mscon2_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         else
+                        %                           tlock_ms4mscon2_absbin{ll,tt,ss,bb}=[];
+                        %                         end
+                        
+                        %                         cfg.trials=find(ms4mscon1absIAFbin{ll,tt,ss}(:,bb));
+                        %                         tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(ms4mscon2absIAFbin{ll,tt,ss}(:,bb));
+                        % %                         if ~isempty(cfg.trials)
+                        %                           tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        % %                         else
+                        % %                           tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=[];
+                        % %                         end
                         
                       else
                         cfg=[];
-%                         cfg.trials=find(tacbin{ll-20,tt,ss}(:,bb));
-%                         tlock_tactlock_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(tacbin{ll-20,tt,ss}(:,bb));
+                        %                         tlock_tactlock_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                         cfg.trials=find(tac4mscon1bin{ll-20,tt,ss}(:,bb));
                         tlock_tac4mscon1_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                         cfg.trials=find(tac4mscon2bin{ll-20,tt,ss}(:,bb));
                         tlock_tac4mscon2_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-
-%                         cfg.trials=find(tac4mscon1IAFbin{ll-20,tt,ss}(:,bb));
-%                         tlock_tac4mscon1IAF_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(tac4mscon2IAFbin{ll-20,tt,ss}(:,bb));
-%                         tlock_tac4mscon2IAF_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-
+                        
+                        %                         cfg.trials=find(tac4mscon1IAFbin{ll-20,tt,ss}(:,bb));
+                        %                         tlock_tac4mscon1IAF_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(tac4mscon2IAFbin{ll-20,tt,ss}(:,bb));
+                        %                         tlock_tac4mscon2IAF_phasebin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        
                         cfg=[];
-%                         cfg.trials=find(tacabsbin{ll-20,tt,ss}(:,bb));
-% %                         if ~isempty(cfg.trials)
-%                           tlock_tactlock_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-% %                         else
-% %                           tlock_tactlock_absbin{ll-20,tt,ss,bb}=[];
-% %                         end
+                        %                         cfg.trials=find(tacabsbin{ll-20,tt,ss}(:,bb));
+                        % %                         if ~isempty(cfg.trials)
+                        %                           tlock_tactlock_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        % %                         else
+                        % %                           tlock_tactlock_absbin{ll-20,tt,ss,bb}=[];
+                        % %                         end
                         cfg.trials=find(tac4mscon1absbin{ll-20,tt,ss}(:,bb));
                         tlock_tac4mscon1_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                         cfg.trials=find(tac4mscon2absbin{ll-20,tt,ss}(:,bb));
                         tlock_tac4mscon2_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-
-%                         cfg.trials=find(tac4mscon1absIAFbin{ll-20,tt,ss}(:,bb));
-%                         tlock_tac4mscon1IAF_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
-%                         cfg.trials=find(tac4mscon2absIAFbin{ll-20,tt,ss}(:,bb));
-%                         tlock_tac4mscon2IAF_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        
+                        %                         cfg.trials=find(tac4mscon1absIAFbin{ll-20,tt,ss}(:,bb));
+                        %                         tlock_tac4mscon1IAF_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                        %                         cfg.trials=find(tac4mscon2absIAFbin{ll-20,tt,ss}(:,bb));
+                        %                         tlock_tac4mscon2IAF_absbin{ll-20,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                       end
                       %                       % we need to do all analysis here before tac{ll,tt,ss} gets deleted
                       %                       if ll<10
@@ -1234,40 +1234,40 @@ for sleep=[1]
                   if phaset0 && phaset0use
                     for bb=1:4
                       cfg=[];
-%                       cfg.trials=find(audbin{ll-40,tt,ss}(:,bb));
-% %                       if ~isempty(cfg.trials)
-%                         tlock_audtlock_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-% %                       else
-% %                         tlock_audtlock_phasebin{ll-40,tt,ss,bb}=[];
-% %                       end
+                      %                       cfg.trials=find(audbin{ll-40,tt,ss}(:,bb));
+                      % %                       if ~isempty(cfg.trials)
+                      %                         tlock_audtlock_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      % %                       else
+                      % %                         tlock_audtlock_phasebin{ll-40,tt,ss,bb}=[];
+                      % %                       end
                       cfg.trials=find(aud4mscon1bin{ll-40,tt,ss}(:,bb));
                       tlock_aud4mscon1_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                       cfg.trials=find(aud4mscon2bin{ll-40,tt,ss}(:,bb));
-%                       if ~isempty(cfg.trials)
-                        tlock_aud4mscon2_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-%                       else
-%                         tlock_aud4mscon2_phasebin{ll-40,tt,ss,bb}=[];
-%                       end
-%                       cfg.trials=find(aud4mscon1IAFbin{ll-40,tt,ss}(:,bb));
-%                       tlock_aud4mscon1IAF_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-%                       cfg.trials=find(aud4mscon2IAFbin{ll-40,tt,ss}(:,bb));
-% %                       if ~isempty(cfg.trials)
-%                         tlock_aud4mscon2IAF_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-% %                       else
-% %                         tlock_aud4mscon2IAF_phasebin{ll-40,tt,ss,bb}=[];
-% %                       end
-
+                      %                       if ~isempty(cfg.trials)
+                      tlock_aud4mscon2_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      %                       else
+                      %                         tlock_aud4mscon2_phasebin{ll-40,tt,ss,bb}=[];
+                      %                       end
+                      %                       cfg.trials=find(aud4mscon1IAFbin{ll-40,tt,ss}(:,bb));
+                      %                       tlock_aud4mscon1IAF_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      %                       cfg.trials=find(aud4mscon2IAFbin{ll-40,tt,ss}(:,bb));
+                      % %                       if ~isempty(cfg.trials)
+                      %                         tlock_aud4mscon2IAF_phasebin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      % %                       else
+                      % %                         tlock_aud4mscon2IAF_phasebin{ll-40,tt,ss,bb}=[];
+                      % %                       end
+                      
                       cfg=[];
-%                       cfg.trials=find(audabsbin{ll-40,tt,ss}(:,bb));
-%                       tlock_audtlock_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      %                       cfg.trials=find(audabsbin{ll-40,tt,ss}(:,bb));
+                      %                       tlock_audtlock_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                       cfg.trials=find(aud4mscon1absbin{ll-40,tt,ss}(:,bb));
                       tlock_aud4mscon1_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                       cfg.trials=find(aud4mscon2absbin{ll-40,tt,ss}(:,bb));
                       tlock_aud4mscon2_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-%                       cfg.trials=find(aud4mscon1absIAFbin{ll-40,tt,ss}(:,bb));
-%                       tlock_aud4mscon1IAF_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
-%                       cfg.trials=find(aud4mscon2absIAFbin{ll-40,tt,ss}(:,bb));
-%                       tlock_aud4mscon2IAF_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      %                       cfg.trials=find(aud4mscon1absIAFbin{ll-40,tt,ss}(:,bb));
+                      %                       tlock_aud4mscon1IAF_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                      %                       cfg.trials=find(aud4mscon2absIAFbin{ll-40,tt,ss}(:,bb));
+                      %                       tlock_aud4mscon2IAF_absbin{ll-40,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                     end
                   end
                 end
@@ -1368,44 +1368,44 @@ for sleep=[1]
                 if phaset0 && phaset0use
                   for bb=1:4
                     cfg=[];
-%                     cfg.trials=find(nulbin{ll-50,tt,ss}(:,bb));
-% %                     if ~isempty(cfg.trials)
-%                       tlock_nultlock_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-% %                     else
-% %                       tlock_nultlock_phasebin{ll-50,tt,ss,bb}=[];
-% %                     end
+                    %                     cfg.trials=find(nulbin{ll-50,tt,ss}(:,bb));
+                    % %                     if ~isempty(cfg.trials)
+                    %                       tlock_nultlock_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    % %                     else
+                    % %                       tlock_nultlock_phasebin{ll-50,tt,ss,bb}=[];
+                    % %                     end
                     cfg.trials=find(nul4mscon1bin{ll-50,tt,ss}(:,bb));
-%                     if ~isempty(cfg.trials)
-                      tlock_nul4mscon1_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-%                     else
-%                       tlock_nul4mscon1_phasebin{ll-50,tt,ss,bb}=[];
-%                     end
+                    %                     if ~isempty(cfg.trials)
+                    tlock_nul4mscon1_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    %                     else
+                    %                       tlock_nul4mscon1_phasebin{ll-50,tt,ss,bb}=[];
+                    %                     end
                     cfg.trials=find(nul4mscon2bin{ll-50,tt,ss}(:,bb));
-%                     if ~isempty(cfg.trials)
-                      tlock_nul4mscon2_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-%                     else
-%                       tlock_nul4mscon2_phasebin{ll-50,tt,ss,bb}=[];
-%                     end
-%                     cfg.trials=find(nul4mscon1IAFbin{ll-50,tt,ss}(:,bb));
-%                     tlock_nul4mscon1IAF_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-%                     cfg.trials=find(nul4mscon2IAFbin{ll-50,tt,ss}(:,bb));
-%                     tlock_nul4mscon2IAF_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-
+                    %                     if ~isempty(cfg.trials)
+                    tlock_nul4mscon2_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    %                     else
+                    %                       tlock_nul4mscon2_phasebin{ll-50,tt,ss,bb}=[];
+                    %                     end
+                    %                     cfg.trials=find(nul4mscon1IAFbin{ll-50,tt,ss}(:,bb));
+                    %                     tlock_nul4mscon1IAF_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    %                     cfg.trials=find(nul4mscon2IAFbin{ll-50,tt,ss}(:,bb));
+                    %                     tlock_nul4mscon2IAF_phasebin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    
                     cfg=[];
-%                     cfg.trials=find(nulabsbin{ll-50,tt,ss}(:,bb));
-%                     tlock_nultlock_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    %                     cfg.trials=find(nulabsbin{ll-50,tt,ss}(:,bb));
+                    %                     tlock_nultlock_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
                     cfg.trials=find(nul4mscon1absbin{ll-50,tt,ss}(:,bb));
                     tlock_nul4mscon1_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
                     cfg.trials=find(nul4mscon2absbin{ll-50,tt,ss}(:,bb));
                     tlock_nul4mscon2_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-%                     cfg.trials=find(nul4mscon1absIAFbin{ll-50,tt,ss}(:,bb));
-%                     tlock_nul4mscon1IAF_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-%                     cfg.trials=find(nul4mscon2absIAFbin{ll-50,tt,ss}(:,bb));
-% %                     if ~isempty(cfg.trials)
-%                       tlock_nul4mscon2IAF_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
-% %                     else
-% %                       tlock_nul4mscon2IAF_absbin{ll-50,tt,ss,bb}=[];
-% %                     end
+                    %                     cfg.trials=find(nul4mscon1absIAFbin{ll-50,tt,ss}(:,bb));
+                    %                     tlock_nul4mscon1IAF_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    %                     cfg.trials=find(nul4mscon2absIAFbin{ll-50,tt,ss}(:,bb));
+                    % %                     if ~isempty(cfg.trials)
+                    %                       tlock_nul4mscon2IAF_absbin{ll-50,tt,ss,bb}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                    % %                     else
+                    % %                       tlock_nul4mscon2IAF_absbin{ll-50,tt,ss,bb}=[];
+                    % %                     end
                   end
                 end
               end
@@ -1434,18 +1434,18 @@ for sleep=[1]
               if ~isempty(tlock_aud{10,tt,ss}),  tlock_aud{10,tt,ss}=trim_nans(tlock_aud{10,tt,ss}); end
               
               cfg=[];
-              try 
-                tlock_tac9T_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_tac{102,tt,ss}); 
+              try
+                tlock_tac9T_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_tac{102,tt,ss});
               catch
                 tlock_tac9T_tlock{tt,ss}=[];
               end
-              try tlock_aud1A_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_aud{102,tt,ss}); catch 
+              try tlock_aud1A_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_aud{102,tt,ss}); catch
                 tlock_aud1A_tlock{tt,ss}=[];end
-              try tlock_tacT_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_tac{10,tt,ss});   catch 
+              try tlock_tacT_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_tac{10,tt,ss});   catch
                 tlock_tacT_tlock{tt,ss}=[];end
-              try tlock_audA_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_aud{10,tt,ss});   catch 
+              try tlock_audA_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_aud{10,tt,ss});   catch
                 tlock_audA_tlock{tt,ss}=[];end
-              try tlock_nul_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_nul{10,tt,ss});    catch 
+              try tlock_nul_tlock{tt,ss}=ft_timelockanalysis(cfg,tlock_nul{10,tt,ss});    catch
                 tlock_nul_tlock{tt,ss}=[];end
               
               cfg=[];
@@ -1557,35 +1557,35 @@ for sleep=[1]
                 for bb=1:4
                   tlock_tacPaud_4mscon1_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1_phasebin{ll,tt,ss,bb},tlock_aud4mscon1_phasebin{ll,tt,ss,bb});
                   tlock_tacPaud_4mscon2_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2_phasebin{ll,tt,ss,bb},tlock_aud4mscon2_phasebin{ll,tt,ss,bb});
-%                   tlock_tacPaud_4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb},tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb});
-%                   try
-%                     tlock_tacPaud_4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb},tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb});
-%                   catch
-%                     tlock_tacPaud_4mscon2IAF_phasebin{ll,tt,ss,bb}=[];
-%                   end
+                  %                   tlock_tacPaud_4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb},tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb});
+                  %                   try
+                  %                     tlock_tacPaud_4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb},tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb});
+                  %                   catch
+                  %                     tlock_tacPaud_4mscon2IAF_phasebin{ll,tt,ss,bb}=[];
+                  %                   end
                   
                   tlock_tac4mscon1_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_tac4mscon2_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_aud4mscon1_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_aud4mscon2_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   try tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'}); catch end
- 
+                  %                   tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   try tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'}); catch end
+                  
                   tlock_tacPaud_4mscon1_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1_absbin{ll,tt,ss,bb},tlock_aud4mscon1_absbin{ll,tt,ss,bb});
                   tlock_tacPaud_4mscon2_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2_absbin{ll,tt,ss,bb},tlock_aud4mscon2_absbin{ll,tt,ss,bb});
-%                   tlock_tacPaud_4mscon1IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb},tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb});
-%                   tlock_tacPaud_4mscon2IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb},tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb});
+                  %                   tlock_tacPaud_4mscon1IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb},tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb});
+                  %                   tlock_tacPaud_4mscon2IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb},tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb});
                   
                   tlock_tac4mscon1_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_tac4mscon2_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_aud4mscon1_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_aud4mscon2_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_tac4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_aud4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
                 end
               end
             else
@@ -1617,31 +1617,31 @@ for sleep=[1]
                 for bb=1:4
                   tlock_tacMSpN_4mscon1_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1_phasebin{ll,tt,ss,bb},tlock_nul4mscon1_phasebin{ll,tt,ss,bb});
                   tlock_tacMSpN_4mscon2_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2_phasebin{ll,tt,ss,bb},tlock_nul4mscon2_phasebin{ll,tt,ss,bb});
-%                   tlock_tacMSpN_4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb},tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb});
-%                   tlock_tacMSpN_4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb},tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb});
+                  %                   tlock_tacMSpN_4mscon1IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb},tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb});
+                  %                   tlock_tacMSpN_4mscon2IAF_phasebin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb},tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb});
                   
                   tlock_ms4mscon1_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_ms4mscon2_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_nul4mscon1_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_nul4mscon2_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2IAF_phasebin{ll,tt,ss,bb},{'var' 'dof'});
                   
                   tlock_tacMSpN_4mscon1_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1_absbin{ll,tt,ss,bb},tlock_nul4mscon1_absbin{ll,tt,ss,bb});
                   tlock_tacMSpN_4mscon2_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2_absbin{ll,tt,ss,bb},tlock_nul4mscon2_absbin{ll,tt,ss,bb});
-%                   tlock_tacMSpN_4mscon1IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb},tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb});
-%                   tlock_tacMSpN_4mscon2IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb},tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb});
+                  %                   tlock_tacMSpN_4mscon1IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb},tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb});
+                  %                   tlock_tacMSpN_4mscon2IAF_absbin{ll,tt,ss,bb}=ft_math(cfg,tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb},tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb});
                   
                   tlock_ms4mscon1_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_ms4mscon2_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_nul4mscon1_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1_absbin{ll,tt,ss,bb},{'var' 'dof'});
                   tlock_nul4mscon2_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
-%                   tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_ms4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon1IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
+                  %                   tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb}=rmfield(tlock_nul4mscon2IAF_absbin{ll,tt,ss,bb},{'var' 'dof'});
                 end
               end
             else
@@ -2371,15 +2371,15 @@ subuseind=0;
 for ii=subuse
   subuseind=subuseind+1;
   cd([edir sub{ii} ])
-%   try
-    load(['absbin_' sub{ii} '_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat']);
-%   catch
-%     if trialkc==0
-%       load(['absbin_' sub{ii} '_sleep' num2str(sleep) '.mat']);
-%     else
-%       error('where is the file?')
-%     end
-%   end
+  %   try
+  load(['absbin_' sub{ii} '_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat']);
+  %   catch
+  %     if trialkc==0
+  %       load(['absbin_' sub{ii} '_sleep' num2str(sleep) '.mat']);
+  %     else
+  %       error('where is the file?')
+  %     end
+  %   end
   
   poweach4{subuseind}=[aud4mscon1abs{5,3,12}; tac4mscon1abs{5,3,12}; nul4mscon1abs{5,3,12}; ms4mscon1abs{5,3,12}]';
   poweach10{subuseind}=[aud4mscon1abs{5,3,12}; tac4mscon1abs{5,3,12}; nul4mscon1abs{5,3,12}; ms4mscon1abs{1,3,12}; ms4mscon1abs{3,3,12}; ms4mscon1abs{4,3,12}; ms4mscon1abs{5,3,12}; ms4mscon1abs{6,3,12}; ms4mscon1abs{7,3,12}; ms4mscon1abs{9,3,12}]';
@@ -2397,14 +2397,14 @@ for ii=subuse
   ms6each{subuseind}=ms4mscon1abs{6,3,12}';
   ms7each{subuseind}=ms4mscon1abs{7,3,12}';
   ms9each{subuseind}=ms4mscon1abs{9,3,12}';
-
+  
   for ll=soalist
     audbineach(:,ll,subuseind)=mean(aud4mscon1absbin{ll,3,12});
     tacbineach(:,ll,subuseind)=mean(tac4mscon1absbin{ll,3,12});
     nulbineach(:,ll,subuseind)=mean(nul4mscon1absbin{ll,3,12});
     ms1bineach(:,ll,subuseind)=mean(ms4mscon1absbin{ll,3,12});
   end
-
+  
 end % ii
 
 thresh=.05;
@@ -2451,7 +2451,7 @@ subplot(2,5,7);hist([ms5each{:}],[0:10 20]);
 subplot(2,5,8);hist([ms6each{:}],[0:10 20]);
 subplot(2,5,9);hist([ms7each{:}],[0:10 20]);
 subplot(2,5,10);hist([ms9each{:}],[0:10 20]);
-  
+
 
 
 
@@ -3252,20 +3252,20 @@ for ss=10:12
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Tactile alone');end
   if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_audA_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_audA_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Auditory alone');end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Null');end
   if ss==12,lg=legend({'Top half (Part 2, P200-N100)' 'Bottom half (Part 2, P200-N100)'});set(lg,'fontsize',14);end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
 end
 print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1.png'],'-dpng');
 print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1.eps'],'-depsc');
@@ -3317,21 +3317,21 @@ for ss=10:12
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Tactile alone');end
   if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
   subplot(3,3,2+(ss-10)*3);
   for ii=1:length(sortplot),plot(time,squeeze(tlock_audA_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
   hold on;
   plot(time,squeeze(nanmean(tlock_audA_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,:),5)),'k','LineWidth',3');
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Auditory alone');end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
   subplot(3,3,3+(ss-10)*3);
   for ii=1:length(sortplot),plot(time,squeeze(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
   hold on;
   plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,:),5)),'k','LineWidth',3');
   if ss==12,xlabel('Time (s)');end
   if ss==10,title('Null');end
-      set(gca,'FontSize',20)
+  set(gca,'FontSize',20)
 end
 print(1,[fdir 'unisensory_sortedWideP2N1_sleep1.png'],'-dpng');
 print(1,[fdir 'unisensory_sortedWideP2N1_sleep1.eps'],'-depsc');
@@ -3445,6 +3445,7 @@ for ss=10:12
     statt_nultopbotWwideF{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWwide{ss,tk},   tlock_nul_gndavgbotWwide{ss,tk});
   end
 end
+
 
 %% More testing of tactile-alone response, using tacaloneproc=1 flag, phase relationship
 
@@ -3614,7 +3615,7 @@ for sleep=[1]
       close all
       figind=1;
       
-%       for ll=soalist
+      %       for ll=soalist
       for ll=[5]
         %   for tt=1:4
         clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch*
@@ -4888,6 +4889,319 @@ save([edir 'tlock_numtrlltt.mat'],'numtr*');
 
 close all
 
+
+%% Compare Stages during 'sleep' data (W vs N1 vs N2)
+% This had been written and then lost during a file transfer.
+% Thus only bits of original code remain or are gussed at as to how it was set up.
+% At least this was discovered only a few days after it was written, so still very fresh in my mind!
+
+% To generate
+% tlock_statmc_STAGECOMP_sleep1_ss12_iter11_trialkc-1.mat
+% tlock_grind_STAGECOMP_sleep1_iter11.mat
+
+plotflag=0;
+printflag=0;
+statsflag=1;
+soalist=[1 3 4 5 6 7 9];
+tophalfflag=0;
+
+
+chanuse_sleep0={'all' '-F4'};
+chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
+tt=3;
+
+sleep=1;
+chanuse=chanuse_sleep1;
+iteruse=11;
+iter=iteruse;
+trialkc=-1;
+usetr=1;
+
+clearvars -except ll tt sub edir ddir ii* sleep *flag soa* chanuse* iter* usetr trial* synch*
+tacaud=1;
+if sleep
+  if tophalfflag
+    load sortTacN2.mat
+    subuseall=sort(sortTacN2(end-8:end)');
+  else
+    subuseall=setdiff(iiBuse,[3:7]);
+  end
+else
+  subuseall=iiSuse;
+end
+
+submin=subuseall(1)-1;
+subuseind=0;
+%         subuse=subuseall;
+subuse=nan(12,length(subuseall));
+subuse(10:12,:)=repmat(subuseall,[3 1]);
+
+
+for ll=soalist
+  for ii=subuseall
+    subuseind=subuseind+1;
+    cd([edir sub{ii} ])
+    
+    load(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
+    tk1=load(['trialkept_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter)  '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+    
+    
+    for ss=10:12
+      
+      numtrt(ll,tt,ss,subuseind)=numt_trials(ll,tt,ss); % does this need to be per 'sleep01' as well?
+      if numtrt(ll,tt,ss,subuseind)<20
+        subuse(ss,subuseind)=nan;
+      end
+      
+      if ~isnan(subuse(ss,subuseind))
+        
+        tlock_tacPaud_each{ss}{subuseind}=tlock_tacPaud{ll,tt,ss};
+        tlock_tacMSpN_each{ss}{subuseind}=tlock_tacMSpN{ll,tt,ss};
+        tlock_MStlock_each{ss}{subuseind}=tlock_tMSAlone{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+        tlock_tactlock_each{ss}{subuseind}=tlock_tTacAlone{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+        tlock_audtlock_each{ss}{subuseind}=tlock_tAudAlone{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+        tlock_nulttlock_each{ss}{subuseind}=tlock_tNulAlone{ll,tt,ss}; % ll+50 is nul, tac-locked
+        
+        cfg=[];
+        cfg.operation='subtract';
+        cfg.parameter='avg';
+        tlock_tacVSnul_each{ss}{subuseind}=ft_math(cfg,tlock_tTacAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        tlock_audVSnul_each{ss}{subuseind}=ft_math(cfg,tlock_tAudAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        tlock_msVSnul_each{ss}{subuseind}=ft_math(cfg,tlock_tMSAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+      end
+    end % ss
+    
+    clear tlock*N tlock*tac tlock*aud
+  end % ii
+  subuseindfinal=subuseind
+  
+  
+  useAll=~isnan(subuse(10,:));
+  useN1N2=~isnan(subuse(11,:));
+  
+  for ss=10:12
+    
+    cfg=[];
+    cfg.keepindividual='yes';
+    cfg.channel=chanuse;
+    grind_tacPaud_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tacPaud_each{ss}{useAll});
+    grind_tacMSpN_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tacMSpN_each{ss}{useAll});
+    grind_tactlock_stageAll_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_each{ss}{useAll});
+    grind_audtlock_stageAll_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{ss}{useAll});
+    grind_nultlock_stageAll_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{ss}{useAll});
+    grind_MStlock_stageAll_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{ss}{useAll});
+    
+    if ss>10
+      grind_tacPaud_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tacPaud_each{ss}{useN1N2});
+      grind_tacMSpN_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tacMSpN_each{ss}{useN1N2});
+      grind_tactlock_stageN1N2_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_each{ss}{useN1N2});
+      grind_audtlock_stageN1N2_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{ss}{useN1N2});
+      grind_nultlock_stageN1N2_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{ss}{useN1N2});
+      grind_MStlock_stageN1N2_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{ss}{useN1N2});
+    end
+    
+    cfg=[];
+    cfg.channel=chanuse;
+    grave_tacPaud_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tacPaud_each{ss}{useAll});
+    grave_tacMSpN_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tacMSpN_each{ss}{useAll});
+    grave_tactlock_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_each{ss}{useAll});
+    grave_audtlock_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{ss}{useAll});
+    grave_nultlock_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{ss}{useAll});
+    grave_MStlock_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{ss}{useAll});
+    
+    grave_tacVSnul_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_tacVSnul_each{ss}{useAll});
+    grave_audVSnul_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_audVSnul_each{ss}{useAll});
+    grave_msVSnul_stageAll{ss}=ft_timelockgrandaverage(cfg,tlock_msVSnul_each{ss}{useAll});
+    
+    if ss>10
+      grave_tacPaud_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tacPaud_each{ss}{useN1N2});
+      grave_tacMSpN_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tacMSpN_each{ss}{useN1N2});
+      grave_tactlock_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_each{ss}{useN1N2});
+      grave_audtlock_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{ss}{useN1N2});
+      grave_nultlock_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{ss}{useN1N2});
+      grave_MStlock_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{ss}{useN1N2});
+      
+      grave_tacVSnul_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_tacVSnul_each{ss}{useN1N2});
+      grave_audVSnul_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_audVSnul_each{ss}{useN1N2});
+      grave_msVSnul_stageN1N2{ss}=ft_timelockgrandaverage(cfg,tlock_msVSnul_each{ss}{useN1N2});
+    end
+    
+    finduseAll=find(useAll);
+    finduseN1N2=find(useN1N2);
+    cfg=[];
+    cfg.operation='subtract';
+    cfg.parameter='avg';
+    cfg.channel=chanuse;
+    for ii=1:length(find(useAll))
+      tlock_TPA_MSPN_stageAll{ss}{ii}=ft_math(cfg,tlock_tacPaud_each{ss}{finduseAll(ii)},tlock_tacMSpN_each{ss}{finduseAll(ii)});
+    end
+    if ss>10
+      for ii=1:length(find(useN1N2))
+        tlock_TPA_MSPN_stageN1N2{ss}{ii}=ft_math(cfg,tlock_tacPaud_each{ss}{finduseN1N2(ii)},tlock_tacMSpN_each{ss}{finduseN1N2(ii)});
+      end
+    end
+    cfg=[];
+    cfg.channel=chanuse;
+    grave_TPA_MSPN_stageAll{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_stageAll{ss}{:});
+    if ss>10
+      grave_TPA_MSPN_stageN1N2{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_stageN1N2{ss}{:});
+    end
+    cfg.keepindividual='yes';
+    grind_TPA_MSPN_stageAll{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_stageAll{ss}{:});
+    if ss>10
+      grind_TPA_MSPN_stageN1N2{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_stageN1N2{ss}{:});
+    end
+    
+    %     cfg=[];
+    %     cfg.latency=[-.5 1];
+    %     grind_tacPaud_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacPaud{ss});
+    %     grind_tacMSpN_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacMSpN{ss});
+    %     grind_tacPaud_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacPaud{ss});
+    %     grind_tacMSpN_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacMSpN{ss});
+    
+  end %ss
+  
+  
+  if statsflag
+    load eeg1010_neighb
+    nsuball=length(find(sum(isnan(subuse(10:12,:)))==0));
+    nsubN1N2=length(find(sum(isnan(subuse(10:12,:)))<2));
+    
+    
+    cfg=[];
+    if ll==1 || ll==3 || ll==4 || ll==5
+      cfg.latency=[.1 .45];
+    elseif ll==6
+      cfg.latency=[.12 .47];
+    elseif ll==7
+      cfg.latency=[.17 .52];
+    elseif ll==9
+      cfg.latency=[.6 .95];
+    end
+    cfg.channel=chanuse;
+    cfg.neighbours=neighbours;
+    cfg.parameter='individual';
+    cfg.method='montecarlo';
+    cfg.numrandomization=2000;
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.minnbchan = 2;
+    cfg.statistic='depsamplesT';
+    cfg.ivar=1;
+    cfg.uvar=2;
+    
+    cfg.design=zeros(2,2*nsuball);
+    cfg.design(1,:)=[ones(1,nsuball) 2*ones(1,nsuball)];
+    cfg.design(2,:)=[1:nsuball 1:nsuball];
+    
+    statt_mc_WN1{ll}=ft_timelockstatistics(cfg,grind_TPA_MSPN_stageAll{ll,tt,11},grind_TPA_MSPN_stageAll{ll,tt,10});
+    statt_ms_early_WN1{ll}=ft_timelockstatistics(cfg,grind_MStlock_stageAll_save{ll,tt,11},grind_MStlock_stageAll_save{ll,tt,10});
+    
+    cfg.design=zeros(2,2*nsubN1N2);
+    cfg.design(1,:)=[ones(1,nsubN1N2) 2*ones(1,nsubN1N2)];
+    cfg.design(2,:)=[1:nsubN1N2 1:nsubN1N2];
+    
+    statt_mc_N1N2{ll}=ft_timelockstatistics(cfg,grind_TPA_MSPN_stageN1N2{ll,tt,11},grind_TPA_MSPN_stageN1N2{ll,tt,12});
+    statt_ms_early_N1N2{ll}=ft_timelockstatistics(cfg,grind_MStlock_stageN1N2_save{ll,tt,11},grind_MStlock_stageN1N2_save{ll,tt,12});
+    
+    if ll==1
+      cfg.latency=[.1 .45]-.5;
+    elseif ll==3
+      cfg.latency=[.1 .45]-.07;
+    elseif ll==4
+      cfg.latency=[.1 .45]-.02;
+    elseif ll==5
+      cfg.latency=[.1 .45];
+    elseif ll==6
+      cfg.latency=[.12 .47];
+    elseif ll==7
+      cfg.latency=[.17 .52];
+    elseif ll==9
+      cfg.latency=[.6 .95];
+    end
+    
+    statt_aud_early_N1N2{ll}=ft_timelockstatistics(cfg,grind_audtlock_stageN1N2_save{ll,tt,11},grind_audtlock_stageN1N2_save{ll,tt,12});
+    
+    cfg.design=zeros(2,2*nsuball);
+    cfg.design(1,:)=[ones(1,nsuball) 2*ones(1,nsuball)];
+    cfg.design(2,:)=[1:nsuball 1:nsuball];
+    
+    statt_aud_early_WN1{ll}=ft_timelockstatistics(cfg,grind_audtlock_stageAll_save{ll,tt,11},grind_audtlock_stageAll_save{ll,tt,10});
+    
+    cfg.latency=[.1 .45];
+    
+    statt_tac_early_WN1{ll}=ft_timelockstatistics(cfg,grind_tactlock_stageAll_save{ll,tt,11},grind_tactlock_stageAll_save{ll,tt,10});
+    
+    cfg.design=zeros(2,2*nsubN1N2);
+    cfg.design(1,:)=[ones(1,nsubN1N2) 2*ones(1,nsubN1N2)];
+    cfg.design(2,:)=[1:nsubN1N2 1:nsubN1N2];
+    
+    statt_tac_early_N1N2{ll}=ft_timelockstatistics(cfg,grind_tactlock_stageN1N2_save{ll,tt,11},grind_tactlock_stageN1N2_save{ll,tt,12});
+    
+    save([edir 'tlock_statmc_STAGECOMP_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+    save([edir 'tlock_grind_STAGECOMP_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'grind*');
+    
+    cfg=[];
+    cfg.neighbours=neighbours;
+    cfg.parameter='individual';
+    cfg.method='montecarlo';
+    cfg.numrandomization=1000;
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.minnbchan = 2;
+    cfg.statistic='depsamplesFunivariate';
+    cfg.ivar=1;
+    cfg.uvar=2;
+    cfg.tail=1;
+    cfg.design=zeros(2,3*nsuball);
+    cfg.design(1,:)=[ones(1,nsuball) 2*ones(1,nsuball) 3*ones(1,nsuball)];
+    cfg.design(2,:)=[1:nsuball 1:nsuball 1:nsuball];
+    
+    if ll==1 || ll==3 || ll==4 || ll==5
+      cfg.latency=[.1 .45];
+    elseif ll==6
+      cfg.latency=[.12 .47];
+    elseif ll==7
+      cfg.latency=[.17 .52];
+    elseif ll==9
+      cfg.latency=[.6 .95];
+    end
+    
+    statt_mc_All{ll}=ft_timelockstatistics(cfg,grind_TPA_MSPN_stageAll{ll,tt,10},grind_TPA_MSPN_stageAll{ll,tt,11},grind_TPA_MSPN_stageAll{ll,tt,12});
+    statt_ms_early_All{ll}=ft_timelockstatistics(cfg,grind_MStlock_stageAll_save{ll,tt,10},grind_MStlock_stageAll_save{ll,tt,11},grind_MStlock_stageAll_save{ll,tt,12});
+    
+    if ll==1
+      cfg.latency=[.1 .45]-.5;
+    elseif ll==3
+      cfg.latency=[.1 .45]-.07;
+    elseif ll==4
+      cfg.latency=[.1 .45]-.02;
+    elseif ll==5
+      cfg.latency=[.1 .45];
+    elseif ll==6
+      cfg.latency=[.12 .47];
+    elseif ll==7
+      cfg.latency=[.17 .52];
+    elseif ll==9
+      cfg.latency=[.6 .95];
+    end
+    
+    statt_aud_early_All{ll}=ft_timelockstatistics(cfg,grind_audtlock_stageAll_save{ll,tt,10},grind_audtlock_stageAll_save{ll,tt,11},grind_audtlock_stageAll_save{ll,tt,12});
+    
+    cfg.latency=[.1 .45];
+    
+    statt_tac_early_All{ll}=ft_timelockstatistics(cfg,grind_tactlock_stageAll_save{ll,tt,10},grind_tactlock_stageAll_save{ll,tt,11},grind_tactlock_stageAll_save{ll,tt,12});
+    
+    save(['tlock_statmc_STAGECOMP_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+  end
+  
+end  %ll
+
+
+
+
 %% Assess reproducibility of stats output
 if runagain==0
   stat1=load('tlock_statmc_sleep0');
@@ -5008,13 +5322,13 @@ for iter=11
     load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
   end
   for ll=[1 3 4 5 6 7 9]
-    try mcposp(ll,iter)=statt_mc{ll,tt,ss}.posclusters(1).prob; catch 
+    try mcposp(ll,iter)=statt_mc{ll,tt,ss}.posclusters(1).prob; catch
       mcposp(ll,iter)=nan; end
-    try mcnegp(ll,iter)=statt_mc{ll,tt,ss}.negclusters(1).prob;  catch 
+    try mcnegp(ll,iter)=statt_mc{ll,tt,ss}.negclusters(1).prob;  catch
       mcnegp(ll,iter)=nan; end
-    try snposp(ll,iter)=statt_synch{ll,tt,ss}.posclusters(1).prob;  catch 
+    try snposp(ll,iter)=statt_synch{ll,tt,ss}.posclusters(1).prob;  catch
       snposp(ll,iter)=nan; end
-    try snnegp(ll,iter)=statt_synch{ll,tt,ss}.negclusters(1).prob;  catch 
+    try snnegp(ll,iter)=statt_synch{ll,tt,ss}.negclusters(1).prob;  catch
       snnegp(ll,iter)=nan; end
     if plotflag
       figure(ll);
@@ -6446,10 +6760,10 @@ for ii=iiuse
     end % ll
     
     
-%     tac5_dof(bb,subuseind)=tlockavg_tac5_phasebin{bb}{subuseind}.dof(18,1000);
-%     aud5_dof(bb,subuseind)=tlockavg_aud5_phasebin{bb}{subuseind}.dof(18,1000);
-%     nul5_dof(bb,subuseind)=tlockavg_nul5_phasebin{bb}{subuseind}.dof(18,1000);
-%     ms15_dof(bb,subuseind)=tlockavg_ms15_phasebin{bb}{subuseind}.dof(18,1000);
+    %     tac5_dof(bb,subuseind)=tlockavg_tac5_phasebin{bb}{subuseind}.dof(18,1000);
+    %     aud5_dof(bb,subuseind)=tlockavg_aud5_phasebin{bb}{subuseind}.dof(18,1000);
+    %     nul5_dof(bb,subuseind)=tlockavg_nul5_phasebin{bb}{subuseind}.dof(18,1000);
+    %     ms15_dof(bb,subuseind)=tlockavg_ms15_phasebin{bb}{subuseind}.dof(18,1000);
   end
   
   subuseind=subuseind+1;
@@ -6483,7 +6797,7 @@ for bb=1:4,
   grave_audMnul_pb{bb}.avg=squeeze(mean(grave_audMnul_pb{bb}.individual,1))
   grave_audMnul_pb{bb}=rmfield(grave_audMnul_pb{bb},'individual');
   grave_audMnul_pb{bb}.dimord='chan_time';
-
+  
   for ll=soalist
     cfg=[];
     grave_msllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_phasebin{ll,bb}{:})
@@ -6507,39 +6821,39 @@ for bb=1:4,
     grave_msMnul1_pb{ll,bb}.avg=squeeze(mean(grave_msMnul1_pb{ll,bb}.individual,1))
     grave_msMnul1_pb{ll,bb}=rmfield(grave_msMnul1_pb{ll,bb},'individual');
     grave_msMnul1_pb{ll,bb}.dimord='chan_time';
-
+    
     grave_msMnul2_pb{ll,bb}=grind_msMnul2_pb{ll,bb};
     grave_msMnul2_pb{ll,bb}.avg=squeeze(mean(grave_msMnul2_pb{ll,bb}.individual,1))
     grave_msMnul2_pb{ll,bb}=rmfield(grave_msMnul2_pb{ll,bb},'individual');
     grave_msMnul2_pb{ll,bb}.dimord='chan_time';
   end % ll
 end % bb
-  save([edir 'grind_pb_uninul.mat'],'grind*')
+save([edir 'grind_pb_uninul.mat'],'grind*')
 
 if plotflag
-    chanplot{1}={'Fz' 'FC1' 'FC2' 'F1' 'F2' 'C1' 'C2' 'Cz'};
-
-    cfg=[];
-    cfg.channel=chanplot{1};
-    cfg.xlim=[-0.5 1.1];
-    cfg.ylim=[-7 7];
-    figure(12);
-    ft_singleplotER(cfg, grave_tacMnul_pb{:})
-    legend({'Peak' 'P to T' 'Trough' 'T to P'})
-    %   xlabel(['Tactile at time 0, ' sleepcond])
-    %   ylabel(chanlabel{cc})
-    title('T-N')
+  chanplot{1}={'Fz' 'FC1' 'FC2' 'F1' 'F2' 'C1' 'C2' 'Cz'};
   
-    cfg=[];
-    cfg.channel=chanplot{1};
-    cfg.xlim=[-0.5 1.1];
-    cfg.ylim=[-7 7];
-    figure(11);
-    ft_singleplotER(cfg, grave_audMnul_pb{:})
-    legend({'Peak' 'P to T' 'Trough' 'T to P'})
-    %   xlabel(['Tactile at time 0, ' sleepcond])
-    %   ylabel(chanlabel{cc})
-    title('A-N')
+  cfg=[];
+  cfg.channel=chanplot{1};
+  cfg.xlim=[-0.5 1.1];
+  cfg.ylim=[-7 7];
+  figure(12);
+  ft_singleplotER(cfg, grave_tacMnul_pb{:})
+  legend({'Peak' 'P to T' 'Trough' 'T to P'})
+  %   xlabel(['Tactile at time 0, ' sleepcond])
+  %   ylabel(chanlabel{cc})
+  title('T-N')
+  
+  cfg=[];
+  cfg.channel=chanplot{1};
+  cfg.xlim=[-0.5 1.1];
+  cfg.ylim=[-7 7];
+  figure(11);
+  ft_singleplotER(cfg, grave_audMnul_pb{:})
+  legend({'Peak' 'P to T' 'Trough' 'T to P'})
+  %   xlabel(['Tactile at time 0, ' sleepcond])
+  %   ylabel(chanlabel{cc})
+  title('A-N')
   
   for ll=soalist
     
@@ -6554,7 +6868,7 @@ if plotflag
     %   ylabel(chanlabel{cc})
     title('AT*-N')
   end
-
+  
 end
 
 
@@ -6583,7 +6897,7 @@ if statsflag
   cfg.latency=[.1 .45];
   stat_tacMnul_pb=ft_timelockstatistics(cfg, grind_tacMnul_pb{:});
   stat_audMnul_pb=ft_timelockstatistics(cfg, grind_audMnul_pb{:});
-
+  
   for ll=soalist
     if ll==1 || ll==3 || ll==4 || ll==5
       cfg.latency=[.1 .45];
@@ -6638,7 +6952,7 @@ for ii=iiuse
         tlockavg_tacMSpN1_absbin{ll,bb}{subuseind}=tlock_tacMSpN_4mscon1_absbin{ll,tt,ss,bb};
       else
         tlockavg_tacPaud1IAF_phasebin{ll,bb}{subuseind}=tlock_tacPaud_4mscon1IAF_phasebin{ll,tt,ss,bb};
-      tlockavg_tacMSpN1IAF_phasebin{ll,bb}{subuseind}=tlock_tacMSpN_4mscon1IAF_phasebin{ll,tt,ss,bb};
+        tlockavg_tacMSpN1IAF_phasebin{ll,bb}{subuseind}=tlock_tacMSpN_4mscon1IAF_phasebin{ll,tt,ss,bb};
       end
     end % bb
   end % ll
@@ -6655,7 +6969,7 @@ save([edir 'freqfinal_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],
 %   cd([edir sub{ii}])
 %   load(['tlock_ERPphasebin_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freqsub');
 %   freqsubfinal(subuseind)=freqsub(ii);
-%   
+%
 %   subuseind=subuseind+1;
 %   clear tlock*tlock_phasebin
 % end  % ii
@@ -6672,11 +6986,11 @@ for ll=soalist
     grave_tacPaud1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_phasebin{ll,bb}{:});
     grave_tacMSpN1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_phasebin{ll,bb}{:});
     if sleep
-    grave_tacPaud1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_absbin{ll,bb}{:});
-    grave_tacMSpN1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_absbin{ll,bb}{:});
+      grave_tacPaud1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_absbin{ll,bb}{:});
+      grave_tacMSpN1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_absbin{ll,bb}{:});
     else
-    grave_tacPaud1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1IAF_phasebin{ll,bb}{:});
-    grave_tacMSpN1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1IAF_phasebin{ll,bb}{:});
+      grave_tacPaud1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1IAF_phasebin{ll,bb}{:});
+      grave_tacMSpN1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1IAF_phasebin{ll,bb}{:});
     end
     %     grave_TPAmMSPN1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_TPAmMSPN1_phasebin{ll,bb}{:});
     
@@ -6685,11 +6999,11 @@ for ll=soalist
     grind_tacPaud1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_phasebin{ll,bb}{:});
     grind_tacMSpN1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_phasebin{ll,bb}{:});
     if sleep
-    grind_tacPaud1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_absbin{ll,bb}{:});
-    grind_tacMSpN1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_absbin{ll,bb}{:});
+      grind_tacPaud1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1_absbin{ll,bb}{:});
+      grind_tacMSpN1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1_absbin{ll,bb}{:});
     else
-    grind_tacPaud1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1IAF_phasebin{ll,bb}{:});
-    grind_tacMSpN1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1IAF_phasebin{ll,bb}{:});
+      grind_tacPaud1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacPaud1IAF_phasebin{ll,bb}{:});
+      grind_tacMSpN1IAF_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_tacMSpN1IAF_phasebin{ll,bb}{:});
     end
     %     grind_TPAmMSPN1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_TPAmMSPN1_phasebin{ll,bb}{:});
     
@@ -6698,26 +7012,26 @@ for ll=soalist
     cfg.operation='subtract';
     grind_TPAmMSPN1_pb{ll,bb}=ft_math(cfg,grind_tacPaud1_pb{ll,bb},grind_tacMSpN1_pb{ll,bb})
     if sleep
-    grind_TPAmMSPN1_ab{ll,bb}=ft_math(cfg,grind_tacPaud1_ab{ll,bb},grind_tacMSpN1_ab{ll,bb})
+      grind_TPAmMSPN1_ab{ll,bb}=ft_math(cfg,grind_tacPaud1_ab{ll,bb},grind_tacMSpN1_ab{ll,bb})
     else
-    grind_TPAmMSPN1IAF_pb{ll,bb}=ft_math(cfg,grind_tacPaud1IAF_pb{ll,bb},grind_tacMSpN1IAF_pb{ll,bb})
+      grind_TPAmMSPN1IAF_pb{ll,bb}=ft_math(cfg,grind_tacPaud1IAF_pb{ll,bb},grind_tacMSpN1IAF_pb{ll,bb})
     end
     
     grave_TPAmMSPN1_pb{ll,bb}=grind_TPAmMSPN1_pb{ll,bb};
     grave_TPAmMSPN1_pb{ll,bb}.avg=squeeze(mean(grave_TPAmMSPN1_pb{ll,bb}.individual,1))
     grave_TPAmMSPN1_pb{ll,bb}=rmfield(grave_TPAmMSPN1_pb{ll,bb},'individual');
     grave_TPAmMSPN1_pb{ll,bb}.dimord='chan_time';
-
+    
     if sleep
-    grave_TPAmMSPN1_ab{ll,bb}=grind_TPAmMSPN1_ab{ll,bb};
-    grave_TPAmMSPN1_ab{ll,bb}.avg=squeeze(mean(grave_TPAmMSPN1_ab{ll,bb}.individual,1))
-    grave_TPAmMSPN1_ab{ll,bb}=rmfield(grave_TPAmMSPN1_ab{ll,bb},'individual');
-    grave_TPAmMSPN1_ab{ll,bb}.dimord='chan_time';
+      grave_TPAmMSPN1_ab{ll,bb}=grind_TPAmMSPN1_ab{ll,bb};
+      grave_TPAmMSPN1_ab{ll,bb}.avg=squeeze(mean(grave_TPAmMSPN1_ab{ll,bb}.individual,1))
+      grave_TPAmMSPN1_ab{ll,bb}=rmfield(grave_TPAmMSPN1_ab{ll,bb},'individual');
+      grave_TPAmMSPN1_ab{ll,bb}.dimord='chan_time';
     else
-    grave_TPAmMSPN1IAF_pb{ll,bb}=grind_TPAmMSPN1IAF_pb{ll,bb};
-    grave_TPAmMSPN1IAF_pb{ll,bb}.avg=squeeze(mean(grave_TPAmMSPN1IAF_pb{ll,bb}.individual,1))
-    grave_TPAmMSPN1IAF_pb{ll,bb}=rmfield(grave_TPAmMSPN1IAF_pb{ll,bb},'individual');
-    grave_TPAmMSPN1IAF_pb{ll,bb}.dimord='chan_time';
+      grave_TPAmMSPN1IAF_pb{ll,bb}=grind_TPAmMSPN1IAF_pb{ll,bb};
+      grave_TPAmMSPN1IAF_pb{ll,bb}.avg=squeeze(mean(grave_TPAmMSPN1IAF_pb{ll,bb}.individual,1))
+      grave_TPAmMSPN1IAF_pb{ll,bb}=rmfield(grave_TPAmMSPN1IAF_pb{ll,bb},'individual');
+      grave_TPAmMSPN1IAF_pb{ll,bb}.dimord='chan_time';
     end
   end
   cfg=[];
@@ -6736,23 +7050,23 @@ for ll=soalist
   grave_TPAmMSPN_3m1_pb{ll}.dimord='chan_time';
   
   if sleep
-  grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,2});
-  grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
-  grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
-  grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
-  grave_TPAmMSPN_4m1_ab{ll}.dimord='chan_time';
+    grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,2});
+    grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
+    grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
+    grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
+    grave_TPAmMSPN_4m1_ab{ll}.dimord='chan_time';
   else
-  grind_TPAmMSPNIAF_4m2_pb{ll}=ft_math(cfg,grind_TPAmMSPN1IAF_pb{ll,4},grind_TPAmMSPN1IAF_pb{ll,2});
-  grave_TPAmMSPNIAF_4m2_pb{ll}=grind_TPAmMSPNIAF_4m2_pb{ll};
-  grave_TPAmMSPNIAF_4m2_pb{ll}.avg=squeeze(mean(grave_TPAmMSPNIAF_4m2_pb{ll}.individual,1));
-  grave_TPAmMSPNIAF_4m2_pb{ll}=rmfield(grave_TPAmMSPNIAF_4m2_pb{ll},'individual');
-  grave_TPAmMSPNIAF_4m2_pb{ll}.dimord='chan_time';
-
-  grind_TPAmMSPNIAF_3m1_pb{ll}=ft_math(cfg,grind_TPAmMSPN1IAF_pb{ll,3},grind_TPAmMSPN1IAF_pb{ll,1});
-  grave_TPAmMSPNIAF_3m1_pb{ll}=grind_TPAmMSPNIAF_3m1_pb{ll};
-  grave_TPAmMSPNIAF_3m1_pb{ll}.avg=squeeze(mean(grave_TPAmMSPNIAF_3m1_pb{ll}.individual,1));
-  grave_TPAmMSPNIAF_3m1_pb{ll}=rmfield(grave_TPAmMSPNIAF_3m1_pb{ll},'individual');
-  grave_TPAmMSPNIAF_3m1_pb{ll}.dimord='chan_time';
+    grind_TPAmMSPNIAF_4m2_pb{ll}=ft_math(cfg,grind_TPAmMSPN1IAF_pb{ll,4},grind_TPAmMSPN1IAF_pb{ll,2});
+    grave_TPAmMSPNIAF_4m2_pb{ll}=grind_TPAmMSPNIAF_4m2_pb{ll};
+    grave_TPAmMSPNIAF_4m2_pb{ll}.avg=squeeze(mean(grave_TPAmMSPNIAF_4m2_pb{ll}.individual,1));
+    grave_TPAmMSPNIAF_4m2_pb{ll}=rmfield(grave_TPAmMSPNIAF_4m2_pb{ll},'individual');
+    grave_TPAmMSPNIAF_4m2_pb{ll}.dimord='chan_time';
+    
+    grind_TPAmMSPNIAF_3m1_pb{ll}=ft_math(cfg,grind_TPAmMSPN1IAF_pb{ll,3},grind_TPAmMSPN1IAF_pb{ll,1});
+    grave_TPAmMSPNIAF_3m1_pb{ll}=grind_TPAmMSPNIAF_3m1_pb{ll};
+    grave_TPAmMSPNIAF_3m1_pb{ll}.avg=squeeze(mean(grave_TPAmMSPNIAF_3m1_pb{ll}.individual,1));
+    grave_TPAmMSPNIAF_3m1_pb{ll}=rmfield(grave_TPAmMSPNIAF_3m1_pb{ll},'individual');
+    grave_TPAmMSPNIAF_3m1_pb{ll}.dimord='chan_time';
   end
 end % ll
 
@@ -6779,7 +7093,7 @@ if plotflag
     figure(ll);
     ft_singleplotER(cfg, grave_tacPaud1_pb{ll,:})
     legend({'Peak' 'P to T' 'Trough' 'T to P'})
-%     legend({'Trough' 'Low-mid phase' 'High-mid phase' 'Peak'})
+    %     legend({'Trough' 'Low-mid phase' 'High-mid phase' 'Peak'})
     %   xlabel(['Tactile at time 0, ' sleepcond])
     %   ylabel(chanlabel{cc})
     title('T + A')
@@ -6840,8 +7154,8 @@ if plotflag
       title('(T + A)- (MS + N)')
       legend({'TtoP - PtoT' 'T - P'})
     end
-
-
+    
+    
   end
 end
 
@@ -6895,7 +7209,7 @@ if statsflag
     stat_tacMSpN1_pb{ll}=ft_timelockstatistics(cfg, grind_tacMSpN1_pb{ll,:});
     %   stat_tacMSpN2_pb=ft_timelockstatistics(cfg, grind_tacMSpN2_pb{ll,:});
     stat_TPAmMSPN1_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,:});
-
+    
     if sleep
       stat_tacPaud1_ab{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,:});
       stat_tacMSpN1_ab{ll}=ft_timelockstatistics(cfg, grind_tacMSpN1_ab{ll,:});
@@ -6908,7 +7222,7 @@ if statsflag
       stat_TPAmMSPN1IAF_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1IAF_pb{ll,:});
     end
   end
-%   save([edir 'stat_pb_mult.mat'],'stat*')
+  %   save([edir 'stat_pb_mult.mat'],'stat*')
   save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
   
   cfg.statistic='depsamplesT';
@@ -6928,39 +7242,39 @@ if statsflag
         cfg.latency=[0 1]+.5;
       end
     else
-    if ll==1 || ll==3 || ll==4 || ll==5
-      cfg.latency=[.1 .45];
-    elseif ll==6
-      cfg.latency=[.12 .47];
-    elseif ll==7
-      cfg.latency=[.17 .52];
-    elseif ll==9
-      cfg.latency=[.6 .95];
-    end
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[.1 .45];
+      elseif ll==6
+        cfg.latency=[.12 .47];
+      elseif ll==7
+        cfg.latency=[.17 .52];
+      elseif ll==9
+        cfg.latency=[.6 .95];
+      end
     end
     % these test t-test for any difference of the A+T vs MS+N for each bin separately
     stat_TPAmMSPN1_peak_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_pb{ll,1}, grind_tacMSpN1_pb{ll,1});
     stat_TPAmMSPN1_ptot_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_pb{ll,2}, grind_tacMSpN1_pb{ll,2});
     stat_TPAmMSPN1_trgh_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_pb{ll,3}, grind_tacMSpN1_pb{ll,3});
     stat_TPAmMSPN1_ttop_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_pb{ll,4}, grind_tacMSpN1_pb{ll,4});
-
+    
     if sleep
-    stat_TPAmMSPN1_low_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,1}, grind_tacMSpN1_ab{ll,1});
-    stat_TPAmMSPN1_midl_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,2}, grind_tacMSpN1_ab{ll,2});
-    stat_TPAmMSPN1_midh_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,3}, grind_tacMSpN1_ab{ll,3});
-    stat_TPAmMSPN1_high_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,4}, grind_tacMSpN1_ab{ll,4});
+      stat_TPAmMSPN1_low_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,1}, grind_tacMSpN1_ab{ll,1});
+      stat_TPAmMSPN1_midl_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,2}, grind_tacMSpN1_ab{ll,2});
+      stat_TPAmMSPN1_midh_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,3}, grind_tacMSpN1_ab{ll,3});
+      stat_TPAmMSPN1_high_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1_ab{ll,4}, grind_tacMSpN1_ab{ll,4});
     else
-    stat_TPAmMSPN1IAF_peak_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,1}, grind_tacMSpN1IAF_pb{ll,1});
-    stat_TPAmMSPN1IAF_ptot_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,2}, grind_tacMSpN1IAF_pb{ll,2});
-    stat_TPAmMSPN1IAF_trgh_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,3}, grind_tacMSpN1IAF_pb{ll,3});
-    stat_TPAmMSPN1IAF_ttop_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,4}, grind_tacMSpN1IAF_pb{ll,4});
+      stat_TPAmMSPN1IAF_peak_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,1}, grind_tacMSpN1IAF_pb{ll,1});
+      stat_TPAmMSPN1IAF_ptot_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,2}, grind_tacMSpN1IAF_pb{ll,2});
+      stat_TPAmMSPN1IAF_trgh_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,3}, grind_tacMSpN1IAF_pb{ll,3});
+      stat_TPAmMSPN1IAF_ttop_pb{ll}=ft_timelockstatistics(cfg, grind_tacPaud1IAF_pb{ll,4}, grind_tacMSpN1IAF_pb{ll,4});
     end
   end
   
-%   save([edir 'stat_pb_mult.mat'],'stat*')
+  %   save([edir 'stat_pb_mult.mat'],'stat*')
   save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
   clear grind*IAF* grind_*_*m*
-%   save([edir 'grind_pb_mult.mat'],'grind*')
+  %   save([edir 'grind_pb_mult.mat'],'grind*')
   save([edir 'grind_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'grind*')
 end
 
@@ -6997,14 +7311,14 @@ if stats1flag
       stat_TPAmMSPN_ptotMttop_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,2}, grind_TPAmMSPN1_pb{ll,4});
       stat_TPAmMSPN_peakMtrgh_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,1}, grind_TPAmMSPN1_pb{ll,3});
     end
-
+    
     if ll==3 || ll==5 || ll==7  % conditions where previously there was significance
       aa=nan(2,2);
       try  aa(1,:)=[min(stat_TPAmMSPN1_peak_pb{ll}.time(find(mean(stat_TPAmMSPN1_peak_pb{ll}.mask,1)))) max(stat_TPAmMSPN1_peak_pb{ll}.time(find(mean(stat_TPAmMSPN1_peak_pb{ll}.mask,1))))]; catch end
       try  aa(2,:)=[min(stat_TPAmMSPN1_trgh_pb{ll}.time(find(mean(stat_TPAmMSPN1_trgh_pb{ll}.mask,1)))) max(stat_TPAmMSPN1_trgh_pb{ll}.time(find(mean(stat_TPAmMSPN1_trgh_pb{ll}.mask,1))))]; catch end
       cfg.latency=[min(aa(:,1)) max(aa(:,2))];
       stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,1}, grind_TPAmMSPN1_pb{ll,3});
-
+      
       if ll==3 || ll==5
         aa=nan(2,2);
         try  aa(1,:)=[min(stat_TPAmMSPN1_ptot_pb{ll}.time(find(mean(stat_TPAmMSPN1_ptot_pb{ll}.mask,1)))) max(stat_TPAmMSPN1_ptot_pb{ll}.time(find(mean(stat_TPAmMSPN1_ptot_pb{ll}.mask,1))))]; catch end
@@ -7014,7 +7328,7 @@ if stats1flag
       end
     end
     
-
+    
   end
   
   cd(edir)
@@ -7093,7 +7407,7 @@ close all
 clear tmp*
 for ll=soalist
   for bb=1:4
-
+    
     cfg=[];
     if timwinstatflag==1
       cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
@@ -7107,17 +7421,17 @@ for ll=soalist
     tmpu1{bb}.dimord='chan_time';
     tmpu1{bb}.avg=squeeze(mean(tmpu1{bb}.individual,1));
     tmpu1{bb}=rmfield(tmpu1{bb},'individual');
-
+    
     tmpm10{bb}=ft_selectdata(cfg,grind_tacMSpN1_pb{ll,bb});
     tmpm10{bb}.dimord='chan_time';
     tmpm10{bb}.avg=squeeze(mean(tmpm10{bb}.individual,1));
     tmpm10{bb}=rmfield(tmpm10{bb},'individual');
-  
+    
     tmpd5{bb}=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,bb});
     tmpd5{bb}.dimord='chan_time';
     tmpd5{bb}.avg=scalediff*squeeze(mean(tmpd5{bb}.individual,1));
     tmpd5{bb}=rmfield(tmpd5{bb},'individual');
-
+    
     switch bb
       case 1
         tmpmask=stat_TPAmMSPN1_peak_pb{ll}.mask;
@@ -7140,112 +7454,112 @@ for ll=soalist
       tmpm10{bb}.mask=tmpmask;
       tmpd5{bb}.mask=tmpmask;
     end
-
-  for cg=1:length(chanplot)
-    cfg=[];
-    cfg.parameter='avg';
-    cfg.layout='elec1010.lay';
-    cfg.ylim=[-5 8];
-    cfg.linewidth=3;
-    cfg.xlim=timwin;
-    if cg>length(chanplot)
-      cfg.channel=tmpd5{bb}.label(any(tmpd5{bb}.mask,2));
-    else
-      cfg.channel=chanplot{cg};
-    end
-    cfg.graphcolor=coloruse([1 10 5],:);
-    cfg.interactive='no';
-    cfg.maskparameter='mask';
-    cfg.maskstyle='box'; % default
-    figure(100*bb+ll+10*(cg+1))
-    ft_singleplotER(cfg,tmpu1{bb},tmpm10{bb},tmpd5{bb});
-    hold on;plot(tmpu1{bb}.time,0,'k');
-    set(gca,'XTick',[-.5:.1:1])
-    set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
-    set(gca,'FontSize',30)
-    title([])
-    plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
-    plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
-    plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
-    axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
-    if cg==3
-      legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
-    end
-  end
-  %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-  print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
     
-  if any(tmpmask(:))
-    masktime=find(any(tmpd5{bb}.mask,1));
-    cfg=[];
-    cfg.parameter='avg';
-    cfg.layout='elec1010.lay';
-    cfg.maskalpha=0.5;
-    cfg.zlim=[-5 5];
-    cfg.highlight='on';
-    cfg.highlightsize=12;
-    cfg.xlim=[tmpd5{bb}.time(masktime(1)) tmpd5{bb}.time(masktime(end))];
-    cfg.comment='no';
-    sigchannels=tmpd5{bb}.label(find(ceil(mean(tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',cfg.xlim(1)):dsearchn(tmpd5{bb}.time',cfg.xlim(2))),2))));
-    cfg.highlightchannel=sigchannels;
-    figure(1000*bb+ll);
-    ft_topoplotER(cfg,tmpu1{bb});
-    print(1000*bb+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-    figure(1000*bb+10+ll);
-    ft_topoplotER(cfg,tmpm10{bb});
-    print(1000*bb+10+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-    figure(1000*bb+20+ll);
-    ft_topoplotER(cfg,tmpd5{bb});
-    print(1000*bb+20+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-  end
-  
+    for cg=1:length(chanplot)
+      cfg=[];
+      cfg.parameter='avg';
+      cfg.layout='elec1010.lay';
+      cfg.ylim=[-5 8];
+      cfg.linewidth=3;
+      cfg.xlim=timwin;
+      if cg>length(chanplot)
+        cfg.channel=tmpd5{bb}.label(any(tmpd5{bb}.mask,2));
+      else
+        cfg.channel=chanplot{cg};
+      end
+      cfg.graphcolor=coloruse([1 10 5],:);
+      cfg.interactive='no';
+      cfg.maskparameter='mask';
+      cfg.maskstyle='box'; % default
+      figure(100*bb+ll+10*(cg+1))
+      ft_singleplotER(cfg,tmpu1{bb},tmpm10{bb},tmpd5{bb});
+      hold on;plot(tmpu1{bb}.time,0,'k');
+      set(gca,'XTick',[-.5:.1:1])
+      set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
+      set(gca,'FontSize',30)
+      title([])
+      plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+      plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+      axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
+      if cg==3
+        legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+      end
+    end
+    %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+    
+    if any(tmpmask(:))
+      masktime=find(any(tmpd5{bb}.mask,1));
+      cfg=[];
+      cfg.parameter='avg';
+      cfg.layout='elec1010.lay';
+      cfg.maskalpha=0.5;
+      cfg.zlim=[-5 5];
+      cfg.highlight='on';
+      cfg.highlightsize=12;
+      cfg.xlim=[tmpd5{bb}.time(masktime(1)) tmpd5{bb}.time(masktime(end))];
+      cfg.comment='no';
+      sigchannels=tmpd5{bb}.label(find(ceil(mean(tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',cfg.xlim(1)):dsearchn(tmpd5{bb}.time',cfg.xlim(2))),2))));
+      cfg.highlightchannel=sigchannels;
+      figure(1000*bb+ll);
+      ft_topoplotER(cfg,tmpu1{bb});
+      print(1000*bb+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      figure(1000*bb+10+ll);
+      ft_topoplotER(cfg,tmpm10{bb});
+      print(1000*bb+10+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      figure(1000*bb+20+ll);
+      ft_topoplotER(cfg,tmpd5{bb});
+      print(1000*bb+20+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+    end
+    
   end % bb
 end % ll
 
 for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
-    cfg=[];
-    if timwinstatflag==1
-      cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-    elseif timwinstatflag==0
-      cfg.latency=timwin;
-      stattimwin=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-    end
-    cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
-    
-    % FINISH ME HERE!
-    
-    tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
-    tmpu1.dimord='chan_time';
-    tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-    tmpu1=rmfield(tmpu1,'individual');
-
-    tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
-    tmpm10.dimord='chan_time';
-    tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-    tmpm10=rmfield(tmpm10,'individual');
+  cfg=[];
+  if timwinstatflag==1
+    cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
+  elseif timwinstatflag==0
+    cfg.latency=timwin;
+    stattimwin=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
+  end
+  cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
   
-    tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
-    tmpd5.dimord='chan_time';
-    tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
-    tmpd5=rmfield(tmpd5,'individual');
-    
-    
-    tmpmask=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.mask;
-    if timwinstatflag==0
-      tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
-      tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
-      tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
-      tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
-      tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
-      tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
-    else
-      tmpu1{bb}.mask=tmpmask
-      tmpm10{bb}.mask=tmpmask;
-      tmpd5{bb}.mask=tmpmask;
-    end
-    
+  % FINISH ME HERE!
+  
+  tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
+  tmpu1.dimord='chan_time';
+  tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+  tmpu1=rmfield(tmpu1,'individual');
+  
+  tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
+  tmpm10.dimord='chan_time';
+  tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+  tmpm10=rmfield(tmpm10,'individual');
+  
+  tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
+  tmpd5.dimord='chan_time';
+  tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
+  tmpd5=rmfield(tmpd5,'individual');
+  
+  
+  tmpmask=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.mask;
+  if timwinstatflag==0
+    tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
+    tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
+    tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
+    tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
+    tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
+    tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
+  else
+    tmpu1{bb}.mask=tmpmask
+    tmpm10{bb}.mask=tmpmask;
+    tmpd5{bb}.mask=tmpmask;
+  end
+  
   for cg=1:length(chanplot)
     cfg=[];
     cfg.parameter='avg';
@@ -7281,7 +7595,7 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
   %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_FC_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_OP_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    
+  
   if any(tmpmask(:))
     masktime=find(any(tmpd5.mask,1));
     cfg=[];
@@ -7361,120 +7675,120 @@ clear tmp*
 
 condname={'AT500' '' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' '' 'TA500' '' 'AUD' 'TAC'};
 for ll=[soalist 11 12]
-
-    cfg=[];
-    cfg.channel=grind_tacMnul_pb{1}.label;
   
-    switch ll
-      case {1, 3, 4, 5, 6, 7, 9}
-        if timwinstatflag==1
-          cfg.latency=[stat_msMnul1_pb{ll}.time(1) stat_msMnul1_pb{ll}.time(end)];
-        elseif timwinstatflag==0
-          cfg.latency=timwin;
-          stattimwin=[stat_msMnul1_pb{ll}.time(1) stat_msMnul1_pb{ll}.time(end)];
-        end
-        tmpu1=ft_selectdata(cfg,grind_msMnul1_pb{ll,1});
-        tmpu1.dimord='chan_time';
-        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-        tmpu1=rmfield(tmpu1,'individual');
-        
-        tmpm10=ft_selectdata(cfg,grind_msMnul1_pb{ll,3});
-        tmpm10.dimord='chan_time';
-        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-        tmpm10=rmfield(tmpm10,'individual');
-        
-        tmpd4=ft_selectdata(cfg,grind_msMnul1_pb{ll,2});
-        tmpd4.dimord='chan_time';
-        tmpd4.avg=squeeze(mean(tmpd4.individual,1));
-        tmpd4=rmfield(tmpd4,'individual');
-        
-        tmpd7=ft_selectdata(cfg,grind_msMnul1_pb{ll,4});
-        tmpd7.dimord='chan_time';
-        tmpd7.avg=squeeze(mean(tmpd7.individual,1));
-        tmpd7=rmfield(tmpd7,'individual');
-        
-        tmpmask=stat_msMnul1_pb{ll}.mask;
-        
-      case 11
-        if timwinstatflag==1
-          cfg.latency=[stat_audMnul_pb.time(1) stat_audMnul_pb.time(end)];
-        elseif timwinstatflag==0
-          cfg.latency=timwin;
-          stattimwin=[stat_audMnul_pb.time(1) stat_audMnul_pb.time(end)];
-        end
-        tmpu1=ft_selectdata(cfg,grind_audMnul_pb{1});
-        tmpu1.dimord='chan_time';
-        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-        tmpu1=rmfield(tmpu1,'individual');
-        
-        tmpm10=ft_selectdata(cfg,grind_audMnul_pb{3});
-        tmpm10.dimord='chan_time';
-        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-        tmpm10=rmfield(tmpm10,'individual');
-        
-        tmpd4=ft_selectdata(cfg,grind_audMnul_pb{2});
-        tmpd4.dimord='chan_time';
-        tmpd4.avg=squeeze(mean(tmpd4.individual,1));
-        tmpd4=rmfield(tmpd4,'individual');
-        
-        tmpd7=ft_selectdata(cfg,grind_audMnul_pb{4});
-        tmpd7.dimord='chan_time';
-        tmpd7.avg=squeeze(mean(tmpd7.individual,1));
-        tmpd7=rmfield(tmpd7,'individual');
-        
-        tmpmask=stat_audMnul_pb.mask;
-        
-      case 12
-        if timwinstatflag==1
-          cfg.latency=[stat_tacMnul_pb.time(1) stat_tacMnul_pb.time(end)];
-        elseif timwinstatflag==0
-          cfg.latency=timwin;
-          stattimwin=[stat_tacMnul_pb.time(1) stat_tacMnul_pb.time(end)];
-        end
-        tmpu1=ft_selectdata(cfg,grind_tacMnul_pb{1});
-        tmpu1.dimord='chan_time';
-        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-        tmpu1=rmfield(tmpu1,'individual');
-        
-        tmpm10=ft_selectdata(cfg,grind_tacMnul_pb{3});
-        tmpm10.dimord='chan_time';
-        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-        tmpm10=rmfield(tmpm10,'individual');
-        
-        tmpd4=ft_selectdata(cfg,grind_tacMnul_pb{2});
-        tmpd4.dimord='chan_time';
-        tmpd4.avg=squeeze(mean(tmpd4.individual,1));
-        tmpd4=rmfield(tmpd4,'individual');
-        
-        tmpd7=ft_selectdata(cfg,grind_tacMnul_pb{4});
-        tmpd7.dimord='chan_time';
-        tmpd7.avg=squeeze(mean(tmpd7.individual,1));
-        tmpd7=rmfield(tmpd7,'individual');
-        
-        tmpmask=stat_tacMnul_pb.mask;
-        
-    end
+  cfg=[];
+  cfg.channel=grind_tacMnul_pb{1}.label;
+  
+  switch ll
+    case {1, 3, 4, 5, 6, 7, 9}
+      if timwinstatflag==1
+        cfg.latency=[stat_msMnul1_pb{ll}.time(1) stat_msMnul1_pb{ll}.time(end)];
+      elseif timwinstatflag==0
+        cfg.latency=timwin;
+        stattimwin=[stat_msMnul1_pb{ll}.time(1) stat_msMnul1_pb{ll}.time(end)];
+      end
+      tmpu1=ft_selectdata(cfg,grind_msMnul1_pb{ll,1});
+      tmpu1.dimord='chan_time';
+      tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+      tmpu1=rmfield(tmpu1,'individual');
       
+      tmpm10=ft_selectdata(cfg,grind_msMnul1_pb{ll,3});
+      tmpm10.dimord='chan_time';
+      tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+      tmpm10=rmfield(tmpm10,'individual');
+      
+      tmpd4=ft_selectdata(cfg,grind_msMnul1_pb{ll,2});
+      tmpd4.dimord='chan_time';
+      tmpd4.avg=squeeze(mean(tmpd4.individual,1));
+      tmpd4=rmfield(tmpd4,'individual');
+      
+      tmpd7=ft_selectdata(cfg,grind_msMnul1_pb{ll,4});
+      tmpd7.dimord='chan_time';
+      tmpd7.avg=squeeze(mean(tmpd7.individual,1));
+      tmpd7=rmfield(tmpd7,'individual');
+      
+      tmpmask=stat_msMnul1_pb{ll}.mask;
+      
+    case 11
+      if timwinstatflag==1
+        cfg.latency=[stat_audMnul_pb.time(1) stat_audMnul_pb.time(end)];
+      elseif timwinstatflag==0
+        cfg.latency=timwin;
+        stattimwin=[stat_audMnul_pb.time(1) stat_audMnul_pb.time(end)];
+      end
+      tmpu1=ft_selectdata(cfg,grind_audMnul_pb{1});
+      tmpu1.dimord='chan_time';
+      tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+      tmpu1=rmfield(tmpu1,'individual');
+      
+      tmpm10=ft_selectdata(cfg,grind_audMnul_pb{3});
+      tmpm10.dimord='chan_time';
+      tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+      tmpm10=rmfield(tmpm10,'individual');
+      
+      tmpd4=ft_selectdata(cfg,grind_audMnul_pb{2});
+      tmpd4.dimord='chan_time';
+      tmpd4.avg=squeeze(mean(tmpd4.individual,1));
+      tmpd4=rmfield(tmpd4,'individual');
+      
+      tmpd7=ft_selectdata(cfg,grind_audMnul_pb{4});
+      tmpd7.dimord='chan_time';
+      tmpd7.avg=squeeze(mean(tmpd7.individual,1));
+      tmpd7=rmfield(tmpd7,'individual');
+      
+      tmpmask=stat_audMnul_pb.mask;
+      
+    case 12
+      if timwinstatflag==1
+        cfg.latency=[stat_tacMnul_pb.time(1) stat_tacMnul_pb.time(end)];
+      elseif timwinstatflag==0
+        cfg.latency=timwin;
+        stattimwin=[stat_tacMnul_pb.time(1) stat_tacMnul_pb.time(end)];
+      end
+      tmpu1=ft_selectdata(cfg,grind_tacMnul_pb{1});
+      tmpu1.dimord='chan_time';
+      tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+      tmpu1=rmfield(tmpu1,'individual');
+      
+      tmpm10=ft_selectdata(cfg,grind_tacMnul_pb{3});
+      tmpm10.dimord='chan_time';
+      tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+      tmpm10=rmfield(tmpm10,'individual');
+      
+      tmpd4=ft_selectdata(cfg,grind_tacMnul_pb{2});
+      tmpd4.dimord='chan_time';
+      tmpd4.avg=squeeze(mean(tmpd4.individual,1));
+      tmpd4=rmfield(tmpd4,'individual');
+      
+      tmpd7=ft_selectdata(cfg,grind_tacMnul_pb{4});
+      tmpd7.dimord='chan_time';
+      tmpd7.avg=squeeze(mean(tmpd7.individual,1));
+      tmpd7=rmfield(tmpd7,'individual');
+      
+      tmpmask=stat_tacMnul_pb.mask;
+      
+  end
   
   
-    
-    if timwinstatflag==0
-      tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
-      tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
-      tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
-      tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
-      tmpd4.mask=zeros(size(tmpd4.avg,1),length(tmpd4.time));
-      tmpd4.mask(:,dsearchn(tmpd4.time',stattimwin(1)):dsearchn(tmpd4.time',stattimwin(end)))=tmpmask;
-      tmpd7.mask=zeros(size(tmpd7.avg,1),length(tmpd7.time));
-      tmpd7.mask(:,dsearchn(tmpd7.time',stattimwin(1)):dsearchn(tmpd7.time',stattimwin(end)))=tmpmask;
-    else
-      tmpu1.mask=tmpmask;
-      tmpm10.mask=tmpmask;
-      tmpd4.mask=tmpmask;
-      tmpd7.mask=tmpmask;
-    end
-
-    
+  
+  
+  if timwinstatflag==0
+    tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
+    tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
+    tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
+    tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
+    tmpd4.mask=zeros(size(tmpd4.avg,1),length(tmpd4.time));
+    tmpd4.mask(:,dsearchn(tmpd4.time',stattimwin(1)):dsearchn(tmpd4.time',stattimwin(end)))=tmpmask;
+    tmpd7.mask=zeros(size(tmpd7.avg,1),length(tmpd7.time));
+    tmpd7.mask(:,dsearchn(tmpd7.time',stattimwin(1)):dsearchn(tmpd7.time',stattimwin(end)))=tmpmask;
+  else
+    tmpu1.mask=tmpmask;
+    tmpm10.mask=tmpmask;
+    tmpd4.mask=tmpmask;
+    tmpd7.mask=tmpmask;
+  end
+  
+  
   for cg=1:length(chanplot)
     cfg=[];
     cfg.parameter='avg';
@@ -7501,12 +7815,12 @@ for ll=[soalist 11 12]
     plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
     plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
     if ll<10 || ll==12
-    plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
     end
     if ll<10
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
     elseif ll==11
-    plot([soades(5) soades(5)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+      plot([soades(5) soades(5)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
     end
     axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
     if cg==3
@@ -7515,55 +7829,55 @@ for ll=[soalist 11 12]
   end
   print(ll*100+20,[fdir 'erp_' condname{ll} 'vsNul_diff_PeakVsTrgh_FC_sleep' num2str(sleep) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll*100+30,[fdir 'erp_' condname{ll} 'vsNul_diff_PeakVsTrgh_OP_sleep' num2str(sleep) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    
+  
   
 end
-    
-    
-        
+
+
+
 
 for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
-    cfg=[];
-    if timwinstatflag==1
-      cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-    elseif timwinstatflag==0
-      cfg.latency=timwin;
-      stattimwin=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-    end
-    cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
-    
-    % FINISH ME HERE!
-    
-    tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
-    tmpu1.dimord='chan_time';
-    tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-    tmpu1=rmfield(tmpu1,'individual');
-
-    tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
-    tmpm10.dimord='chan_time';
-    tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-    tmpm10=rmfield(tmpm10,'individual');
+  cfg=[];
+  if timwinstatflag==1
+    cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
+  elseif timwinstatflag==0
+    cfg.latency=timwin;
+    stattimwin=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
+  end
+  cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
   
-    tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
-    tmpd5.dimord='chan_time';
-    tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
-    tmpd5=rmfield(tmpd5,'individual');
-    
-    
-    tmpmask=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.mask;
-    if timwinstatflag==0
-      tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
-      tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
-      tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
-      tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
-      tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
-      tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
-    else
-      tmpu1{bb}.mask=tmpmask
-      tmpm10{bb}.mask=tmpmask;
-      tmpd5{bb}.mask=tmpmask;
-    end
-    
+  % FINISH ME HERE!
+  
+  tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
+  tmpu1.dimord='chan_time';
+  tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+  tmpu1=rmfield(tmpu1,'individual');
+  
+  tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
+  tmpm10.dimord='chan_time';
+  tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+  tmpm10=rmfield(tmpm10,'individual');
+  
+  tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
+  tmpd5.dimord='chan_time';
+  tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
+  tmpd5=rmfield(tmpd5,'individual');
+  
+  
+  tmpmask=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.mask;
+  if timwinstatflag==0
+    tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
+    tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
+    tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
+    tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
+    tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
+    tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
+  else
+    tmpu1{bb}.mask=tmpmask
+    tmpm10{bb}.mask=tmpmask;
+    tmpd5{bb}.mask=tmpmask;
+  end
+  
   for cg=1:length(chanplot)
     cfg=[];
     cfg.parameter='avg';
@@ -7599,7 +7913,7 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
   %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_FC_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_OP_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    
+  
   if any(tmpmask(:))
     masktime=find(any(tmpd5.mask,1));
     cfg=[];
