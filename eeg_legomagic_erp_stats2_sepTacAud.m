@@ -6723,17 +6723,17 @@ figure;imagesc(stat_tacpb_posthocT.time,1:63,stat_tacpb_posthocT.mask);title('Si
 %%  Stats on phase-sorting of unisensory and multisensry ERP versus Nul (use)
 
 % related to phaset0=1 and phaset0use>0
-plotflag=1;
+plotflag=0;
 statsflag=1;
 soalist=[1 3 4 5 6 7 9];
 tt=3;
-sleep=0;
+sleep=1;
 tacaud=1;
 if sleep
   ss=12;
   iter=11;
   iiuse=setdiff(iiBuse,1:7);
-  trialkc=0;
+  trialkc=-1;
 else
   ss=10;
   iter=27;
@@ -6748,22 +6748,29 @@ for ii=iiuse
   load(['tlock_ERPphasebin_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat']);
   for bb=1:4
     
-    tlockavg_tac5con1_phasebin{bb}{subuseind}=tlock_tac4mscon1_phasebin{5,3,10,bb};
-    tlockavg_aud5con1_phasebin{bb}{subuseind}=tlock_aud4mscon1_phasebin{5,3,10,bb};
-    tlockavg_nul5con1_phasebin{bb}{subuseind}=tlock_nul4mscon1_phasebin{5,3,10,bb};
+    tlockavg_tac5con1_phasebin{bb}{subuseind}=tlock_tac4mscon1_phasebin{5,3,ss,bb};
+    tlockavg_aud5con1_phasebin{bb}{subuseind}=tlock_aud4mscon1_phasebin{5,3,ss,bb};
+    tlockavg_nul5con1_phasebin{bb}{subuseind}=tlock_nul4mscon1_phasebin{5,3,ss,bb};
+    
+    if sleep
+      tlockavg_tac5con1_absbin{bb}{subuseind}=tlock_tac4mscon1_absbin{5,3,ss,bb};
+      tlockavg_aud5con1_absbin{bb}{subuseind}=tlock_aud4mscon1_absbin{5,3,ss,bb};
+      tlockavg_nul5con1_absbin{bb}{subuseind}=tlock_nul4mscon1_absbin{5,3,ss,bb};
+    end
     
     for ll=soalist
-      tlockavg_msllcon1_phasebin{ll,bb}{subuseind}=tlock_ms4mscon1_phasebin{ll,3,10,bb};
-      tlockavg_nulllcon1_phasebin{ll,bb}{subuseind}=tlock_nul4mscon1_phasebin{ll,3,10,bb};
-      tlockavg_msllcon2_phasebin{ll,bb}{subuseind}=tlock_ms4mscon2_phasebin{ll,3,10,bb};
-      tlockavg_nulllcon2_phasebin{ll,bb}{subuseind}=tlock_nul4mscon2_phasebin{ll,3,10,bb};
+      tlockavg_msllcon1_phasebin{ll,bb}{subuseind}=tlock_ms4mscon1_phasebin{ll,3,ss,bb};
+      tlockavg_nulllcon1_phasebin{ll,bb}{subuseind}=tlock_nul4mscon1_phasebin{ll,3,ss,bb};
+      tlockavg_msllcon2_phasebin{ll,bb}{subuseind}=tlock_ms4mscon2_phasebin{ll,3,ss,bb};
+      tlockavg_nulllcon2_phasebin{ll,bb}{subuseind}=tlock_nul4mscon2_phasebin{ll,3,ss,bb};
+      if sleep
+        tlockavg_msllcon1_absbin{ll,bb}{subuseind}=tlock_ms4mscon1_absbin{ll,3,ss,bb};
+        tlockavg_nulllcon1_absbin{ll,bb}{subuseind}=tlock_nul4mscon1_absbin{ll,3,ss,bb};
+        tlockavg_msllcon2_absbin{ll,bb}{subuseind}=tlock_ms4mscon2_absbin{ll,3,ss,bb};
+        tlockavg_nulllcon2_absbin{ll,bb}{subuseind}=tlock_nul4mscon2_absbin{ll,3,ss,bb};
+      end
     end % ll
     
-    
-    %     tac5_dof(bb,subuseind)=tlockavg_tac5_phasebin{bb}{subuseind}.dof(18,1000);
-    %     aud5_dof(bb,subuseind)=tlockavg_aud5_phasebin{bb}{subuseind}.dof(18,1000);
-    %     nul5_dof(bb,subuseind)=tlockavg_nul5_phasebin{bb}{subuseind}.dof(18,1000);
-    %     ms15_dof(bb,subuseind)=tlockavg_ms15_phasebin{bb}{subuseind}.dof(18,1000);
   end
   
   subuseind=subuseind+1;
@@ -6798,6 +6805,35 @@ for bb=1:4,
   grave_audMnul_pb{bb}=rmfield(grave_audMnul_pb{bb},'individual');
   grave_audMnul_pb{bb}.dimord='chan_time';
   
+  if sleep
+    cfg=[];
+    grave_tac_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_tac5con1_absbin{bb}{:});
+    grave_aud_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_aud5con1_absbin{bb}{:});
+    grave_nul_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_nul5con1_absbin{bb}{:});
+    
+    cfg=[];
+    cfg.keepindividual='yes';
+    grind_tac_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_tac5con1_absbin{bb}{:});
+    grind_aud_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_aud5con1_absbin{bb}{:});
+    grind_nul_ab{bb}=ft_timelockgrandaverage(cfg,tlockavg_nul5con1_absbin{bb}{:});
+    
+    cfg=[];
+    cfg.parameter='individual';
+    cfg.operation='subtract';
+    grind_tacMnul_ab{bb}=ft_math(cfg,grind_tac_ab{bb},grind_nul_ab{bb});
+    grind_audMnul_ab{bb}=ft_math(cfg,grind_aud_ab{bb},grind_nul_ab{bb});
+    
+    grave_tacMnul_ab{bb}=grind_tacMnul_ab{bb};
+    grave_tacMnul_ab{bb}.avg=squeeze(mean(grave_tacMnul_ab{bb}.individual,1))
+    grave_tacMnul_ab{bb}=rmfield(grave_tacMnul_ab{bb},'individual');
+    grave_tacMnul_ab{bb}.dimord='chan_time';
+    
+    grave_audMnul_ab{bb}=grind_audMnul_ab{bb};
+    grave_audMnul_ab{bb}.avg=squeeze(mean(grave_audMnul_ab{bb}.individual,1))
+    grave_audMnul_ab{bb}=rmfield(grave_audMnul_ab{bb},'individual');
+    grave_audMnul_ab{bb}.dimord='chan_time';
+  end
+  
   for ll=soalist
     cfg=[];
     grave_msllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_phasebin{ll,bb}{:})
@@ -6826,9 +6862,40 @@ for bb=1:4,
     grave_msMnul2_pb{ll,bb}.avg=squeeze(mean(grave_msMnul2_pb{ll,bb}.individual,1))
     grave_msMnul2_pb{ll,bb}=rmfield(grave_msMnul2_pb{ll,bb},'individual');
     grave_msMnul2_pb{ll,bb}.dimord='chan_time';
+    
+    if sleep
+      cfg=[];
+      grave_msllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_absbin{ll,bb}{:})
+      grave_nulllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_absbin{ll,bb}{:})
+      grave_msllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_absbin{ll,bb}{:})
+      grave_nulllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_absbin{ll,bb}{:})
+      cfg=[];
+      cfg.keepindividual='yes';
+      grind_msllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_absbin{ll,bb}{:})
+      grind_nulllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_absbin{ll,bb}{:})
+      grind_msllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_absbin{ll,bb}{:})
+      grind_nulllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_absbin{ll,bb}{:})
+      
+      cfg=[];
+      cfg.parameter='individual';
+      cfg.operation='subtract';
+      grind_msMnul1_ab{ll,bb}=ft_math(cfg,grind_msllcon1_ab{ll,bb},grind_nulllcon1_ab{ll,bb});
+      grind_msMnul2_ab{ll,bb}=ft_math(cfg,grind_msllcon2_ab{ll,bb},grind_nulllcon2_ab{ll,bb});
+      
+      grave_msMnul1_ab{ll,bb}=grind_msMnul1_ab{ll,bb};
+      grave_msMnul1_ab{ll,bb}.avg=squeeze(mean(grave_msMnul1_ab{ll,bb}.individual,1))
+      grave_msMnul1_ab{ll,bb}=rmfield(grave_msMnul1_ab{ll,bb},'individual');
+      grave_msMnul1_ab{ll,bb}.dimord='chan_time';
+      
+      grave_msMnul2_ab{ll,bb}=grind_msMnul2_ab{ll,bb};
+      grave_msMnul2_ab{ll,bb}.avg=squeeze(mean(grave_msMnul2_ab{ll,bb}.individual,1))
+      grave_msMnul2_ab{ll,bb}=rmfield(grave_msMnul2_ab{ll,bb},'individual');
+      grave_msMnul2_ab{ll,bb}.dimord='chan_time';
+    end
   end % ll
 end % bb
-save([edir 'grind_pb_uninul.mat'],'grind*')
+% save([edir 'grind_pb_uninul.mat'],'grind*')
+save([edir 'grind_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'grind*')
 
 if plotflag
   chanplot{1}={'Fz' 'FC1' 'FC2' 'F1' 'F2' 'C1' 'C2' 'Cz'};
@@ -6877,7 +6944,6 @@ if statsflag
   load eeg1010_neighb
   nsub=subuseind-1;
   cfg=[];
-  % cfg.channel=chanuse;
   cfg.neighbours=neighbours;
   cfg.parameter='individual';
   cfg.method='montecarlo';
@@ -6894,25 +6960,51 @@ if statsflag
   cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub];
   cfg.tail=1;
   
-  cfg.latency=[.1 .45];
+  if sleep
+    cfg.latency=[.1 .75];
+  else
+    cfg.latency=[.1 .45];
+  end
+  
   stat_tacMnul_pb=ft_timelockstatistics(cfg, grind_tacMnul_pb{:});
   stat_audMnul_pb=ft_timelockstatistics(cfg, grind_audMnul_pb{:});
   
+  if sleep
+    stat_tacMnul_ab=ft_timelockstatistics(cfg, grind_tacMnul_ab{:});
+    stat_audMnul_ab=ft_timelockstatistics(cfg, grind_audMnul_ab{:});
+  end
+  
   for ll=soalist
-    if ll==1 || ll==3 || ll==4 || ll==5
-      cfg.latency=[.1 .45];
-    elseif ll==6
-      cfg.latency=[.12 .47];
-    elseif ll==7
-      cfg.latency=[.17 .52];
-    elseif ll==9
-      cfg.latency=[.6 .95];
+    if sleep
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[.1 .75];
+      elseif ll==6
+        cfg.latency=[.12 .77];
+      elseif ll==7
+        cfg.latency=[.17 .82];
+      elseif ll==9
+        cfg.latency=[.6 1.25];
+      end
+    else
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[.1 .45];
+      elseif ll==6
+        cfg.latency=[.12 .47];
+      elseif ll==7
+        cfg.latency=[.17 .52];
+      elseif ll==9
+        cfg.latency=[.6 .95];
+      end
     end
     stat_msMnul1_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul1_pb{ll,:});
     stat_msMnul2_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul2_pb{ll,:});
+    if sleep
+      stat_msMnul1_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul1_ab{ll,:});
+      stat_msMnul2_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul2_ab{ll,:});
+    end
   end % ll
   
-  save([edir 'stat_pb_uninul.mat'],'stat*')
+  save([edir 'stat_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
 end % statsflag
 
 
@@ -7312,7 +7404,7 @@ if stats1flag
       stat_TPAmMSPN_peakMtrgh_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,1}, grind_TPAmMSPN1_pb{ll,3});
     end
     
-    if ll==3 || ll==5 || ll==7  % conditions where previously there was significance
+    if sleep==0 && (ll==3 || ll==5 || ll==7)  % conditions where previously there was significance
       aa=nan(2,2);
       try  aa(1,:)=[min(stat_TPAmMSPN1_peak_pb{ll}.time(find(mean(stat_TPAmMSPN1_peak_pb{ll}.mask,1)))) max(stat_TPAmMSPN1_peak_pb{ll}.time(find(mean(stat_TPAmMSPN1_peak_pb{ll}.mask,1))))]; catch end
       try  aa(2,:)=[min(stat_TPAmMSPN1_trgh_pb{ll}.time(find(mean(stat_TPAmMSPN1_trgh_pb{ll}.mask,1)))) max(stat_TPAmMSPN1_trgh_pb{ll}.time(find(mean(stat_TPAmMSPN1_trgh_pb{ll}.mask,1))))]; catch end
