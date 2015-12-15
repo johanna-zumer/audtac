@@ -90,15 +90,15 @@ soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 usetr=1;
 ttuse=[3];
 tacaloneproc=0;
-phaset0=0;
+phaset0=1;
 phaset0use=2; % 0 = compute Hilbert; 1 = FFT Cz, 2 = FFT FC, 3 = FFT PCA, 4 = Hilb Cz, 5 = Hilb FC, 6 = Hilb PCA
 synchasynch=0;
-binonly=0;
+binonly=1;
 
 for sleep=[1]
   if sleep
     iiuse=setdiff(iiBuse,3:7);
-    iiuse=setdiff(iiBuse,[3:7 8]);
+%     iiuse=setdiff(iiBuse,[3:7 8]);
   else
     iiuse=iiSuse;
     %         iiuse=setdiff(iiSuse,1:9);
@@ -169,8 +169,8 @@ for sleep=[1]
         
         if sleep
           ssuse=[tr.stageuse+10 23]; % not enough memory for 23, plus is it useful?
-          ssuse=[tr.stageuse+10];
-          %           ssuse=[12];
+%           ssuse=[tr.stageuse+10];
+                    ssuse=[12];
           clear raw*
         else
           ssuse=tr.stageuse+10;
@@ -6898,49 +6898,6 @@ end % bb
 % save([edir 'grind_pb_uninul.mat'],'grind*')
 save([edir 'grind_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'grind*');
 
-if plotflag
-  chanplot{1}={'Fz' 'FC1' 'FC2' 'F1' 'F2' 'C1' 'C2' 'Cz'};
-  
-  cfg=[];
-  cfg.channel=chanplot{1};
-  cfg.xlim=[-0.5 1.1];
-  cfg.ylim=[-7 7];
-  figure(12);
-  ft_singleplotER(cfg, grave_tacMnul_pb{:})
-  legend({'Peak' 'P to T' 'Trough' 'T to P'})
-  %   xlabel(['Tactile at time 0, ' sleepcond])
-  %   ylabel(chanlabel{cc})
-  title('T-N')
-  
-  cfg=[];
-  cfg.channel=chanplot{1};
-  cfg.xlim=[-0.5 1.1];
-  cfg.ylim=[-7 7];
-  figure(11);
-  ft_singleplotER(cfg, grave_audMnul_pb{:})
-  legend({'Peak' 'P to T' 'Trough' 'T to P'})
-  %   xlabel(['Tactile at time 0, ' sleepcond])
-  %   ylabel(chanlabel{cc})
-  title('A-N')
-  
-  for ll=soalist
-    
-    cfg=[];
-    cfg.channel=chanplot{1};
-    cfg.xlim=[-0.5 1.1];
-    cfg.ylim=[-7 7];
-    figure(ll);
-    ft_singleplotER(cfg, grave_msMnul1_pb{ll,:})
-    legend({'Peak' 'P to T' 'Trough' 'T to P'})
-    %   xlabel(['Tactile at time 0, ' sleepcond])
-    %   ylabel(chanlabel{cc})
-    title('AT*-N')
-  end
-  
-end
-
-
-
 if statsflag
   load eeg1010_neighb
   nsub=subuseind-1;
@@ -7007,6 +6964,155 @@ if statsflag
   end % ll
   
 end % statsflag
+
+
+
+if plotflag
+  if ~exist('grave_tacMnul_pb','var')
+    if ~exist('grind_tacMnul_pb','var')
+      load([edir 'grind_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat']);
+    end
+    
+    for bb=1:4
+      
+      grave_tacMnul_pb{bb}=grind_tacMnul_pb{bb};
+      grave_tacMnul_pb{bb}.avg=squeeze(mean(grave_tacMnul_pb{bb}.individual,1))
+      grave_tacMnul_pb{bb}=rmfield(grave_tacMnul_pb{bb},'individual');
+      grave_tacMnul_pb{bb}.dimord='chan_time';
+      
+      grave_audMnul_pb{bb}=grind_audMnul_pb{bb};
+      grave_audMnul_pb{bb}.avg=squeeze(mean(grave_audMnul_pb{bb}.individual,1))
+      grave_audMnul_pb{bb}=rmfield(grave_audMnul_pb{bb},'individual');
+      grave_audMnul_pb{bb}.dimord='chan_time';
+      
+      if sleep
+        grave_tacMnul_ab{bb}=grind_tacMnul_ab{bb};
+        grave_tacMnul_ab{bb}.avg=squeeze(mean(grave_tacMnul_ab{bb}.individual,1))
+        grave_tacMnul_ab{bb}=rmfield(grave_tacMnul_ab{bb},'individual');
+        grave_tacMnul_ab{bb}.dimord='chan_time';
+        
+        grave_audMnul_ab{bb}=grind_audMnul_ab{bb};
+        grave_audMnul_ab{bb}.avg=squeeze(mean(grave_audMnul_ab{bb}.individual,1))
+        grave_audMnul_ab{bb}=rmfield(grave_audMnul_ab{bb},'individual');
+        grave_audMnul_ab{bb}.dimord='chan_time';
+        
+      end
+      
+      for ll=soalist
+        grave_msMnul1_pb{ll,bb}=grind_msMnul1_pb{ll,bb};
+        grave_msMnul1_pb{ll,bb}.avg=squeeze(mean(grave_msMnul1_pb{ll,bb}.individual,1))
+        grave_msMnul1_pb{ll,bb}=rmfield(grave_msMnul1_pb{ll,bb},'individual');
+        grave_msMnul1_pb{ll,bb}.dimord='chan_time';
+        
+        grave_msMnul2_pb{ll,bb}=grind_msMnul2_pb{ll,bb};
+        grave_msMnul2_pb{ll,bb}.avg=squeeze(mean(grave_msMnul2_pb{ll,bb}.individual,1))
+        grave_msMnul2_pb{ll,bb}=rmfield(grave_msMnul2_pb{ll,bb},'individual');
+        grave_msMnul2_pb{ll,bb}.dimord='chan_time';
+        
+        if sleep
+          grave_msMnul1_ab{ll,bb}=grind_msMnul1_ab{ll,bb};
+          grave_msMnul1_ab{ll,bb}.avg=squeeze(mean(grave_msMnul1_ab{ll,bb}.individual,1))
+          grave_msMnul1_ab{ll,bb}=rmfield(grave_msMnul1_ab{ll,bb},'individual');
+          grave_msMnul1_ab{ll,bb}.dimord='chan_time';
+          
+          grave_msMnul2_ab{ll,bb}=grind_msMnul2_ab{ll,bb};
+          grave_msMnul2_ab{ll,bb}.avg=squeeze(mean(grave_msMnul2_ab{ll,bb}.individual,1))
+          grave_msMnul2_ab{ll,bb}=rmfield(grave_msMnul2_ab{ll,bb},'individual');
+          grave_msMnul2_ab{ll,bb}.dimord='chan_time';
+        end
+      end
+      
+    end  % bb
+  end
+    
+  chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
+  chanplot{2}={'CP5' 'POz' 'Pz' 'P3' 'P4' 'C4' 'O1' 'O2' 'P7' 'PO7'}; % occipital
+
+
+  cfg=[];
+  cfg.channel=chanplot{1};
+  cfg.xlim=[-0.5 1.1];
+  cfg.ylim=[-7 7];
+  figure(2);
+  ft_singleplotER(cfg, grave_tacMnul_pb{:})
+  legend({'Peak' 'P to T' 'Trough' 'T to P'})
+  title('T-N')
+  
+  cfg=[];
+  cfg.channel=chanplot{1};
+  cfg.xlim=[-0.5 1.1];
+  cfg.ylim=[-7 7];
+  figure(8);
+  ft_singleplotER(cfg, grave_audMnul_pb{:})
+  legend({'Peak' 'P to T' 'Trough' 'T to P'})
+  title('A-N')
+  
+  if sleep
+    cfg=[];
+    cfg.channel=chanplot{1};
+    cfg.xlim=[-0.5 1.1];
+    cfg.ylim=[-7 7];
+    figure(12);
+    ft_singleplotER(cfg, grave_tacMnul_ab{:})
+    legend({'Low' 'Mid-low' 'Mid-high' 'High'})
+    title('T-N')
+    
+    cfg=[];
+    cfg.channel=chanplot{1};
+    cfg.xlim=[-0.5 1.1];
+    cfg.ylim=[-7 7];
+    figure(18);
+    ft_singleplotER(cfg, grave_audMnul_ab{:})
+    legend({'Low' 'Mid-low' 'Mid-high' 'High'})
+    title('A-N')
+  end
+
+  for ll=soalist
+    
+    cfg=[];
+    cfg.channel=chanplot{1};
+    cfg.xlim=[-0.5 1.1];
+    cfg.ylim=[-7 7];
+    figure(ll);
+    ft_singleplotER(cfg, grave_msMnul1_pb{ll,:})
+    legend({'Peak' 'P to T' 'Trough' 'T to P'})
+    title('AT*-N')
+
+    cfg=[];
+    cfg.channel=chanplot{1};
+    cfg.xlim=[-0.5 1.1];
+    cfg.ylim=[-7 7];
+    figure(100+ll);
+    ft_singleplotER(cfg, grave_msMnul2_pb{ll,:})
+    legend({'Peak' 'P to T' 'Trough' 'T to P'})
+    title('AT*-N')
+    
+    if sleep
+      cfg=[];
+      cfg.channel=chanplot{1};
+      cfg.xlim=[-0.5 1.1];
+      cfg.ylim=[-7 7];
+      figure(10+ll);
+      ft_singleplotER(cfg, grave_msMnul1_ab{ll,:})
+      legend({'Low' 'Mid-low' 'Mid-high' 'High'})
+      title('AT*-N')
+      
+      cfg=[];
+      cfg.channel=chanplot{1};
+      cfg.xlim=[-0.5 1.1];
+      cfg.ylim=[-7 7];
+      figure(100+10+ll);
+      ft_singleplotER(cfg, grave_msMnul2_ab{ll,:})
+      legend({'Low' 'Mid-low' 'Mid-high' 'High'})
+      title('AT*-N')
+    end
+end
+  
+end
+
+
+
+
 
 
 %% Stats on phase-sorting MS ERP
