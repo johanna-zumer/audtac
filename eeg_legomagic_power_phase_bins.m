@@ -1,17 +1,21 @@
 function [angbin,absbin,freqtr]=eeg_legomagic_power_phase_bins(ii,sub,sleep,ss,trialkc,phaset0use)
 %
 % INPUTS
-% ii  = subject index
-% sleep =  1 for lying/bed dataset, 0 for sitting/awake dataset
-% ss   =  sleep stage (10 = W, 11=N1, 12=n2, 13=N3)
-% trialkc =  -1 for use all trials, 0 for non-Kc trials, and 1 for Kc-only trials
-% phaset0use = method for computing phase.   1,2,3 all use FFT, 4,5,6 use filter+Hilbert
+%  ii  = subject index
+%  sub  = subject structure index (e.g.  sub{8}='e08')
+%  sleep =  1 for lying/bed dataset, 0 for sitting/awake dataset
+%  ss   =  sleep stage (10 = W, 11=N1, 12=n2, 13=N3)
+%  trialkc =  -1 for use all trials, 0 for non-Kc trials, and 1 for Kc-only trials
+%  phaset0use = method for computing phase.   1,2,3 all use FFT, 4,5,6 use filter+Hilbert
 %              1 and 4 use Cz sensor only
 %              2 and 5 use a cluster of frontocentral channels
 %              3 and 6 use a PCA component most correlated to Cz
 %              I've settled on using "2" always now, but left all the other code in just in case.
 %
 % OUTPUTS
+%  angbin = structure of binary index (size: trials X bins) indicating if that trial is in that phase bin or not
+%  absbin = same as above but for power bins
+%  freqtr = containing trial indices
 %
 % Note 1: this is called by Johanna in eeg_legomagic_erp_stats2_sepTacAud.m 
 %       and called by Tom in .....
