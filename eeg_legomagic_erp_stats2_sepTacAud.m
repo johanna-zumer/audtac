@@ -6922,10 +6922,11 @@ end
 
 %% Stats on phase-sorting MS ERP
 
-plotflag=0;
-printflag=0;
-statsflag=1;
+plotflag=1;
+printflag=1;
+statsflag=0;
 stats1flag=0;
+sleepshortstatflag=1;
 
 soalist=[1 3 4 5 6 7 9];
 tt=3;
@@ -7188,7 +7189,7 @@ if statsflag
   cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub];
   cfg.tail=1;
   for ll=soalist
-    if sleep
+    if sleep && ~sleepshortstatflag
       if ll==1 || ll==3 || ll==4 || ll==5
         cfg.latency=[0 1];
       elseif ll==6
@@ -7197,6 +7198,16 @@ if statsflag
         cfg.latency=[0 1]+.07;
       elseif ll==9
         cfg.latency=[0 1]+.5;
+      end
+    elseif sleep && sleepshortstatflag
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[0 .45];
+      elseif ll==6
+        cfg.latency=[0 .45]+.02;
+      elseif ll==7
+        cfg.latency=[0 .45]+.07;
+      elseif ll==9
+        cfg.latency=[0 .45]+.5;
       end
     else
       if ll==1 || ll==3 || ll==4 || ll==5
@@ -7229,7 +7240,8 @@ if statsflag
       stat_TPAmMSPN1IAF_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1IAF_pb{ll,:});
     end
     %   save([edir 'stat_pb_mult.mat'],'stat*')
-    save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
+%     save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
+    save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.mat'],'stat*');
   end
   
   cfg.statistic='depsamplesT';
@@ -7238,7 +7250,7 @@ if statsflag
   cfg.design(2,:)=[1:nsub 1:nsub];
   cfg.tail=0;
   for ll=soalist
-    if sleep
+    if sleep && ~sleepshortstatflag
       if ll==1 || ll==3 || ll==4 || ll==5
         cfg.latency=[0 1];
       elseif ll==6
@@ -7247,6 +7259,16 @@ if statsflag
         cfg.latency=[0 1]+.07;
       elseif ll==9
         cfg.latency=[0 1]+.5;
+      end
+    elseif sleep && sleepshortstatflag
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[0 .45];
+      elseif ll==6
+        cfg.latency=[0 .45]+.02;
+      elseif ll==7
+        cfg.latency=[0 .45]+.07;
+      elseif ll==9
+        cfg.latency=[0 .45]+.5;
       end
     else
       if ll==1 || ll==3 || ll==4 || ll==5
@@ -7279,7 +7301,8 @@ if statsflag
   end
   
   %   save([edir 'stat_pb_mult.mat'],'stat*')
-  save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
+%   save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
+    save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.mat'],'stat*');
   clear grind*IAF* grind_*_*m*
   %   save([edir 'grind_pb_mult.mat'],'grind*')
   save([edir 'grind_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'grind*')
@@ -7315,7 +7338,7 @@ if stats1flag  % specific opposite phase or power contrasts (rather than full AN
       elseif ll==9
         cfg.latency=[.6 .95];
       end
-    elseif sleep==1
+    elseif sleep==1 && ~sleepshortstatflag
       if ll==1 || ll==3 || ll==4 || ll==5
         cfg.latency=[0 1];
       elseif ll==6
@@ -7324,6 +7347,16 @@ if stats1flag  % specific opposite phase or power contrasts (rather than full AN
         cfg.latency=[0 1]+.07;
       elseif ll==9
         cfg.latency=[0 1]+.5;
+      end
+    elseif sleep==1 && ~sleepshortstatflag
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[0 .45];
+      elseif ll==6
+        cfg.latency=[0 .45]+.02;
+      elseif ll==7
+        cfg.latency=[0 .45]+.07;
+      elseif ll==9
+        cfg.latency=[0 .45]+.5;
       end
     end
       stat_TPAmMSPN_ptotMttop_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,2}, grind_TPAmMSPN1_pb{ll,4});
@@ -7353,7 +7386,8 @@ if stats1flag  % specific opposite phase or power contrasts (rather than full AN
   end
   
 %   save([edir 'stat_pb_mult.mat'],'stat_TPAmMSPN_*M*','-append')
-  save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat_TPAmM*M*','-append')
+%   save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat_TPAmM*M*','-append')
+    save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.mat'],'stat_TPAmM*M*','-append');
 end
 
 % going through results
