@@ -7285,7 +7285,7 @@ if statsflag
   save([edir 'grind_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'grind*')
 end
 
-if stats1flag
+if stats1flag  % specific opposite phase or power contrasts (rather than full ANOVA)
   load eeg1010_neighb
   nsub=size(grind_TPAmMSPN1_pb{1,4}.individual,1);
   cfg=[];
@@ -7305,7 +7305,7 @@ if stats1flag
   cfg.design(2,:)=[1:nsub 1:nsub];
   cfg.tail=0;
   for ll=soalist
-    if 0
+    if sleep==0
       if ll==1 || ll==3 || ll==4 || ll==5
         cfg.latency=[.1 .45];
       elseif ll==6
@@ -7315,9 +7315,23 @@ if stats1flag
       elseif ll==9
         cfg.latency=[.6 .95];
       end
+    elseif sleep==1
+      if ll==1 || ll==3 || ll==4 || ll==5
+        cfg.latency=[0 1];
+      elseif ll==6
+        cfg.latency=[0 1]+.02;
+      elseif ll==7
+        cfg.latency=[0 1]+.07;
+      elseif ll==9
+        cfg.latency=[0 1]+.5;
+      end
+    end
       stat_TPAmMSPN_ptotMttop_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,2}, grind_TPAmMSPN1_pb{ll,4});
       stat_TPAmMSPN_peakMtrgh_pb{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_pb{ll,1}, grind_TPAmMSPN1_pb{ll,3});
-    end
+      
+      if sleep
+        stat_TPAmMSPN_highMlow_ab{ll}=ft_timelockstatistics(cfg, grind_TPAmMSPN1_ab{ll,1}, grind_TPAmMSPN1_ab{ll,4});
+      end
     
     if sleep==0 && (ll==3 || ll==5 || ll==7)  % conditions where previously there was significance
       aa=nan(2,2);
@@ -7338,8 +7352,8 @@ if stats1flag
     
   end
   
-  cd(edir)
-  save([edir 'stat_pb_mult.mat'],'stat_TPAmMSPN_*M*','-append')
+%   save([edir 'stat_pb_mult.mat'],'stat_TPAmMSPN_*M*','-append')
+  save([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat_TPAmM*M*','-append')
 end
 
 % going through results
