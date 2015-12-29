@@ -7418,8 +7418,10 @@ chanplot{2}={'CP5' 'POz' 'Pz' 'P3' 'P4' 'C4' 'O1' 'O2' 'P7' 'PO7'}; % occipital
 chanlabel{1}='Frontocentral electrodes';
 chanlabel{2}='Occipital-parietal electrodes';
 iterflag=1;
-sleep=0;
 tt=3;
+
+sleep=1;
+sleepshortstatflag=0;
 if sleep
   iter=11;
   ss=12;
@@ -7432,6 +7434,12 @@ end
 
 if iterflag
   if sleep
+    try
+      load([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.mat']);
+    catch
+      load([edir 'stat_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat']);
+    end
+    load([edir 'grind_pb_mult_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat']);
   else
     load([edir 'stat_pb_mult.mat']);
     load([edir 'grind_pb_mult.mat']);
@@ -7440,26 +7448,111 @@ end
 
 soalist=[1 3 4 5 6 7 9];
 timwinstatflag=0; % =1 for using only stat.time, =0 for using [-0.5 1.0];
-timwin=[-0.5 1];
+if sleepshortstatflag
+  timwin=[-0.5 1];
+else
+  timwin=[-0.5 1.5];
+end
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
-scalediff=2;
+scalediff=1;
 
-coloruse=varycolor(10);
-% optimsied to be maximally apart and distinct
-% 1  TacPAud
-% 2  Nul
-% 3  MS_synch
-% 4  Tac
-% 5  diff_TPAMSPN
-% 6  diff_synchAsynch
-% 7  MS
-% 8  MS_asynch
-% 9  Aud
-% 10 MSpN
+coloruse=varycolor(12);
+% use 1, 5, 8, 12 as 4 bins
+% 3 as con of 1 vs 8
+% 10 as con of 5 vs 12
 
 close all
 clear tmp*
+% For ANOVA results
+for ll=soalist
+  
+    cfg=[];
+    if timwinstatflag==1
+      cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+    elseif timwinstatflag==0
+      cfg.latency=timwin;
+      stattimwin=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+    end
+    cfg.channel=stat_TPAmMSPN1_peak_pb{ll}.label;
+    
+    tmp1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
+    tmp1.dimord='chan_time';
+    tmp1.avg=squeeze(mean(tmp1.individual,1));
+    tmp1=rmfield(tmp1,'individual');
+    
+    tmp5=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,2});
+    tmp5.dimord='chan_time';
+    tmp5.avg=squeeze(mean(tmp5.individual,1));
+    tmp5=rmfield(tmp5,'individual');
+  
+    tmp8=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
+    tmp8.dimord='chan_time';
+    tmp8.avg=squeeze(mean(tmp8.individual,1));
+    tmp8=rmfield(tmp8,'individual');
+  
+    tmp12=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,4});
+    tmp12.dimord='chan_time';
+    tmp12.avg=squeeze(mean(tmp12.individual,1));
+    tmp12=rmfield(tmp12,'individual');
+    
+    tmpmask=stat_TPAmMSPN1_pb{ll}.mask;
+    if timwinstatflag==0
+      tmp1.mask=zeros(size(tmp1.avg,1),length(tmp1.time));
+      tmp1.mask(:,dsearchn(tmp1.time',stattimwin(1)):dsearchn(tmp1.time',stattimwin(end)))=tmpmask;
+      tmp5.mask=zeros(size(tmp5.avg,1),length(tmp5.time));
+      tmp5.mask(:,dsearchn(tmp5.time',stattimwin(1)):dsearchn(tmp5.time',stattimwin(end)))=tmpmask;
+      tmp8.mask=zeros(size(tmp8.avg,1),length(tmp8.time));
+      tmp8.mask(:,dsearchn(tmp8.time',stattimwin(1)):dsearchn(tmp8.time',stattimwin(end)))=tmpmask;
+      tmp12.mask=zeros(size(tmp12.avg,1),length(tmp12.time));
+      tmp12.mask(:,dsearchn(tmp12.time',stattimwin(1)):dsearchn(tmp12.time',stattimwin(end)))=tmpmask;
+    else
+      tmpu1{bb}.mask=tmpmask
+      tmpm10{bb}.mask=tmpmask;
+      tmpd5{bb}.mask=tmpmask;
+    end
+    
+    for cg=1:length(chanplot)
+      cfg=[];
+      cfg.parameter='avg';
+      cfg.layout='elec1010.lay';
+      cfg.ylim=[-5 8];
+      cfg.linewidth=3;
+      cfg.xlim=timwin;
+      if cg>length(chanplot)
+        cfg.channel=tmp5.label(any(tmp5.mask,2));
+      else
+        cfg.channel=chanplot{cg};
+      end
+      cfg.graphcolor=coloruse([1 5 8 12],:);
+      cfg.interactive='no';
+      cfg.maskparameter='mask';
+      cfg.maskstyle='box'; % default
+      figure(ll+10*(cg+1))
+      ft_singleplotER(cfg,tmp1,tmp5,tmp8,tmp12);
+      hold on;plot(tmp1.time,0,'k');
+      set(gca,'XTick',[-.5:.1:1])
+      set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
+      set(gca,'FontSize',30)
+      title([])
+      plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+      plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+      plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+      axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
+      if cg==3
+        legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+      end
+    end
+    print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '.png'],'-dpng')
+    print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '.png'],'-dpng')
+end % ll
+    
+    
+    
+    
+    
+% for individual bin results    
 for ll=soalist
   for bb=1:4
     
@@ -7522,7 +7615,7 @@ for ll=soalist
       else
         cfg.channel=chanplot{cg};
       end
-      cfg.graphcolor=coloruse([1 10 5],:);
+      cfg.graphcolor=coloruse([1 4 12],:);
       cfg.interactive='no';
       cfg.maskparameter='mask';
       cfg.maskstyle='box'; % default
@@ -7533,18 +7626,18 @@ for ll=soalist
       set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
       set(gca,'FontSize',30)
       title([])
+      plot([0 0],cfg.ylim,'Color',coloruse(5,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(10,:),'LineWidth',6)
       plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
       plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
-      plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
-      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
-      axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
+      axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
       if cg==3
         legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
       end
     end
     %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
+    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
     
     if any(tmpmask(:))
       masktime=find(any(tmpd5{bb}.mask,1));
@@ -7573,6 +7666,139 @@ for ll=soalist
   end % bb
 end % ll
 
+
+% Now, for specific ptotMttop and peakMtrgh
+for ll=soalist
+    
+  for kk=1:2
+    cfg=[];
+    if timwinstatflag==1
+      cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+    elseif timwinstatflag==0
+      cfg.latency=timwin;
+      stattimwin=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+    end
+    cfg.channel=stat_TPAmMSPN1_peak_pb{ll}.label;
+    
+    switch kk
+      case 1
+        tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,2});
+        tmpu1.dimord='chan_time';
+        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+        tmpu1=rmfield(tmpu1,'individual');
+        
+        tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,4});
+        tmpm10.dimord='chan_time';
+        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+        tmpm10=rmfield(tmpm10,'individual');
+        
+        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_4m2_pb{ll});
+        tmpd5.dimord='chan_time';
+        tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
+        tmpd5=rmfield(tmpd5,'individual');
+      case 2
+        tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
+        tmpu1.dimord='chan_time';
+        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+        tmpu1=rmfield(tmpu1,'individual');
+        
+        tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
+        tmpm10.dimord='chan_time';
+        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+        tmpm10=rmfield(tmpm10,'individual');
+        
+        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
+        tmpd5.dimord='chan_time';
+        tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
+        tmpd5=rmfield(tmpd5,'individual');
+    end
+    
+    switch kk
+      case 1
+        tmpmask=stat_TPAmMSPN_ptotMttop_pb{ll}.mask;
+      case 2
+        tmpmask=stat_TPAmMSPN_peakMtrgh_pb{ll}.mask;
+    end
+    
+    if timwinstatflag==0
+      tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
+      tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
+      tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
+      tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
+      tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
+      tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
+    else
+      tmpu1.mask=tmpmask
+      tmpm10.mask=tmpmask;
+      tmpd5.mask=tmpmask;
+    end
+    
+    for cg=1:length(chanplot)
+      cfg=[];
+      cfg.parameter='avg';
+      cfg.layout='elec1010.lay';
+      cfg.ylim=[-5 8];
+      cfg.linewidth=3;
+      cfg.xlim=timwin;
+      if cg>length(chanplot)
+        cfg.channel=tmpd5.label(any(tmpd5.mask,2));
+      else
+        cfg.channel=chanplot{cg};
+      end
+      cfg.graphcolor=coloruse([1 4 12],:);
+      cfg.interactive='no';
+      cfg.maskparameter='mask';
+      cfg.maskstyle='box'; % default
+      figure(100*bb+ll+10*(cg+1))
+      ft_singleplotER(cfg,tmpu1,tmpm10,tmpd5);
+      hold on;plot(tmpu1.time,0,'k');
+      set(gca,'XTick',[-.5:.1:1])
+      set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
+      set(gca,'FontSize',30)
+      title([])
+      plot([0 0],cfg.ylim,'Color',coloruse(5,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(10,:),'LineWidth',6)
+      plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+      plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+      axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
+      if cg==3
+        legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+      end
+    end
+    %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
+    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
+    
+    if any(tmpmask(:))
+      masktime=find(any(tmpm10.mask,1));
+      cfg=[];
+      cfg.parameter='avg';
+      cfg.layout='elec1010.lay';
+      cfg.maskalpha=0.5;
+      cfg.zlim=[-5 5];
+      cfg.highlight='on';
+      cfg.highlightsize=12;
+      cfg.xlim=[tmpm10.time(masktime(1)) tmpm10.time(masktime(end))];
+      cfg.comment='no';
+      sigchannels=tmpm10.label(find(ceil(mean(tmpm10.mask(:,dsearchn(tmpm10.time',cfg.xlim(1)):dsearchn(tmpm10.time',cfg.xlim(2))),2))));
+      cfg.highlightchannel=sigchannels;
+      figure(1000*bb+ll);
+      ft_topoplotER(cfg,tmpu1);
+      print(1000*bb+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      figure(1000*bb+10+ll);
+      ft_topoplotER(cfg,tmpm10);
+      print(1000*bb+10+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      figure(1000*bb+20+ll);
+      ft_topoplotER(cfg,tmpm10);
+      print(1000*bb+20+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+    end
+    
+  end % bb
+end % ll
+
+% Now, all same as above but for power!
+
+  
 for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
   cfg=[];
   if timwinstatflag==1
