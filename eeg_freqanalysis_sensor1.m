@@ -101,7 +101,7 @@ dofftadd=0;
 usetr=1; % this means use existing trial selection
 synchasynch=0;
 use23=0;
-phaset0=1;
+phaset0=0;
 
 for sleep=[1]
   if sleep
@@ -1778,10 +1778,16 @@ for sleep=[1]
                 if dofftadd
                   save(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','freq*fftadd','num*trials','-v7.3')
                 else
+                  % NOTE: this below is with trialkc=0 implicit!!
+%                   if numtests>2
+%                     save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
+%                   else
+%                     save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','num*trials','-v7.3')
+%                   end
                   if numtests>2
-                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
+                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
                   else
-                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','num*trials','-v7.3')
+                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
                   end
                 end
               end
@@ -1794,11 +1800,17 @@ for sleep=[1]
           if dofftadd
             save(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','freq*fftadd','num*trials','-v7.3')
           else
-            if numtests>2
-              save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
-            else
-              save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','num*trials','-v7.3')
-            end
+                  % NOTE: this below is with trialkc=0 implicit!!
+%             if numtests>2
+%               save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
+%             else
+%               save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','num*trials','-v7.3')
+%             end
+                  if numtests>2
+                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
+                  else
+                    save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+                  end
           end
         end
         clear freq*comb freq*fftadd num*trials freq*time0
@@ -3022,7 +3034,9 @@ for sleep=[1]
         if dofftadd
           save(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','freq*fftadd','num*trials','-v7.3')
         else
-          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','statsa','num*trials','-v7.3')
+                  % NOTE: this below is with trialkc=0 implicit!!
+%           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','statsa','num*trials','-v7.3')
+          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','statsa','num*trials','-v7.3')
         end
         clear freq*comb freq*fftadd num*trials
       end % tt
@@ -3059,7 +3073,8 @@ ylimhi=[30 45; 55 80];
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
 plotflag=1;
 printflag=1;
-statsflag=1;
+statspowflag=1;
+statsplvflag=1;
 audtacflag=0;
 fftaddflag=0;
 synchasynch=0;
@@ -3071,23 +3086,24 @@ chanuse_sleep0={'all' '-F4'};
 chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
 for sleep=[1]
   for tt=3
+    
     clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax
     if sleep
       chanuse=chanuse_sleep1;
       subuseall=iiBuse;
       iteruse=11;
       trialkc=0;
-      ssuse=12; % this is concatenation of N2 and N3
+      %       ssuse=12;
       sleepcond='Sleep N2';
     else
       chanuse=chanuse_sleep0;
       subuseall=setdiff(iiSuse,[]);
       iteruse=27;
       trialkc=-1;
-      ssuse=10; % awake
+      %       ssuse=10; % awake
       sleepcond='Awake W';
     end
-    ss=ssuse;
+    %     ss=ssuse;
     
     submin=subuseall(1)-1;
     subuseind=0;
@@ -3097,151 +3113,353 @@ for sleep=[1]
     for ii=subuseall
       cd([edir sub{ii} ])
       %       load(['freq_diffs_averef_' sub{ii} '.mat']);
-%       try
-%         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-%         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '_tt' num2str(tt) '.mat'])
-%       catch
-%         if tt==2
-%           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat'])
-%           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '.mat'])
-%         end
-%       end
-        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-%       try
-%         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
-%       catch
-%         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat']);
-%       end
+      %       try
+      %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+      %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '_tt' num2str(tt) '.mat'])
+      %       catch
+      %         if tt==2
+      %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat'])
+      %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '.mat'])
+      %         end
+      %       end
+      
+      % NOTE: this below is with trialkc=0 implicit!!
+      %         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+      try
+        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
+      catch
+        if trialkc==0
+          load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+        end
+      end
+      
+      
+      %       try
+      %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+      %       catch
+      %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat']);
+      %       end
       %         for ss=ssuse
       %       subuse=subuseall; % reset to all for each sleep stage
       subuseind=subuseind+1;
-      for ll=soalist
-        freqhiall_tNulAlone_comb{ll}{subuseind}=freqhi_tNulAlone_comb{ll,tt,ss};
-        freqloall_tNulAlone_comb{ll}{subuseind}=freqlo_tNulAlone_comb{ll,tt,ss};
-        freqhiall_tTacAlone_comb{ll}{subuseind}=freqhi_tTacAlone_comb{ll,tt,ss};
-        freqloall_tTacAlone_comb{ll}{subuseind}=freqlo_tTacAlone_comb{ll,tt,ss};
-        freqhiall_tAudAlone_comb{ll}{subuseind}=freqhi_tAudAlone_comb{ll,tt,ss};
-        freqloall_tAudAlone_comb{ll}{subuseind}=freqlo_tAudAlone_comb{ll,tt,ss};
-        freqhiall_tMSAlone_comb{ll}{subuseind} =freqhi_tMSAlone_comb{ll,tt,ss};
-        freqloall_tMSAlone_comb{ll}{subuseind} =freqlo_tMSAlone_comb{ll,tt,ss};
-          freqloall_tNulAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqloall_tTacAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqloall_tAudAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqloall_tMSAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqhiall_tNulAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqhiall_tTacAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqhiall_tAudAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-          freqhiall_tMSAlone_comb{ll}{subuseind}.dimord='chan_freq_time';
-      end %ll
+      
+      for ss=10:12
+        for ll=soalist
+          
+          numtrt(ll,tt,ss,subuseind)=numt_trials(ll,tt,ss); 
+          if numtrt(ll,tt,ss,subuseind)<20
+            subuse(ll,ss,subuseind)=nan;
+          else
+            subuse(ll,ss,subuseind)=1;
+          end
+          
+          if ~isnan(subuse(ll,ss,subuseind))
+            freqhiall_tNulAlone_comb{ll,ss}{subuseind}=freqhi_tNulAlone_comb{ll,tt,ss};
+            freqloall_tNulAlone_comb{ll,ss}{subuseind}=freqlo_tNulAlone_comb{ll,tt,ss};
+            freqhiall_tTacAlone_comb{ll,ss}{subuseind}=freqhi_tTacAlone_comb{ll,tt,ss};
+            freqloall_tTacAlone_comb{ll,ss}{subuseind}=freqlo_tTacAlone_comb{ll,tt,ss};
+            freqhiall_tAudAlone_comb{ll,ss}{subuseind}=freqhi_tAudAlone_comb{ll,tt,ss};
+            freqloall_tAudAlone_comb{ll,ss}{subuseind}=freqlo_tAudAlone_comb{ll,tt,ss};
+            freqhiall_tMSAlone_comb{ll,ss}{subuseind} =freqhi_tMSAlone_comb{ll,tt,ss};
+            freqloall_tMSAlone_comb{ll,ss}{subuseind} =freqlo_tMSAlone_comb{ll,tt,ss};
+            freqloall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqloall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqloall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqloall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqhiall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqhiall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqhiall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+            freqhiall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+          end
+        end %ll
+      end
     end %ii
+    subuseindfinal=subuseind;
     
     
-    cfg=[];
-    cfg.keepindividual='yes';
-    cfg.parameter={'powspctrm' 'plvspctrm'};
-    for ll=soalist
-      grindlo_tNulAlone{ll}=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{ll}{:});
-      grindhi_tNulAlone{ll}=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{ll}{:});
-      grindlo_tTacAlone{ll}=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{ll}{:});
-      grindhi_tTacAlone{ll}=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{ll}{:});
-      grindlo_tAudAlone{ll}=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{ll}{:});
-      grindhi_tAudAlone{ll}=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{ll}{:});
-      grindlo_tMSAlone{ll} =ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{ll}{:});
-      grindhi_tMSAlone{ll} =ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{ll}{:});
-    end % ll
-    
-    nsub=size(grindlo_tNulAlone{ll}.powspctrm,1);
-    cfg=[];
-    cfg.neighbours=neighbours;
-    cfg.parameter='powspctrm';
-    cfg.method='montecarlo';
-    cfg.numrandomization=2000;
-    % cfg.correctm='holm';
-    cfg.correctm='cluster';
-    cfg.clusteralpha = 0.05;
-    cfg.clusterstatistic = 'maxsum';
-    cfg.minnbchan = 2;
-    cfg.statistic='depsamplesT';
-    cfg.design=zeros(2,2*nsub);
-    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-    cfg.design(2,:)=[1:nsub 1:nsub];
-    cfg.ivar=1;
-    cfg.uvar=2;
-    for ll=soalist
-      cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-      stattl_mc_TacVsNul{ll}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll}, grindlo_tNulAlone{ll});
-      if ll>=5
-        cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-      else
-        cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+    for ss=10:12
+      
+      cfg=[];
+      cfg.keepindividual='yes';
+      cfg.parameter={'powspctrm' 'plvspctrm'};
+      for ll=soalist
+        usesub=~isnan(subuse(ll,ss,:));
+        grindlo_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{ll,ss}{usesub});
+        grindhi_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{ll,ss}{usesub});
+        grindlo_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{ll,ss}{usesub});
+        grindhi_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{ll,ss}{usesub});
+        grindlo_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{ll,ss}{usesub});
+        grindhi_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{ll,ss}{usesub});
+        grindlo_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{ll,ss}{usesub});
+        grindhi_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{ll,ss}{usesub});
+      end % ll
+      
+      cfg=[];
+      cfg.neighbours=neighbours;
+      cfg.method='montecarlo';
+      cfg.numrandomization=2000;
+      cfg.correctm='cluster';
+      cfg.clusteralpha = 0.05;
+      cfg.clusterstatistic = 'maxsum';
+      cfg.minnbchan = 2;
+      cfg.ivar=1;
+      cfg.uvar=2;
+      
+      if statspowflag
+        cfg.statistic='depsamplesT';
+        cfg.parameter='powspctrm';
+        for ll=soalist
+          nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          stattl_mc_TacVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+          if ll>=5
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          else
+            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+          end
+          stattl_mc_AudVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          stattl_mc_MSVsNul{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        end
+        
       end
-      stattl_mc_AudVsNul{ll}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll}, grindlo_tNulAlone{ll});
-      cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-      stattl_mc_MSVsNul{ll} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll}, grindlo_tNulAlone{ll});
-    end
-    
-%     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
-    save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*');
-    
-    load('sortTacWP200.mat','iiuse_*halfWwideP2N1');
-    
-    for ll=soalist
-      grindlo_tTacAlone_top{ll}=grindlo_tTacAlone{ll};
-      grindlo_tTacAlone_top{ll}.powspctrm=grindlo_tTacAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_tophalfWwideP2N1'),:,:,:);
-      grindlo_tTacAlone_bot{ll}=grindlo_tTacAlone{ll};
-      grindlo_tTacAlone_bot{ll}.powspctrm=grindlo_tTacAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_bothalfWwideP2N1'),:,:,:);
-      grindlo_tNulAlone_top{ll}=grindlo_tNulAlone{ll};
-      grindlo_tNulAlone_top{ll}.powspctrm=grindlo_tNulAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_tophalfWwideP2N1'),:,:,:);
-      grindlo_tNulAlone_bot{ll}=grindlo_tNulAlone{ll};
-      grindlo_tNulAlone_bot{ll}.powspctrm=grindlo_tNulAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_bothalfWwideP2N1'),:,:,:);
-      grindlo_tAudAlone_top{ll}=grindlo_tAudAlone{ll};
-      grindlo_tAudAlone_top{ll}.powspctrm=grindlo_tAudAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_tophalfWwideP2N1'),:,:,:);
-      grindlo_tAudAlone_bot{ll}=grindlo_tAudAlone{ll};
-      grindlo_tAudAlone_bot{ll}.powspctrm=grindlo_tAudAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_bothalfWwideP2N1'),:,:,:);
-      grindlo_tMSAlone_top{ll}=grindlo_tMSAlone{ll};
-      grindlo_tMSAlone_top{ll}.powspctrm=grindlo_tMSAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_tophalfWwideP2N1'),:,:,:);
-      grindlo_tMSAlone_bot{ll}=grindlo_tMSAlone{ll};
-      grindlo_tMSAlone_bot{ll}.powspctrm=grindlo_tMSAlone{ll}.powspctrm(dsearchn(iiBuse',iiuse_bothalfWwideP2N1'),:,:,:);
-    end
-    
-    nsub=size(grindlo_tNulAlone_top{ll}.powspctrm,1);
-    cfg=[];
-    cfg.neighbours=neighbours;
-    cfg.parameter='powspctrm';
-    cfg.method='montecarlo';
-    cfg.numrandomization=2000;
-    % cfg.correctm='holm';
-    cfg.correctm='cluster';
-    cfg.clusteralpha = 0.05;
-    cfg.clusterstatistic = 'maxsum';
-    cfg.minnbchan = 2;
-    cfg.statistic='depsamplesT';
-    cfg.design=zeros(2,2*nsub);
-    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-    cfg.design(2,:)=[1:nsub 1:nsub];
-    cfg.ivar=1;
-    cfg.uvar=2;
-    for ll=soalist
-      cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-      stattl_mc_TacVsNul_top{ll}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll}, grindlo_tNulAlone_top{ll});
-      stattl_mc_TacVsNul_bot{ll}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll}, grindlo_tNulAlone_bot{ll});
-      stattl_mc_TacTVsTacB{ll}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll}, grindlo_tTacAlone_bot{ll});
-      if ll>=5
-        cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-      else
-        cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+      
+      if statsplvflag
+        cfg.statistic='diff_itc';
+        cfg.parameter='plvspctrm';
+        cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        for ll=soalist
+          nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          stattl_mcplv_TacVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+          if ll>=5
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          else
+            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+          end
+          stattl_mcplv_AudVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          stattl_mcplv_MSVsNul{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        end
       end
-      stattl_mc_AudVsNul_top{ll}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll}, grindlo_tNulAlone_top{ll});
-      stattl_mc_AudVsNul_bot{ll}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll}, grindlo_tNulAlone_bot{ll});
-      stattl_mc_AudTVsAudB{ll}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll}, grindlo_tAudAlone_bot{ll});
-      cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-      stattl_mc_MSVsNul_top{ll} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll}, grindlo_tNulAlone_top{ll});
-      stattl_mc_MSVsNul_bot{ll} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll}, grindlo_tNulAlone_bot{ll});
-      stattl_mc_MSTVsMSB{ll}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll}, grindlo_tMSAlone_bot{ll});
-    end
-    
-    save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*');
+      
+      
+      % NOTE: without trialkc label, it refers to trialkc=0;
+      %     if ~exist([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'file')
+      %       %     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
+      %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+      %     else
+      %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+      %     end
+      if ~exist([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'file')
+        %     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
+        save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','subuse');
+      else
+        save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','subuse','-append');
+      end
+      
+      load([edir 'sortTacWP200.mat'],'iiuse_*halfWwideP2N1');
+      
+      for ll=soalist
+        subind_top=dsearchn(iiBuse',iiuse_tophalfWwideP2N1');
+        subind_bot=dsearchn(iiBuse',iiuse_bothalfWwideP2N1');
+        usesub=find(squeeze(~isnan(subuse(ll,ss,:))));
 
+        grindlo_tTacAlone_top{ll,ss}=grindlo_tTacAlone{ll,ss};
+        grindlo_tTacAlone_top{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tTacAlone_bot{ll,ss}=grindlo_tTacAlone{ll,ss};
+        grindlo_tTacAlone_bot{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tNulAlone_top{ll,ss}=grindlo_tNulAlone{ll,ss};
+        grindlo_tNulAlone_top{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tNulAlone_bot{ll,ss}=grindlo_tNulAlone{ll,ss};
+        grindlo_tNulAlone_bot{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tAudAlone_top{ll,ss}=grindlo_tAudAlone{ll,ss};
+        grindlo_tAudAlone_top{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tAudAlone_bot{ll,ss}=grindlo_tAudAlone{ll,ss};
+        grindlo_tAudAlone_bot{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tMSAlone_top{ll,ss}=grindlo_tMSAlone{ll,ss};
+        grindlo_tMSAlone_top{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tMSAlone_bot{ll,ss}=grindlo_tMSAlone{ll,ss};
+        grindlo_tMSAlone_bot{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      end
+      
+      cfg=[];
+      cfg.neighbours=neighbours;
+      cfg.method='montecarlo';
+      cfg.numrandomization=2000;
+      % cfg.correctm='holm';
+      cfg.correctm='cluster';
+      cfg.clusteralpha = 0.05;
+      cfg.clusterstatistic = 'maxsum';
+      cfg.minnbchan = 2;
+      cfg.ivar=1;
+      cfg.uvar=2;
+      
+      
+      if statspowflag
+        cfg.statistic='depsamplesT';
+        cfg.parameter='powspctrm';
+        for ll=soalist
+          % top
+          nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+          if nsub>1
+            cfg.design=zeros(2,2*nsub);
+            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+            cfg.design(2,:)=[1:nsub 1:nsub];
+            
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mc_TacVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mc_AudVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mc_MSVsNul_top{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          else
+            stattl_mc_TacVsNul_top{ll,ss}=[];
+            stattl_mc_AudVsNul_top{ll,ss}=[];
+            stattl_mc_MSVsNul_top{ll,ss} =[];
+          end
+            
+
+          % bottom
+          nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+          if nsub>1
+            cfg.design=zeros(2,2*nsub);
+            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+            cfg.design(2,:)=[1:nsub 1:nsub];
+            
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mc_TacVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mc_AudVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mc_MSVsNul_bot{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          else
+            stattl_mc_TacVsNul_bot{ll,ss}=[];
+            stattl_mc_AudVsNul_bot{ll,ss}=[];
+            stattl_mc_MSVsNul_bot{ll,ss} =[];
+          end
+
+          % top vs bottom
+          nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+          nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+          if nsubb>1 && nsubt>1
+            cfg.design=zeros(2,nsubb + nsubt);
+            cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+            cfg.design(2,:)=[1:nsubt 1:nsubb];
+            
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mc_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mc_AudTVsAudB{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mc_MSTVsMSB{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
+          else
+            stattl_mc_TacTVsTacB{ll,ss}=[];
+            stattl_mc_AudTVsAudB{ll,ss}=[];
+            stattl_mc_MSTVsMSB{ll,ss}=[];
+          end
+        end %ll
+      end
+      
+      if statsplvflag
+        cfg.statistic='diff_itc';
+        cfg.parameter='plvspctrm';
+        cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        for ll=soalist
+          
+          % top
+          nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+          if nsub>1
+            cfg.design=zeros(2,2*nsub);
+            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+            cfg.design(2,:)=[1:nsub 1:nsub];
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mcplv_TacVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSVsNul_top{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          else
+            stattl_mcplv_TacVsNul_top{ll,ss}=[];
+            stattl_mcplv_AudVsNul_top{ll,ss}=[];
+            stattl_mcplv_MSVsNul_top{ll,ss} =[];
+          end
+          
+          % bottom
+          nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+          if nsub>1
+            cfg.design=zeros(2,2*nsub);
+            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+            cfg.design(2,:)=[1:nsub 1:nsub];
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mcplv_TacVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSVsNul_bot{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          else
+            stattl_mcplv_TacVsNul_bot{ll,ss}=[];
+            stattl_mcplv_AudVsNul_bot{ll,ss}=[];
+            stattl_mcplv_MSVsNul_bot{ll,ss} =[];
+          end
+          
+          % top vs bottom
+          nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+          nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+          if nsubt>1 && nsubb>1
+            cfg.design=zeros(2,2*nsub);
+            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+            cfg.design(2,:)=[1:nsub 1:nsub];
+            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+            stattl_mcplv_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudTVsAudB{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSTVsMSB{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
+          else
+          end
+        end %ll
+        
+      end
+      
+      % NOTE: without trialkc label, it refers to trialkc=0;
+      %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*');
+      %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+      save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+    end % ss
+    
   end % tt
 end % sleep
 
