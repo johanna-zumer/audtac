@@ -7058,7 +7058,7 @@ for ll=soalist
   grave_TPAmMSPN_3m1_pb{ll}.dimord='chan_time';
   
   if sleep
-    grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,2});
+    grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,1}); 
     grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
     grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
     grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
@@ -7348,7 +7348,7 @@ if stats1flag  % specific opposite phase or power contrasts (rather than full AN
       elseif ll==9
         cfg.latency=[0 1]+.5;
       end
-    elseif sleep==1 && ~sleepshortstatflag
+    elseif sleep==1 && sleepshortstatflag
       if ll==1 || ll==3 || ll==4 || ll==5
         cfg.latency=[0 .45];
       elseif ll==6
@@ -7425,7 +7425,7 @@ sleepshortstatflag=0;
 if sleep
   iter=11;
   ss=12;
-  trialkc=0;
+  trialkc=-1;
 else
   iter=27;
   ss=10;
@@ -7457,16 +7457,15 @@ soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
 scalediff=1;
 
-coloruse=varycolor(12);
-% use 1, 5, 8, 12 as 4 bins
-% 3 as con of 1 vs 8
-% 10 as con of 5 vs 12
+bluered=varycolor(10);
+coloruse=parula(8);
 
-close all
-clear tmp*
 % For ANOVA results
-for ll=soalist
-  
+for pb=1:2 % pb=1 means phase results, pb=2 means power results
+  close all
+  clear tmp*
+  for ll=soalist
+    
     cfg=[];
     if timwinstatflag==1
       cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
@@ -7476,27 +7475,54 @@ for ll=soalist
     end
     cfg.channel=stat_TPAmMSPN1_peak_pb{ll}.label;
     
-    tmp1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
-    tmp1.dimord='chan_time';
-    tmp1.avg=squeeze(mean(tmp1.individual,1));
-    tmp1=rmfield(tmp1,'individual');
+    switch pb
+      case 1
+        tmp1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
+        tmp1.dimord='chan_time';
+        tmp1.avg=squeeze(mean(tmp1.individual,1));
+        tmp1=rmfield(tmp1,'individual');
+        
+        tmp5=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,2});
+        tmp5.dimord='chan_time';
+        tmp5.avg=squeeze(mean(tmp5.individual,1));
+        tmp5=rmfield(tmp5,'individual');
+        
+        tmp8=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
+        tmp8.dimord='chan_time';
+        tmp8.avg=squeeze(mean(tmp8.individual,1));
+        tmp8=rmfield(tmp8,'individual');
+        
+        tmp12=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,4});
+        tmp12.dimord='chan_time';
+        tmp12.avg=squeeze(mean(tmp12.individual,1));
+        tmp12=rmfield(tmp12,'individual');
+        
+        tmpmask=stat_TPAmMSPN1_pb{ll}.mask;
+      case 2
+        tmp1=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,1});
+        tmp1.dimord='chan_time';
+        tmp1.avg=squeeze(mean(tmp1.individual,1));
+        tmp1=rmfield(tmp1,'individual');
+        
+        tmp5=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,2});
+        tmp5.dimord='chan_time';
+        tmp5.avg=squeeze(mean(tmp5.individual,1));
+        tmp5=rmfield(tmp5,'individual');
+        
+        tmp8=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,3});
+        tmp8.dimord='chan_time';
+        tmp8.avg=squeeze(mean(tmp8.individual,1));
+        tmp8=rmfield(tmp8,'individual');
+        
+        tmp12=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,4});
+        tmp12.dimord='chan_time';
+        tmp12.avg=squeeze(mean(tmp12.individual,1));
+        tmp12=rmfield(tmp12,'individual');
+        
+        tmpmask=stat_TPAmMSPN1_ab{ll}.mask;
+    end
     
-    tmp5=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,2});
-    tmp5.dimord='chan_time';
-    tmp5.avg=squeeze(mean(tmp5.individual,1));
-    tmp5=rmfield(tmp5,'individual');
-  
-    tmp8=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
-    tmp8.dimord='chan_time';
-    tmp8.avg=squeeze(mean(tmp8.individual,1));
-    tmp8=rmfield(tmp8,'individual');
-  
-    tmp12=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,4});
-    tmp12.dimord='chan_time';
-    tmp12.avg=squeeze(mean(tmp12.individual,1));
-    tmp12=rmfield(tmp12,'individual');
     
-    tmpmask=stat_TPAmMSPN1_pb{ll}.mask;
     if timwinstatflag==0
       tmp1.mask=zeros(size(tmp1.avg,1),length(tmp1.time));
       tmp1.mask(:,dsearchn(tmp1.time',stattimwin(1)):dsearchn(tmp1.time',stattimwin(end)))=tmpmask;
@@ -7524,7 +7550,7 @@ for ll=soalist
       else
         cfg.channel=chanplot{cg};
       end
-      cfg.graphcolor=coloruse([1 5 8 12],:);
+      cfg.graphcolor=coloruse([pb:2:8],:);
       cfg.interactive='no';
       cfg.maskparameter='mask';
       cfg.maskstyle='box'; % default
@@ -7535,8 +7561,8 @@ for ll=soalist
       set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
       set(gca,'FontSize',30)
       title([])
-      plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
-      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',bluered(4,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',bluered(9,:),'LineWidth',6)
       plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
       plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
       axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
@@ -7544,133 +7570,267 @@ for ll=soalist
         legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
       end
     end
-    print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '.png'],'-dpng')
-    print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '.png'],'-dpng')
-end % ll
-    
-    
-    
-    
-    
-% for individual bin results    
-for ll=soalist
-  for bb=1:4
-    
-    cfg=[];
-    if timwinstatflag==1
-      cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
-    elseif timwinstatflag==0
-      cfg.latency=timwin;
-      stattimwin=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
-    end
-    cfg.channel=stat_TPAmMSPN1_peak_pb{ll}.label;
-    
-    tmpu1{bb}=ft_selectdata(cfg,grind_tacPaud1_pb{ll,bb});
-    tmpu1{bb}.dimord='chan_time';
-    tmpu1{bb}.avg=squeeze(mean(tmpu1{bb}.individual,1));
-    tmpu1{bb}=rmfield(tmpu1{bb},'individual');
-    
-    tmpm10{bb}=ft_selectdata(cfg,grind_tacMSpN1_pb{ll,bb});
-    tmpm10{bb}.dimord='chan_time';
-    tmpm10{bb}.avg=squeeze(mean(tmpm10{bb}.individual,1));
-    tmpm10{bb}=rmfield(tmpm10{bb},'individual');
-    
-    tmpd5{bb}=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,bb});
-    tmpd5{bb}.dimord='chan_time';
-    tmpd5{bb}.avg=scalediff*squeeze(mean(tmpd5{bb}.individual,1));
-    tmpd5{bb}=rmfield(tmpd5{bb},'individual');
-    
-    switch bb
+    switch pb
       case 1
-        tmpmask=stat_TPAmMSPN1_peak_pb{ll}.mask;
+        print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+        print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
       case 2
-        tmpmask=stat_TPAmMSPN1_ptot_pb{ll}.mask;
-      case 3
-        tmpmask=stat_TPAmMSPN1_trgh_pb{ll}.mask;
-      case 4
-        tmpmask=stat_TPAmMSPN1_ttop_pb{ll}.mask;
-    end
-    if timwinstatflag==0
-      tmpu1{bb}.mask=zeros(size(tmpu1{bb}.avg,1),length(tmpu1{bb}.time));
-      tmpu1{bb}.mask(:,dsearchn(tmpu1{bb}.time',stattimwin(1)):dsearchn(tmpu1{bb}.time',stattimwin(end)))=tmpmask;
-      tmpm10{bb}.mask=zeros(size(tmpm10{bb}.avg,1),length(tmpm10{bb}.time));
-      tmpm10{bb}.mask(:,dsearchn(tmpm10{bb}.time',stattimwin(1)):dsearchn(tmpm10{bb}.time',stattimwin(end)))=tmpmask;
-      tmpd5{bb}.mask=zeros(size(tmpd5{bb}.avg,1),length(tmpd5{bb}.time));
-      tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',stattimwin(1)):dsearchn(tmpd5{bb}.time',stattimwin(end)))=tmpmask;
-    else
-      tmpu1{bb}.mask=tmpmask
-      tmpm10{bb}.mask=tmpmask;
-      tmpd5{bb}.mask=tmpmask;
+        print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+        print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
     end
     
-    for cg=1:length(chanplot)
+    
+      if any(tmpmask(:))
+        masktime=find(any(tmp5.mask,1));
+        cfg=[];
+        cfg.parameter='avg';
+        cfg.layout='elec1010.lay';
+        cfg.maskalpha=0.5;
+        cfg.zlim=[-5 5];
+        cfg.highlight='on';
+        cfg.highlightsize=12;
+        cfg.xlim=[tmp5.time(masktime(1)) tmp5.time(masktime(end))];
+        cfg.comment='no';
+        sigchannels=tmp5.label(find(ceil(mean(tmp5.mask(:,dsearchn(tmp5.time',cfg.xlim(1)):dsearchn(tmp5.time',cfg.xlim(2))),2))));
+        cfg.highlightchannel=sigchannels;
+        figure(1000*bb+ll);
+        ft_topoplotER(cfg,tmp1);
+        switch pb
+          case 1
+            print(1000*bb+ll,[fdir 'erp_topoBin1_pb_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+ll,[fdir 'erp_topoBin1_ab_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+        figure(1000*bb+10+ll);
+        ft_topoplotER(cfg,tmp5);
+        switch pb
+          case 1
+            print(1000*bb+10+ll,[fdir 'erp_topoBin2_pb_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+10+ll,[fdir 'erp_topoBin2_ab_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+        figure(1000*bb+20+ll);
+        ft_topoplotER(cfg,tmp8);
+        switch pb
+          case 1
+            print(1000*bb+20+ll,[fdir 'erp_topoBin3_pb_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+20+ll,[fdir 'erp_topoBin3_ab_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+        figure(1000*bb+30+ll);
+        ft_topoplotER(cfg,tmp12);
+        switch pb
+          case 1
+            print(1000*bb+20+ll,[fdir 'erp_topoBin4_pb_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+20+ll,[fdir 'erp_topoBin4_ab_' num2str(ll) num2str(tt) num2str(ss) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+      end
+    
+    
+  end % ll
+end
+    
+    
+    
+    
+% for individual bin results
+for pb=1:2
+  close all
+  clear tmp*
+  for ll=soalist
+    for bb=1:4
+      
       cfg=[];
-      cfg.parameter='avg';
-      cfg.layout='elec1010.lay';
-      cfg.ylim=[-5 8];
-      cfg.linewidth=3;
-      cfg.xlim=timwin;
-      if cg>length(chanplot)
-        cfg.channel=tmpd5{bb}.label(any(tmpd5{bb}.mask,2));
+      if timwinstatflag==1
+        cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+      elseif timwinstatflag==0
+        cfg.latency=timwin;
+        stattimwin=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
+      end
+      cfg.channel=stat_TPAmMSPN1_peak_pb{ll}.label;
+      
+      switch pb
+        case 1
+          tmpu1{bb}=ft_selectdata(cfg,grind_tacPaud1_pb{ll,bb});
+          tmpu1{bb}.dimord='chan_time';
+          tmpu1{bb}.avg=squeeze(mean(tmpu1{bb}.individual,1));
+          tmpu1{bb}=rmfield(tmpu1{bb},'individual');
+          
+          tmpm10{bb}=ft_selectdata(cfg,grind_tacMSpN1_pb{ll,bb});
+          tmpm10{bb}.dimord='chan_time';
+          tmpm10{bb}.avg=squeeze(mean(tmpm10{bb}.individual,1));
+          tmpm10{bb}=rmfield(tmpm10{bb},'individual');
+          
+          tmpd5{bb}=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,bb});
+          tmpd5{bb}.dimord='chan_time';
+          tmpd5{bb}.avg=scalediff*squeeze(mean(tmpd5{bb}.individual,1));
+          tmpd5{bb}=rmfield(tmpd5{bb},'individual');
+          
+          switch bb
+            case 1
+              tmpmask=stat_TPAmMSPN1_peak_pb{ll}.mask;
+            case 2
+              tmpmask=stat_TPAmMSPN1_ptot_pb{ll}.mask;
+            case 3
+              tmpmask=stat_TPAmMSPN1_trgh_pb{ll}.mask;
+            case 4
+              tmpmask=stat_TPAmMSPN1_ttop_pb{ll}.mask;
+          end
+        case 2
+          tmpu1{bb}=ft_selectdata(cfg,grind_tacPaud1_ab{ll,bb});
+          tmpu1{bb}.dimord='chan_time';
+          tmpu1{bb}.avg=squeeze(mean(tmpu1{bb}.individual,1));
+          tmpu1{bb}=rmfield(tmpu1{bb},'individual');
+          
+          tmpm10{bb}=ft_selectdata(cfg,grind_tacMSpN1_ab{ll,bb});
+          tmpm10{bb}.dimord='chan_time';
+          tmpm10{bb}.avg=squeeze(mean(tmpm10{bb}.individual,1));
+          tmpm10{bb}=rmfield(tmpm10{bb},'individual');
+          
+          tmpd5{bb}=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,bb});
+          tmpd5{bb}.dimord='chan_time';
+          tmpd5{bb}.avg=scalediff*squeeze(mean(tmpd5{bb}.individual,1));
+          tmpd5{bb}=rmfield(tmpd5{bb},'individual');
+          
+          switch bb
+            case 1
+              tmpmask=stat_TPAmMSPN1_low_pb{ll}.mask;
+            case 2
+              tmpmask=stat_TPAmMSPN1_midl_pb{ll}.mask;
+            case 3
+              tmpmask=stat_TPAmMSPN1_midh_pb{ll}.mask;
+            case 4
+              tmpmask=stat_TPAmMSPN1_high_pb{ll}.mask;
+          end
+      end
+      
+      if timwinstatflag==0
+        tmpu1{bb}.mask=zeros(size(tmpu1{bb}.avg,1),length(tmpu1{bb}.time));
+        tmpu1{bb}.mask(:,dsearchn(tmpu1{bb}.time',stattimwin(1)):dsearchn(tmpu1{bb}.time',stattimwin(end)))=tmpmask;
+        tmpm10{bb}.mask=zeros(size(tmpm10{bb}.avg,1),length(tmpm10{bb}.time));
+        tmpm10{bb}.mask(:,dsearchn(tmpm10{bb}.time',stattimwin(1)):dsearchn(tmpm10{bb}.time',stattimwin(end)))=tmpmask;
+        tmpd5{bb}.mask=zeros(size(tmpd5{bb}.avg,1),length(tmpd5{bb}.time));
+        tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',stattimwin(1)):dsearchn(tmpd5{bb}.time',stattimwin(end)))=tmpmask;
       else
-        cfg.channel=chanplot{cg};
+        tmpu1{bb}.mask=tmpmask
+        tmpm10{bb}.mask=tmpmask;
+        tmpd5{bb}.mask=tmpmask;
       end
-      cfg.graphcolor=coloruse([1 4 12],:);
-      cfg.interactive='no';
-      cfg.maskparameter='mask';
-      cfg.maskstyle='box'; % default
-      figure(100*bb+ll+10*(cg+1))
-      ft_singleplotER(cfg,tmpu1{bb},tmpm10{bb},tmpd5{bb});
-      hold on;plot(tmpu1{bb}.time,0,'k');
-      set(gca,'XTick',[-.5:.1:1])
-      set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
-      set(gca,'FontSize',30)
-      title([])
-      plot([0 0],cfg.ylim,'Color',coloruse(5,:),'LineWidth',6)
-      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(10,:),'LineWidth',6)
-      plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
-      plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
-      axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
-      if cg==3
-        legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+      
+      for cg=1:length(chanplot)
+        cfg=[];
+        cfg.parameter='avg';
+        cfg.layout='elec1010.lay';
+        cfg.ylim=[-5 8];
+        cfg.linewidth=3;
+        cfg.xlim=timwin;
+        if cg>length(chanplot)
+          cfg.channel=tmpd5{bb}.label(any(tmpd5{bb}.mask,2));
+        else
+          cfg.channel=chanplot{cg};
+        end
+        cfg.graphcolor=[bluered(1,:); bluered(10,:); coloruse(2*(bb-1)+pb,:)];
+        cfg.interactive='no';
+        cfg.maskparameter='mask';
+        cfg.maskstyle='box'; % default
+        figure(100*bb+ll+10*(cg+1))
+        ft_singleplotER(cfg,tmpu1{bb},tmpm10{bb},tmpd5{bb});
+        hold on;plot(tmpu1{bb}.time,0,'k');
+        set(gca,'XTick',[-.5:.1:1])
+        set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
+        set(gca,'FontSize',30)
+        title([])
+        plot([0 0],cfg.ylim,'Color',bluered(4,:),'LineWidth',6)
+        plot([soades(ll) soades(ll)],cfg.ylim,'Color',bluered(9,:),'LineWidth',6)
+        plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+        plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+        axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
+        if cg==3
+          legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+        end
       end
-    end
-    %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
-    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
-    
-    if any(tmpmask(:))
-      masktime=find(any(tmpd5{bb}.mask,1));
-      cfg=[];
-      cfg.parameter='avg';
-      cfg.layout='elec1010.lay';
-      cfg.maskalpha=0.5;
-      cfg.zlim=[-5 5];
-      cfg.highlight='on';
-      cfg.highlightsize=12;
-      cfg.xlim=[tmpd5{bb}.time(masktime(1)) tmpd5{bb}.time(masktime(end))];
-      cfg.comment='no';
-      sigchannels=tmpd5{bb}.label(find(ceil(mean(tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',cfg.xlim(1)):dsearchn(tmpd5{bb}.time',cfg.xlim(2))),2))));
-      cfg.highlightchannel=sigchannels;
-      figure(1000*bb+ll);
-      ft_topoplotER(cfg,tmpu1{bb});
-      print(1000*bb+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-      figure(1000*bb+10+ll);
-      ft_topoplotER(cfg,tmpm10{bb});
-      print(1000*bb+10+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-      figure(1000*bb+20+ll);
-      ft_topoplotER(cfg,tmpd5{bb});
-      print(1000*bb+20+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
-    end
-    
-  end % bb
-end % ll
+      switch pb
+        case 1
+          print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb)  '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+          print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb)  '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+        case 2
+          print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb)  '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+          print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb)  '_shortstat' num2str(sleepshortstatflag) '.png'],'-dpng')
+      end
+      
+      if any(tmpmask(:))
+        masktime=find(any(tmpd5{bb}.mask,1));
+        cfg=[];
+        cfg.parameter='avg';
+        cfg.layout='elec1010.lay';
+        cfg.maskalpha=0.5;
+        cfg.zlim=[-5 5];
+        cfg.highlight='on';
+        cfg.highlightsize=12;
+        cfg.xlim=[tmpd5{bb}.time(masktime(1)) tmpd5{bb}.time(masktime(end))];
+        cfg.comment='no';
+        sigchannels=tmpd5{bb}.label(find(ceil(mean(tmpd5{bb}.mask(:,dsearchn(tmpd5{bb}.time',cfg.xlim(1)):dsearchn(tmpd5{bb}.time',cfg.xlim(2))),2))));
+        cfg.highlightchannel=sigchannels;
+        figure(1000*bb+ll);
+        ft_topoplotER(cfg,tmpu1{bb});
+        switch pb
+          case 1
+            print(1000*bb+ll,[fdir 'erp_topoU_pb_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+ll,[fdir 'erp_topoU_ab_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+        figure(1000*bb+10+ll);
+        ft_topoplotER(cfg,tmpm10{bb});
+        switch pb
+          case 1
+            print(1000*bb+10+ll,[fdir 'erp_topoM_pb_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+10+ll,[fdir 'erp_topoM_ab_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+        figure(1000*bb+20+ll);
+        ft_topoplotER(cfg,tmpd5{bb});
+        switch pb
+          case 1
+            print(1000*bb+20+ll,[fdir 'erp_topoDiff_pb_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          case 2
+            print(1000*bb+20+ll,[fdir 'erp_topoDiff_ab_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        end
+      end
+      
+    end % bb
+  end % ll
+end % pb
 
 
-% Now, for specific ptotMttop and peakMtrgh
+close all
+clear tmp*
+% Now, for specific ptotMttop and peakMtrgh and highMlow
+
 for ll=soalist
-    
-  for kk=1:2
+  
+  cfg=[];
+  cfg.parameter='individual';
+  cfg.operation='subtract';
+  grind_TPAmMSPN_4m2_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,4},grind_TPAmMSPN1_pb{ll,2});
+  grave_TPAmMSPN_4m2_pb{ll}=grind_TPAmMSPN_4m2_pb{ll};
+  grave_TPAmMSPN_4m2_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m2_pb{ll}.individual,1));
+  grave_TPAmMSPN_4m2_pb{ll}=rmfield(grave_TPAmMSPN_4m2_pb{ll},'individual');
+  grave_TPAmMSPN_4m2_pb{ll}.dimord='chan_time';
+  
+  grind_TPAmMSPN_3m1_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,3},grind_TPAmMSPN1_pb{ll,1});
+  grave_TPAmMSPN_3m1_pb{ll}=grind_TPAmMSPN_3m1_pb{ll};
+  grave_TPAmMSPN_3m1_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_3m1_pb{ll}.individual,1));
+  grave_TPAmMSPN_3m1_pb{ll}=rmfield(grave_TPAmMSPN_3m1_pb{ll},'individual');
+  grave_TPAmMSPN_3m1_pb{ll}.dimord='chan_time';
+  
+  grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,1});
+  grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
+  grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
+  grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
+  grave_TPAmMSPN_4m1_ab{ll}.dimord='chan_time';
+  
+  for kk=1:3
     cfg=[];
     if timwinstatflag==1
       cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
@@ -7711,6 +7871,21 @@ for ll=soalist
         tmpd5.dimord='chan_time';
         tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
         tmpd5=rmfield(tmpd5,'individual');
+      case 3
+        tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,1});
+        tmpu1.dimord='chan_time';
+        tmpu1.avg=squeeze(mean(tmpu1.individual,1));
+        tmpu1=rmfield(tmpu1,'individual');
+        
+        tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_ab{ll,4});
+        tmpm10.dimord='chan_time';
+        tmpm10.avg=squeeze(mean(tmpm10.individual,1));
+        tmpm10=rmfield(tmpm10,'individual');
+        
+        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_4m1_ab{ll});
+        tmpd5.dimord='chan_time';
+        tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
+        tmpd5=rmfield(tmpd5,'individual');
     end
     
     switch kk
@@ -7718,6 +7893,12 @@ for ll=soalist
         tmpmask=stat_TPAmMSPN_ptotMttop_pb{ll}.mask;
       case 2
         tmpmask=stat_TPAmMSPN_peakMtrgh_pb{ll}.mask;
+      case 3
+        if trialkc==-1
+          tmpmask=stat_TPAmMSPN_lowMhigh_ab{ll}.mask;
+        elseif trialkc==0
+          tmpmask=stat_TPAmMSPN_highMlow_ab{ll}.mask;
+        end
     end
     
     if timwinstatflag==0
@@ -7728,7 +7909,7 @@ for ll=soalist
       tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
       tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
     else
-      tmpu1.mask=tmpmask
+      tmpu1.mask=tmpmask;
       tmpm10.mask=tmpmask;
       tmpd5.mask=tmpmask;
     end
@@ -7745,7 +7926,14 @@ for ll=soalist
       else
         cfg.channel=chanplot{cg};
       end
-      cfg.graphcolor=coloruse([1 4 12],:);
+      switch kk
+        case 1
+          cfg.graphcolor=[coloruse(3,:); coloruse(7,:);  bluered(10,:)]
+        case 2
+          cfg.graphcolor=[coloruse(1,:); coloruse(5,:);  bluered(10,:)]
+        case 3
+          cfg.graphcolor=[coloruse(2,:); coloruse(8,:);  bluered(10,:)]
+      end
       cfg.interactive='no';
       cfg.maskparameter='mask';
       cfg.maskstyle='box'; % default
@@ -7756,8 +7944,8 @@ for ll=soalist
       set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
       set(gca,'FontSize',30)
       title([])
-      plot([0 0],cfg.ylim,'Color',coloruse(5,:),'LineWidth',6)
-      plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(10,:),'LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',bluered(4,:),'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',bluered(9,:),'LineWidth',6)
       plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
       plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
       axis([-0.55 1.5 cfg.ylim(1) cfg.ylim(2)])
@@ -7766,8 +7954,17 @@ for ll=soalist
       end
     end
     %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
-    print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_bin' num2str(bb) '.png'],'-dpng')
+    switch kk
+      case 1
+        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff42.png'],'-dpng')
+        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff42.png'],'-dpng')
+      case 2
+        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff31.png'],'-dpng')
+        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff31.png'],'-dpng')
+      case 3
+        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
+        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
+    end
     
     if any(tmpmask(:))
       masktime=find(any(tmpm10.mask,1));
@@ -7784,19 +7981,39 @@ for ll=soalist
       cfg.highlightchannel=sigchannels;
       figure(1000*bb+ll);
       ft_topoplotER(cfg,tmpu1);
-      print(1000*bb+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      switch kk
+        case 1
+          print(1000*bb+ll,[fdir 'erp_topoU_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 2
+          print(1000*bb+ll,[fdir 'erp_topoU_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 3
+          print(1000*bb+ll,[fdir 'erp_topoU_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+      end
       figure(1000*bb+10+ll);
       ft_topoplotER(cfg,tmpm10);
-      print(1000*bb+10+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      switch kk
+        case 1
+          print(1000*bb+10+ll,[fdir 'erp_topoM_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 2
+          print(1000*bb+10+ll,[fdir 'erp_topoM_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 3
+          print(1000*bb+10+ll,[fdir 'erp_topoM_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+      end
       figure(1000*bb+20+ll);
-      ft_topoplotER(cfg,tmpm10);
-      print(1000*bb+20+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '.png'],'-dpng')
+      ft_topoplotER(cfg,tmpd5);
+      switch kk
+        case 1
+          print(1000*bb+20+ll,[fdir 'erp_topoDiff_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 2
+          print(1000*bb+20+ll,[fdir 'erp_topoDiff_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+        case 3
+          print(1000*bb+20+ll,[fdir 'erp_topoDiff_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+      end
     end
     
   end % bb
 end % ll
 
-% Now, all same as above but for power!
 
   
 for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
