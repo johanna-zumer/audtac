@@ -3274,20 +3274,28 @@ for sleep=[1]
 
         grindlo_tTacAlone_top{ll,ss}=grindlo_tTacAlone{ll,ss};
         grindlo_tTacAlone_top{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tTacAlone_top{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
         grindlo_tTacAlone_bot{ll,ss}=grindlo_tTacAlone{ll,ss};
         grindlo_tTacAlone_bot{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tTacAlone_bot{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
         grindlo_tNulAlone_top{ll,ss}=grindlo_tNulAlone{ll,ss};
         grindlo_tNulAlone_top{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tNulAlone_top{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
         grindlo_tNulAlone_bot{ll,ss}=grindlo_tNulAlone{ll,ss};
         grindlo_tNulAlone_bot{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tNulAlone_bot{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
         grindlo_tAudAlone_top{ll,ss}=grindlo_tAudAlone{ll,ss};
         grindlo_tAudAlone_top{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tAudAlone_top{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
         grindlo_tAudAlone_bot{ll,ss}=grindlo_tAudAlone{ll,ss};
         grindlo_tAudAlone_bot{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tAudAlone_bot{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
         grindlo_tMSAlone_top{ll,ss}=grindlo_tMSAlone{ll,ss};
         grindlo_tMSAlone_top{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+        grindlo_tMSAlone_top{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
         grindlo_tMSAlone_bot{ll,ss}=grindlo_tMSAlone{ll,ss};
         grindlo_tMSAlone_bot{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+        grindlo_tMSAlone_bot{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
       end
       
       cfg=[];
@@ -3304,10 +3312,11 @@ for sleep=[1]
       
       
       if statspowflag
-        cfg.statistic='depsamplesT';
         cfg.parameter='powspctrm';
         for ll=soalist
           % top
+        cfg.statistic='depsamplesT';
+        cfg.uvar=2;
           nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
           if nsub>1
             cfg.design=zeros(2,2*nsub);
@@ -3332,6 +3341,8 @@ for sleep=[1]
             
 
           % bottom
+        cfg.statistic='depsamplesT';
+        cfg.uvar=2;
           nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
           if nsub>1
             cfg.design=zeros(2,2*nsub);
@@ -3355,6 +3366,8 @@ for sleep=[1]
           end
 
           % top vs bottom
+        cfg.statistic='indepsamplesT';
+        cfg.uvar=[];
           nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
           nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
           if nsubb>1 && nsubt>1
@@ -3382,6 +3395,7 @@ for sleep=[1]
       
       if statsplvflag
         cfg.statistic='diff_itc';
+        cfg.uvar=[];
         cfg.parameter='plvspctrm';
         cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
         cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
@@ -3435,9 +3449,9 @@ for sleep=[1]
           nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
           nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
           if nsubt>1 && nsubb>1
-            cfg.design=zeros(2,2*nsub);
-            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-            cfg.design(2,:)=[1:nsub 1:nsub];
+            cfg.design=zeros(2,nsubb + nsubt);
+            cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+            cfg.design(2,:)=[1:nsubt 1:nsubb];
             cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
             stattl_mcplv_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
             if ll>=5
