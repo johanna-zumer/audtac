@@ -3420,8 +3420,8 @@ for sleep=[1]
       close all
       figind=1;
       
-      %       for ll=soalist
-      for ll=[5]
+      for ll=soalist
+%       for ll=[5]
         %   for tt=1:4
         clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch*
         
@@ -3503,7 +3503,7 @@ for sleep=[1]
               ss=12; % N2
               ss=11; % N1
               ss=10; % W
-              sleepcond='Sleep N2';
+              sleepcond='Sleep W';
               
               %               ss=11; % N1
               %               sleepcond='Sleep N1';
@@ -3586,7 +3586,7 @@ for sleep=[1]
               
               % this makes up for an error in main code.  once error fixed,
               % then this shouldn't be necessary but leaving it in for now.
-              if ll<5
+              if synchasynch && ll<5
                 if ~isfield(tlock_tMSsynch{ll,tt,ss},'avg')
                   cfg=[];
                   cfg.operation='add';
@@ -3682,7 +3682,7 @@ for sleep=[1]
         grind_audtlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{:});
         grind_nultlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{:});
         grind_MStlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{:});
-        if ll<5
+        if synchasynch && ll<5
           grind_tMSsynch=ft_timelockgrandaverage(cfg,tlock_tMSsynch_each{:});
           grind_tMSasynch=ft_timelockgrandaverage(cfg,tlock_tMSasynch_each{:});
         end
@@ -3704,14 +3704,14 @@ for sleep=[1]
         grave_audtlock=ft_timelockgrandaverage(cfg,tlock_audtlock_each{:});
         grave_nultlock=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{:});
         grave_MStlock=ft_timelockgrandaverage(cfg,tlock_MStlock_each{:});
-        if ll<5
+        if synchasynch && ll<5
           grave_tMSsynch=ft_timelockgrandaverage(cfg,tlock_tMSsynch_each{:});
           grave_tMSasynch=ft_timelockgrandaverage(cfg,tlock_tMSasynch_each{:});
         end
         if audtacflag
           grave_audPtac=ft_timelockgrandaverage(cfg,tlock_audPtac_each{:});
           grave_audMSpN=ft_timelockgrandaverage(cfg,tlock_audMSpN_each{:});
-          if ll<5
+          if synchasynch && ll<5
             grave_aMSsynch=ft_timelockgrandaverage(cfg,tlock_aMSsynch_each{:});
             grave_aMSasynch=ft_timelockgrandaverage(cfg,tlock_aMSasynch_each{:});
           end
@@ -3835,7 +3835,7 @@ for sleep=[1]
         chanlabel{1}='Frontocentral electrodes';
         chanlabel{2}='Occipital-parietal electrodes';
         chanlabel{3}='Right frontotemporal electrodes';
-        if ~tacnulmsaudstatsflag
+        if ~tacnulmsaudstatsflag && plotflag
           for cc=1:length(chanplot)
             if cc==2 % posterior, compute phase of alpha at time where signif findings
               %           keyboard
@@ -3870,7 +3870,7 @@ for sleep=[1]
               end
             end
             
-            if plotflag
+%             if plotflag
               if sleep
                 figure(50+cc*10); % 60, 70, 80
               else
@@ -3903,7 +3903,7 @@ for sleep=[1]
               xlabel(['Tactile at time 0, ' sleepcond])
               ylabel(chanlabel{cc})
               
-              if ll<5
+              if synchasynch && ll<5
                 if sleep
                   figure(140+cc*10); % 150, 160, 170
                 else
@@ -3943,7 +3943,7 @@ for sleep=[1]
                 xlabel(['Auditory at time 0, ' sleepcond])
                 ylabel('Frontocentral electrodes')
                 
-                if ll<5
+                if synchasynch && ll<5
                   if sleep
                     figure(200+cc*10); % 210, 220, 230
                   else
@@ -3966,8 +3966,10 @@ for sleep=[1]
               
               
               
-            end % plotflag
+%             end % plotflag
           end % cc
+        else
+          plv=[];
         end
         
         if plotflag && printflag
@@ -4016,7 +4018,7 @@ for sleep=[1]
           cfg.parameter='avg';
           cfg.channel=chanuse;
           tlock_TPA_MSPN{ii}=ft_math(cfg,tlock_tacPaud_each{ii},tlock_tacMSpN_each{ii});
-          if ll<5
+          if synchasynch && ll<5
             tlock_TMSs_TMSa{ii}=ft_math(cfg,tlock_tMSsynch_each{ii},tlock_tMSasynch_each{ii});
           end
           if audtacflag
@@ -4029,7 +4031,7 @@ for sleep=[1]
         cfg=[];
         cfg.channel=chanuse;
         grave_TPA_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN{:});
-        if ll<5
+        if synchasynch && ll<5
           grave_TMSs_TMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TMSs_TMSa{:});
         end
         if audtacflag
@@ -4133,11 +4135,12 @@ for sleep=[1]
         end
         
         
-        if statsflag
+        nsub=length(tlock_tacMSpN_each);
+        if statsflag && nsub>1
           load eeg1010_neighb
           
-          nsub=length(tlock_tacMSpN_each);
           
+            
           cfg=[];
           %           if sleep
           %             %           cfg.latency=[.1 .8]; % longer to allow for Kc
