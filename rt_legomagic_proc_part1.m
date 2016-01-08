@@ -327,6 +327,7 @@ cd(bdir)
 
 load([edir 'iikeep.mat'])
 
+%%
 rtsrall=nan(1,10);
 diffms=nan(1,max(iiuse));
 pcb=nan(1,max(iiuse));
@@ -413,13 +414,15 @@ for bb=setdiff(union(iiSuse,iiBuse),3:9)
   ms6=rtsr(~isnan(rtsr(:,8)),8);
   ms7=rtsr(~isnan(rtsr(:,9)),9);
   ms9=rtsr(~isnan(rtsr(:,10)),10);
-  [Xp, Yp, Zp1(:,buse), Bp1(:,buse)] = RaceModel(round(1000*tac')+500,round(1000*aud'),    round(1000*ms1'),[.1:.1:1],1);
-  [Xp, Yp, Zp3(:,buse), Bp3(:,buse)] = RaceModel(round(1000*tac')+70, round(1000*aud'),    round(1000*ms3'),[.1:.1:1],1);
-  [Xp, Yp, Zp4(:,buse), Bp4(:,buse)] = RaceModel(round(1000*tac')+20, round(1000*aud'),    round(1000*ms4'),[.1:.1:1],1);
-  [Xp, Yp, Zp5(:,buse), Bp5(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud'),    round(1000*ms5'),[.1:.1:1],1);
-  [Xp, Yp, Zp6(:,buse), Bp6(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+20, round(1000*ms6'),[.1:.1:1],1);
-  [Xp, Yp, Zp7(:,buse), Bp7(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+70, round(1000*ms7'),[.1:.1:1],1);
-  [Xp, Yp, Zp9(:,buse), Bp9(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+500,round(1000*ms9'),[.1:.1:1],1);
+  % Modified RaceModel so that plotflag is also the figure handle, and
+  % further input for subplot
+  [Xp, Yp, Zp1(:,buse), Bp1(:,buse)] = RaceModel(round(1000*tac')+500,round(1000*aud'),    round(1000*ms1'),[.1:.1:1],1,[4 6 buse]);
+  [Xp, Yp, Zp3(:,buse), Bp3(:,buse)] = RaceModel(round(1000*tac')+70, round(1000*aud'),    round(1000*ms3'),[.1:.1:1],3,[4 6 buse]);
+  [Xp, Yp, Zp4(:,buse), Bp4(:,buse)] = RaceModel(round(1000*tac')+20, round(1000*aud'),    round(1000*ms4'),[.1:.1:1],4,[4 6 buse]);
+  [Xp, Yp, Zp5(:,buse), Bp5(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud'),    round(1000*ms5'),[.1:.1:1],5,[4 6 buse]);
+  [Xp, Yp, Zp6(:,buse), Bp6(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+20, round(1000*ms6'),[.1:.1:1],6,[4 6 buse]);
+  [Xp, Yp, Zp7(:,buse), Bp7(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+70, round(1000*ms7'),[.1:.1:1],7,[4 6 buse]);
+  [Xp, Yp, Zp9(:,buse), Bp9(:,buse)] = RaceModel(round(1000*tac'),    round(1000*aud')+500,round(1000*ms9'),[.1:.1:1],9,[4 6 buse]);
 end
 
 hh=nan(10,9);pp=nan(10,9);
@@ -432,17 +435,72 @@ hh=nan(10,9);pp=nan(10,9);
 [hh(:,9),pp(:,9)]=ttest(Zp9',Bp9','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
 
 % plot of % of participants who violate race model
-figure;imagesc([mean(Zp1-Bp1<0,2) mean(Zp3-Bp3<0,2) mean(Zp4-Bp4<0,2) mean(Zp5-Bp5<0,2) mean(Zp6-Bp6<0,2) mean(Zp7-Bp7<0,2) mean(Zp9-Bp9<0,2)])
-% thresholded at 75%
-figure;imagesc([mean(Zp1-Bp1<0,2) mean(Zp3-Bp3<0,2) mean(Zp4-Bp4<0,2) mean(Zp5-Bp5<0,2) mean(Zp6-Bp6<0,2) mean(Zp7-Bp7<0,2) mean(Zp9-Bp9<0,2)]>=.75)
+figure(100);imagesc([mean(Zp1-Bp1<0,2) mean(Zp3-Bp3<0,2) mean(Zp4-Bp4<0,2) mean(Zp5-Bp5<0,2) mean(Zp6-Bp6<0,2) mean(Zp7-Bp7<0,2) mean(Zp9-Bp9<0,2)])
+caxis([0 1]);
+set(get(100,'Children'),'XTickLabel',{'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'})
 
+% [Zp1-Bp1 Zp3-Bp3 Zp4-Bp4 Zp5-Bp5 Zp6-Bp6 Zp7-Bp7 Zp9-Bp9]
+sum([mean(Zp1(1:2,:)-Bp1(1:2,:)); mean(Zp3(1:2,:)-Bp3(1:2,:)); mean(Zp4(1:2,:)-Bp4(1:2,:)); mean(Zp5(1:2,:)-Bp5(1:2,:)); mean(Zp6(1:2,:)-Bp6(1:2,:)); mean(Zp7(1:2,:)-Bp7(1:2,:)); mean(Zp9(1:2,:)-Bp9(1:2,:))]<0,2)
+sum([mean(Zp1(1:3,:)-Bp1(1:3,:)); mean(Zp3(1:3,:)-Bp3(1:3,:)); mean(Zp4(1:3,:)-Bp4(1:3,:)); mean(Zp5(1:3,:)-Bp5(1:3,:)); mean(Zp6(1:3,:)-Bp6(1:3,:)); mean(Zp7(1:3,:)-Bp7(1:3,:)); mean(Zp9(1:3,:)-Bp9(1:3,:))]<0,2)
+sum([mean(Zp1(2:3,:)-Bp1(2:3,:)); mean(Zp3(2:3,:)-Bp3(2:3,:)); mean(Zp4(2:3,:)-Bp4(2:3,:)); mean(Zp5(2:3,:)-Bp5(2:3,:)); mean(Zp6(2:3,:)-Bp6(2:3,:)); mean(Zp7(2:3,:)-Bp7(2:3,:)); mean(Zp9(2:3,:)-Bp9(2:3,:))]<0,2)
+
+numviol=[sum(Zp1-Bp1<0,2) sum(Zp3-Bp3<0,2) sum(Zp4-Bp4<0,2) sum(Zp5-Bp5<0,2) sum(Zp6-Bp6<0,2) sum(Zp7-Bp7<0,2) sum(Zp9-Bp9<0,2)];
+% myBinomTest(17,22,.5)
+%     0.0169
+% myBinomTest(16,22,.5)
+%     0.0525
+% Thus, we should use 17/22 as the threshold but 16/22 is nearly there.
+figure(101);imagesc(numviol>=17)
+set(get(101,'Children'),'XTickLabel',{'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'})
+
+
+% % thresholded at 75%
+% figure;imagesc([mean(Zp1-Bp1<0,2) mean(Zp3-Bp3<0,2) mean(Zp4-Bp4<0,2) mean(Zp5-Bp5<0,2) mean(Zp6-Bp6<0,2) mean(Zp7-Bp7<0,2) mean(Zp9-Bp9<0,2)]>=.75)
+
+% % Tom reminds me that this is not valid since the data points are dependent on each other; use RM 2-way anova instead
+% [hhh(1),ppp(1)]=ttest(reshape(Zp1(1:2,:)',1,44),reshape(Bp1(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(3),ppp(3)]=ttest(reshape(Zp3(1:2,:)',1,44),reshape(Bp3(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(4),ppp(4)]=ttest(reshape(Zp4(1:2,:)',1,44),reshape(Bp4(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(5),ppp(5)]=ttest(reshape(Zp5(1:2,:)',1,44),reshape(Bp5(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(6),ppp(6)]=ttest(reshape(Zp6(1:2,:)',1,44),reshape(Bp6(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(7),ppp(7)]=ttest(reshape(Zp7(1:2,:)',1,44),reshape(Bp7(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% [hhh(9),ppp(9)]=ttest(reshape(Zp9(1:2,:)',1,44),reshape(Bp9(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+
+% Help for rmanova2:
+% column1 - dependent variable
+% column2 - grouping variable for subject
+% column3 - grouping variable for factor 1
+% column4 - grouping variable for factor 2
+% rmanova2([col1 col2 col3 col4])
+                
+col2=[1:22 1:22 1:22 1:22]';
+col3=[ones(1,44) 2*ones(1,44)]';
+col4=[ones(1,22) 2*ones(1,22) ones(1,22) 2*ones(1,22)]';
+
+col1=[reshape(Zp1(1:2,:)',1,44) reshape(Bp1(1:2,:)',1,44)]';
+stats{1}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp3(1:2,:)',1,44) reshape(Bp3(1:2,:)',1,44)]';
+stats{3}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp4(1:2,:)',1,44) reshape(Bp4(1:2,:)',1,44)]';
+stats{4}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp5(1:2,:)',1,44) reshape(Bp5(1:2,:)',1,44)]';
+stats{5}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp6(1:2,:)',1,44) reshape(Bp6(1:2,:)',1,44)]';
+stats{6}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp7(1:2,:)',1,44) reshape(Bp7(1:2,:)',1,44)]';
+stats{7}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+col1=[reshape(Zp9(1:2,:)',1,44) reshape(Bp9(1:2,:)',1,44)]';
+stats{9}=rm_anova2(col1,col2,col3,col4,{'RaceModel' 'Percentile'})
+
+% RaceModel factor is significant for 4,5,6 with no interaction.
+% Interaction significant for 7; follow up t-test per percentile:
+[hhh(71),ppp(71)]=ttest(Zp7(1,:),Bp7(1,:),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hhh(72),ppp(72)]=ttest(Zp7(2,:),Bp7(2,:),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% 20th% bin significant but not 10th% bin
+
+% RaceModel factor is significant for 1 with no interaction.
 [hhh(1),ppp(1)]=ttest(reshape(Zp1(1:2,:)',1,44),reshape(Bp1(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(3),ppp(3)]=ttest(reshape(Zp3(1:2,:)',1,44),reshape(Bp3(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(4),ppp(4)]=ttest(reshape(Zp4(1:2,:)',1,44),reshape(Bp4(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(5),ppp(5)]=ttest(reshape(Zp5(1:2,:)',1,44),reshape(Bp5(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(6),ppp(6)]=ttest(reshape(Zp6(1:2,:)',1,44),reshape(Bp6(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(7),ppp(7)]=ttest(reshape(Zp7(1:2,:)',1,44),reshape(Bp7(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
-[hhh(9),ppp(9)]=ttest(reshape(Zp9(1:2,:)',1,44),reshape(Bp9(1:2,:)',1,44),'tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+% goes in opposite direction
 
 %%  See eeg_legomagic_brainBehaviourCorrelations
 % for computation of AT70 versus min(A, T+70)
