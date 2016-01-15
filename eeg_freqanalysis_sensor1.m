@@ -115,7 +115,8 @@ for sleep=[1]
     iteruse=27;
     trialkc=-1;
   end
-  for ii=iiuse;
+%   for ii=iiuse;
+  for ii=setdiff(iiuse,1:27)
     cd([edir sub{ii} ])
     clearvars -except ii sub *dir ii*use sleep minnumcomb hostname timestep* soades dofftadd statst use* synchasynch iteruse trialkc phaset0
     [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
@@ -5769,7 +5770,7 @@ tacbasemax=min(-.15,soades-.15);
 % load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) '.mat']);
 stdir='/home/zumerj/audtac/eeg_data/statsgrave_oldstattimwin/';
 
-sleep=1;
+sleep=0;
 if sleep
   ss=12;
 else
@@ -6354,27 +6355,48 @@ for ll=soalist
           disp('get ylim right per ll alpha plv')
           keyboard
         end
-        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        cfg.parameter='plvavgabs';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        %     cfg.zlim='maxabs';
-        cfg.highlight='on';
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        cfg.baseline=baseline2;
-        cfg.zlim=[-.15 .15];
-        cfg.comment='no';
-        figure(100*ll+5);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+6);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-.1 .1];
-        figure(100*ll+7);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+        difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+        if any(difftimes>1)
+          clear masktime
+          finddifftimes=find(difftimes>1);
+          for dd=1:length(finddifftimes)+1
+            if dd==1
+              masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
+            elseif dd==length(finddifftimes)+1
+              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
+            else
+              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+            end
+          end
+        else
+          masktime{1}=masktime_tmp;
+        end
+        for dd=1:length(masktime)
+          
+          cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
+          cfg.parameter='plvavgabs';
+          cfg.layout='elec1010.lay';
+          cfg.maskalpha=0.5;
+          %     cfg.zlim='maxabs';
+          cfg.highlight='on';
+          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+          cfg.baseline=baseline2;
+          cfg.zlim=[-.15 .15];
+          cfg.comment='no';
+          cfg.comment='auto';
+          figure(100*ll+5);
+          ft_topoplotTFR(cfg,tmpuA);
+          print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          figure(100*ll+6);
+          ft_topoplotTFR(cfg,tmpsA);
+          print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          cfg.zlim=[-.1 .1];
+          figure(100*ll+7);
+          ft_topoplotTFR(cfg,tmpA);
+          print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+        end
+        
         
         if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
           chansel=cfg.highlightchannel;
