@@ -40,7 +40,7 @@ cfg.layout='elec1010.lay';
 cfg.maskparameter='mask';
 cfg.maskalpha=0.5;
 cfg.zlim=zlim;
-cfg.xlim=[-.6 1.0];
+cfg.xlim=[-.6 1.6];
 cfg.baseline=baseline;
 cfg.baselinetype='absolute';
 for pp=1:length(pow)
@@ -49,6 +49,9 @@ for pp=1:length(pow)
   ft_singleplotTFR(cfg,tmp{pp});
   axis([cfg.xlim(1) cfg.xlim(2) tmp{1}.freq(1) tmp{1}.freq(end)]);
 end  
+tmpfig=get(figinds(1));
+for ff=2:2:8, set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
+for ff=2:2:8, set(tmpfig.Children(ff).Title,'Visible','off'); end
 % subplot(3,1,3);
 % ft_singleplotTFR(cfg,tmp1);
 % subplot(3,1,1);
