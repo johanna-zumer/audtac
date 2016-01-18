@@ -5780,8 +5780,8 @@ end
 
 
 % for all ll, print at least a TFR even if nothing significant.
-for ll=soalist
-  % for ll=[1 3 4 5 6 7]
+% for ll=soalist
+for ll=[4 5 7 9]
   close all
   clear grave* stat*
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
@@ -5951,7 +5951,6 @@ for ll=soalist
     
     % theta topo
     if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
-      masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
       cfg=[];
       cfg.parameter='powspctrm';
       cfg.layout='elec1010.lay';
@@ -5959,32 +5958,55 @@ for ll=soalist
       cfg.ylim=[4 6.5];
       cfg.zlim=[-1.4 1.4];
       cfg.highlight='on';
-      cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
       cfg.comment='no';
-      %     if ll==1
-      %       cfg.xlim=[.1 .35];
-      %     elseif ll==3
-      %       cfg.xlim=[.06 .42];
-      %     elseif ll==5
-      %       cfg.xlim=[-.04 .36];
-      %     elseif ll==7
-      %       cfg.xlim=[.1 .44];
-      %     end
-      cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
-      %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
-      cfg.baseline=baseline2;
-      figure(10*ll+8);
-      ft_topoplotTFR(cfg,tmpuA);
-      print(10*ll+8,[fdir 'tfrlo_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      figure(10*ll+3);
-      ft_topoplotTFR(cfg,tmpsA);
-      print(10*ll+3,[fdir 'tfrlo_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      cfg.zlim=[-1.4 1.4];
-      %     cfg.zlim='maxabs';
-      %     cfg.baseline='no';
-      figure(10*ll+4);
-      ft_topoplotTFR(cfg,tmpA);
-      print(10*ll+4,[fdir 'tfrlo_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+%       masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
+%       cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+      masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+        difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          clear masktime
+        if any(difftimes>1)
+          finddifftimes=find(difftimes>1);
+          for dd=1:length(finddifftimes)+1
+            if dd==1
+              masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
+            elseif dd==length(finddifftimes)+1
+              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
+            else
+              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+            end
+          end
+        else
+          masktime{1}=masktime_tmp;
+        end
+        for dd=1:length(masktime)
+          %     if ll==1
+          %       cfg.xlim=[.1 .35];
+          %     elseif ll==3
+          %       cfg.xlim=[.06 .42];
+          %     elseif ll==5
+          %       cfg.xlim=[-.04 .36];
+          %     elseif ll==7
+          %       cfg.xlim=[.1 .44];
+          %     end
+          cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
+          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+%           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+          %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
+          cfg.baseline=baseline2;
+          figure(10*ll+8);
+          ft_topoplotTFR(cfg,tmpuA);
+          print(10*ll+8,[fdir 'tfrlo_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(10*ll+3);
+          ft_topoplotTFR(cfg,tmpsA);
+          print(10*ll+3,[fdir 'tfrlo_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          cfg.zlim=[-1.4 1.4];
+          %     cfg.zlim='maxabs';
+          %     cfg.baseline='no';
+          figure(10*ll+4);
+          ft_topoplotTFR(cfg,tmpA);
+          print(10*ll+4,[fdir 'tfrlo_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        end
+        
       
       if 0; %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
         %         chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
@@ -6019,6 +6041,7 @@ for ll=soalist
       cfg.parameter='powspctrm';
       cfg.layout='elec1010.lay';
       cfg.maskalpha=0.5;
+%       cfg.zlim=[-1.4 1.4];
       cfg.zlim=[-9 9];
       cfg.highlight='on';
       cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
@@ -6030,6 +6053,7 @@ for ll=soalist
       figure(10*ll+6);
       ft_topoplotTFR(cfg,tmpsA);
       print(10*ll+6,[fdir 'tfrlo_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+%       cfg.zlim=[-1.4 1.4];
       cfg.zlim=[-9 9];
       %     cfg.zlim='maxabs';
       %     cfg.baseline='no';
@@ -6357,8 +6381,8 @@ for ll=soalist
         end
         masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
         difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
-        if any(difftimes>1)
           clear masktime
+        if any(difftimes>1)
           finddifftimes=find(difftimes>1);
           for dd=1:length(finddifftimes)+1
             if dd==1
@@ -6374,12 +6398,12 @@ for ll=soalist
         end
         for dd=1:length(masktime)
           
-          cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
           cfg.parameter='plvavgabs';
           cfg.layout='elec1010.lay';
           cfg.maskalpha=0.5;
           %     cfg.zlim='maxabs';
           cfg.highlight='on';
+          cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
           cfg.baseline=baseline2;
           cfg.zlim=[-.15 .15];
