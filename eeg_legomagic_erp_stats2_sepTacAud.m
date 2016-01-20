@@ -3465,10 +3465,10 @@ trialkcflag=0; % 0 for ignore trialkc (old results; all trials), or 1 for use tr
 tophalfflag=0; % only relevant for sleep=1; tophalf of participants only (see sortTacN2.mat)
 synchasynch=0;
 soalist=[1 3 4 5 6 7 9];
-statwinorig=1; % =1 means the latency range of .1 to .45 (first old way);  =0 means 0 to .5 (final /better way)
+statwinorig=0; % =1 means the latency range of .1 to .45 (first old way);  =0 means 0 to .5 (final /better way)
 
-ftver=20151001;  % 0 means the svn version on the local machine
-if ftver>0
+ftver=0;  % 0 means the svn version on the local machine that is already on path
+if ftver
   if ispc
     rmpath(genpath('D:\fieldtrip_svn\'))
     addpath(['D:\fieldtrip-' num2str(ftver)]);
@@ -3478,6 +3478,7 @@ if ftver>0
   end
 end
 
+mcseed=17;
 
 chanuse_sleep0={'all' '-F4'};
 chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
@@ -3512,7 +3513,7 @@ figind=1;
 for ll=soalist
   %       for ll=[5]
   %   for tt=1:4
-  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch*
+  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed
   
   %     if ll==1 | ll==9
   %       subuse=8:32;
@@ -4325,6 +4326,7 @@ for ll=soalist
     cfg.design(2,:)=[1:nsub 1:nsub];
     cfg.ivar=1;
     cfg.uvar=2;
+    cfg.randomseed=mcseed;
     disp('test1')
     statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
     if audtacflag
@@ -4334,7 +4336,7 @@ for ll=soalist
     statt_tacmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
     statt_audmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
     statt_msmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
-    save([edir 'tlock_statmc_early_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'stat*early');
+    save([edir 'tlock_statmc_early_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*early');
     %             continue
     %           end
     
@@ -4392,6 +4394,7 @@ for ll=soalist
     cfg.design(2,:)=[1:nsub 1:nsub];
     cfg.ivar=1;
     cfg.uvar=2;
+    cfg.randomseed=mcseed;
     disp('test2')
     statt_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
     if audtacflag
@@ -4455,6 +4458,7 @@ for ll=soalist
     cfg.design(2,:)=[1:nsub 1:nsub];
     cfg.ivar=1;
     cfg.uvar=2;
+    cfg.randomseed=mcseed;
     disp('test4')
     statt_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
     disp('test5')
@@ -4525,12 +4529,12 @@ for ll=soalist
     if iterflag
       if sleep
         %               if trialkcflag
-        save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'stat*');
+        save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*');
         %               else
         %                 save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '.mat'],'stat*');
         %               end
       else
-        save([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'stat*');
+        save([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*');
       end
     else
       if runagain==1
