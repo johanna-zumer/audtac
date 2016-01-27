@@ -510,3 +510,25 @@ load([ddir 'rt_allsubj.mat'],'rt*');
 [hh,pp]=ttest(squeeze(rt_msMminshiftuni(:,3,:))')
 1000*nanmean(squeeze(rt_msMminshiftuni(:,3,:)),2)
 
+%% correlation to spindles
+% using race model and subtraction
+
+load([edir 'spindles.mat'])
+
+rmodel=[mean(Zp1(1:3,:)-Bp1(1:3,:)); mean(Zp3(1:3,:)-Bp3(1:3,:)); mean(Zp4(1:3,:)-Bp4(1:3,:)); mean(Zp5(1:3,:)-Bp5(1:3,:)); mean(Zp6(1:3,:)-Bp6(1:3,:)); mean(Zp7(1:3,:)-Bp7(1:3,:)); mean(Zp9(1:3,:)-Bp9(1:3,:))];
+iruse=setdiff(union(iiSuse,iiBuse),3:9);
+corruse=intersect(find(~isnan(spindles(:,1))),iruse);
+
+[cc,pp]=corr(spindles(corruse,:),rmodel(:,dsearchn(iruse',corruse))');
+% nothing significant (after correction)
+
+load([ddir 'rt_allsubj.mat'],'rt_msMminshiftuni');
+soalist=[1 3 4 5 6 7 9];
+rtdiff=squeeze(rt_msMminshiftuni(soalist,3,:));
+iruse=iiSuse;
+corruse=setdiff(intersect(find(~isnan(spindles(:,1))),iruse),[8 9]);
+[cc,pp]=corr(spindles(corruse,:),rtdiff(:,dsearchn(iruse',corruse))');
+% nothing significant (after correction)
+
+
+
