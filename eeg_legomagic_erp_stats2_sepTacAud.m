@@ -2676,7 +2676,11 @@ fsample=1000;
 latuse=[-0.5 1];
 time=latuse(1):1/fsample:latuse(end);
 coloruse=varycolor(length(subuse));
-numtr=10;
+cmap=colormap('parula');
+
+numtr=10; % for BACN
+% numtr=20;
+
 for ii=iiuse
   cd([edir sub{ii} ])
   subuseind=subuseind+1;
@@ -2767,22 +2771,32 @@ end % ii
 % figure;imagesc(time,1:subuseind,squeeze(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,:))');caxis([-5 5])
 
 % Get max/min of peaks from awake data
-[maxval,maxind]=max(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
-[minval,minind]=min(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
+  [maxval,maxind]=max(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
+  [minval,minind]=min(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
+  
+  % max versus min (peak P200 vs peak N100)
+  for ss=10:12
+    [sortval(:,ss),sortind(:,ss)]=sort(squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind,ss,1,:)-tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind,ss,1,:)));
+  end
+  
+  % wideband P200 versus prestim
+  for ss=10:12
+    [sortwideval(:,ss),sortwideind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),1:500,ss,1,:),2)));
+  end
+  
+  % wideband P200 versus wideband N100
+  for ss=10:12
+    [sortwideP2N1val(:,ss),sortwideP2N1ind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind-30:minind+30,ss,1,:),2)));
+  end
 
+load([edir 'spindles.mat']);
 for ss=10:12
-  [sortval(:,ss),sortind(:,ss)]=sort(squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind,ss,1,:)-tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind,ss,1,:)));
+  tmpuse=length(find(~isnan(sortval(:,ss))));
+  tmp=spindles(subuse(sortind(:,ss)),:);        [cc,pp]=corr(sortval(1:tmpuse,ss),tmp(1:tmpuse,:))
+  tmp=spindles(subuse(sortwideind(:,ss)),:);    [cc,pp]=corr(sortwideval(1:tmpuse,ss),tmp(1:tmpuse,:))
+  tmp=spindles(subuse(sortwideP2N1ind(:,ss)),:);[cc,pp]=corr(sortwideP2N1val(1:tmpuse,ss),tmp(1:tmpuse,:))
 end
 
-% wideband P200 versus prestim
-for ss=12
-  [sortwideval(:,ss),sortwideind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),1:500,ss,1,:),2)));
-end
-
-% wideband P200 versus wideband N100
-for ss=12
-  [sortwideP2N1val(:,ss),sortwideP2N1ind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind-30:minind+30,ss,1,:),2)));
-end
 
 % for tk=1:3
 %   figure(tk)
@@ -2797,7 +2811,8 @@ end
 % end
 
 sortTacN2=subuse(sortind(:,12))';
-save([edir 'sortTacN2.mat'],'sort*');
+% save([edir 'sortTacN2.mat'],'sort*');
+save([edir 'sortTacN2_numtr' num2str(numtr) '.mat'],'sort*');
 
 % tophalf=sortind(end-8:end,12);
 % bothalf=sortind(1:9,12);
@@ -2844,52 +2859,70 @@ save([edir 'sortTacN2.mat'],'sort*');
 %   hold on;plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,bothalfwideP2N1),5)),'Color',cmapuse(1,:));
 % end
 
+tk=1;
+% chanuse={'Fz' 'Cz'};
+chanuse={'Fz' 'C1' 'C2' 'FC1' 'FC2'};
+
 tophalfwide=sortwideind(end-8:end,12);
 bothalfwide=sortwideind(1:9,12);
+sortplot=[bothalfwide  tophalfwide];
+cmapuse=cmap(1:4:4*length(sortplot),:);
 figure(10);
 for ss=10:12
   subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwide),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwide),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+%   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+%   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwide),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwide),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwide),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwide),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
 end
 
 tophalfwideP2N1=sortwideP2N1ind(end-8:end,12);
 bothalfwideP2N1=sortwideP2N1ind(1:9,12);
+sortplot=[bothalfwideP2N1  tophalfwideP2N1];
+cmapuse=cmap(1:4:4*length(sortplot),:);
 figure(11);
 for ss=10:12
   subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwideP2N1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwideP2N1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwideP2N1),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwideP2N1),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwideP2N1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwideP2N1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwideP2N1),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwideP2N1),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalfwideP2N1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalfwideP2N1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwideP2N1),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwideP2N1),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
 end
 
 tophalf=sortind(end-8:end,12);
 bothalf=sortind(1:9,12);
+sortplot=[bothalf  tophalf];
+cmapuse=cmap(1:4:4*length(sortplot),:);
 figure(12);
 for ss=10:12
   subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalf),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalf),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalf),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalf),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalf),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalf),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalf),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalf),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,tophalf),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-  hold on;lh=plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'Cz'}),:,ss,tk,bothalf),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalf),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalf),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
 end
 
-
+% Is bottom half of auditory-alone the *opposite*?
 
 
 % contrast tophalf bothalf for conditions not used for sorting.
@@ -2906,12 +2939,60 @@ for ss=10:12
     tlock_nul_gndavgtop{ss,tk}=tlock_tac9T_gndavgtop{ss,tk};
     tlock_nul_gndavgbot{ss,tk}=tlock_tac9T_gndavgtop{ss,tk};
     
-    tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,tophalf)),[3 1 2]);
-    tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,bothalf)),[3 1 2]);
-    tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,tophalf)),[3 1 2]);
-    tlock_aud1A_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,bothalf)),[3 1 2]);
-    tlock_nul_gndavgtop{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,tophalf)),[3 1 2]);
-    tlock_nul_gndavgbot{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+%     tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,tophalf)),[3 1 2]);    % bug that this was '10' always?
+%     tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+%     tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,tophalf)),[3 1 2]);
+%     tlock_aud1A_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+%     tlock_nul_gndavgtop{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,tophalf)),[3 1 2]);
+%     tlock_nul_gndavgbot{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+    tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,tophalf)),[3 1 2]);
+    tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,bothalf)),[3 1 2]);
+    tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,tophalf)),[3 1 2]);
+    tlock_aud1A_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,bothalf)),[3 1 2]);
+    tlock_nul_gndavgtop{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,tophalf)),[3 1 2]);
+    tlock_nul_gndavgbot{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,bothalf)),[3 1 2]);
+  end
+end
+for ss=10:12
+  for tk=1:2
+    tlock_tac9T_gndavgtopwide{ss,tk}=[];
+    tlock_tac9T_gndavgtopwide{ss,tk}.label=tlock_nul_tlocktmp.label;
+    tlock_tac9T_gndavgtopwide{ss,tk}.dimord='subj_chan_time';
+    tlock_tac9T_gndavgtopwide{ss,tk}.time=tlock_nul_tlocktmp.time;
+    
+    tlock_tac9T_gndavgbotwide{ss,tk}=tlock_tac9T_gndavgtopwide{ss,tk};
+    tlock_aud1A_gndavgtopwide{ss,tk}=tlock_tac9T_gndavgtopwide{ss,tk};
+    tlock_aud1A_gndavgbotwide{ss,tk}=tlock_tac9T_gndavgtopwide{ss,tk};
+    tlock_nul_gndavgtopwide{ss,tk}=tlock_tac9T_gndavgtopwide{ss,tk};
+    tlock_nul_gndavgbotwide{ss,tk}=tlock_tac9T_gndavgtopwide{ss,tk};
+    
+    tlock_tac9T_gndavgtopwide{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,tophalfwide )),[3 1 2]);
+    tlock_tac9T_gndavgbotwide{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,bothalfwide)),[3 1 2]);
+    tlock_aud1A_gndavgtopwide{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,tophalfwide)),[3 1 2]);
+    tlock_aud1A_gndavgbotwide{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,bothalfwide)),[3 1 2]);
+    tlock_nul_gndavgtopwide{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,tophalfwide)),[3 1 2]);
+    tlock_nul_gndavgbotwide{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,bothalfwide)),[3 1 2]);
+  end
+end
+for ss=10:12
+  for tk=1:2
+    tlock_tac9T_gndavgtopwideP2N1{ss,tk}=[];
+    tlock_tac9T_gndavgtopwideP2N1{ss,tk}.label=tlock_nul_tlocktmp.label;
+    tlock_tac9T_gndavgtopwideP2N1{ss,tk}.dimord='subj_chan_time';
+    tlock_tac9T_gndavgtopwideP2N1{ss,tk}.time=tlock_nul_tlocktmp.time;
+    
+    tlock_tac9T_gndavgbotwideP2N1{ss,tk}=tlock_tac9T_gndavgtopwideP2N1{ss,tk};
+    tlock_aud1A_gndavgtopwideP2N1{ss,tk}=tlock_tac9T_gndavgtopwideP2N1{ss,tk};
+    tlock_aud1A_gndavgbotwideP2N1{ss,tk}=tlock_tac9T_gndavgtopwideP2N1{ss,tk};
+    tlock_nul_gndavgtopwideP2N1{ss,tk}=tlock_tac9T_gndavgtopwideP2N1{ss,tk};
+    tlock_nul_gndavgbotwideP2N1{ss,tk}=tlock_tac9T_gndavgtopwideP2N1{ss,tk};
+    
+    tlock_tac9T_gndavgtopwideP2N1{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,tophalfwideP2N1 )),[3 1 2]);
+    tlock_tac9T_gndavgbotwideP2N1{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,bothalfwideP2N1)),[3 1 2]);
+    tlock_aud1A_gndavgtopwideP2N1{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,tophalfwideP2N1)),[3 1 2]);
+    tlock_aud1A_gndavgbotwideP2N1{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,bothalfwideP2N1)),[3 1 2]);
+    tlock_nul_gndavgtopwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,tophalfwideP2N1)),[3 1 2]);
+    tlock_nul_gndavgbotwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,bothalfwideP2N1)),[3 1 2]);
   end
 end
 
@@ -2941,11 +3022,29 @@ for ss=10:12
     statt_nultopbot{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtop{ss,tk},   tlock_nul_gndavgbot{ss,tk});
   end
 end
-% nothing signif above.
+% numtr=20; not signif for  tac or aud; but yes for nul in 12,1 (p=0.047)
+for ss=10:12
+  for tk=1:2
+    statt_tactopbotwide{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopwide{ss,tk}, tlock_tac9T_gndavgbotwide{ss,tk});
+    statt_audtopbotwide{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopwide{ss,tk}, tlock_aud1A_gndavgbotwide{ss,tk});
+    statt_nultopbotwide{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopwide{ss,tk},   tlock_nul_gndavgbotwide{ss,tk});
+  end
+end
+% numtr=20;  tac: 10,2 p=0.07;    aud 11,1 p=0.045  11,2 p=0.02  12,2 p=0.04;    nul  none
+for ss=10:12
+  for tk=1:2
+    statt_tactopbotwideP2N1{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopwideP2N1{ss,tk}, tlock_tac9T_gndavgbotwideP2N1{ss,tk});
+    statt_audtopbotwideP2N1{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopwideP2N1{ss,tk}, tlock_aud1A_gndavgbotwideP2N1{ss,tk});
+    statt_nultopbotwideP2N1{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopwideP2N1{ss,tk},   tlock_nul_gndavgbotwideP2N1{ss,tk});
+  end
+end
+% numtr=20;   tac: none;   aud:  none;   nul: 12,1 p=0.036  
 
 % try for just one channel of main effect.
 cfg=[];
-cfg.channel='Fz';
+% cfg.channel='Fz';
+cfg.channel=chanuse;
+cfg.avgoverchan='yes';
 cfg.latency=[.03 .43];
 cfg.parameter='individual';
 cfg.method='montecarlo';
@@ -2964,30 +3063,46 @@ for ss=10:12
     statt_nultopbotF{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtop{ss,tk},   tlock_nul_gndavgbot{ss,tk});
   end
 end
-% things only trend signif at p=0.07 here
-
-% try for just one channel of main effect and around 100ms and 200ms peaks
-cfg=[];
-cfg.channel='Fz';
-cfg.latency=[.08 .23];
-cfg.parameter='individual';
-cfg.method='montecarlo';
-cfg.numrandomization=2000;
-cfg.correctm='cluster';
-cfg.clusteralpha = 0.05;
-cfg.clusterstatistic = 'maxsum';
-cfg.statistic='indepsamplesT';
-cfg.design=zeros(2,2*nsub);
-cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-cfg.ivar=1;
+% numtr=20;  tac 12,1 p=0.02;   aud 10,1 p=0.04  10,2 p=0.06;    nul 12,2 p=0.06
 for ss=10:12
   for tk=1:2
-    statt_tactopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtop{ss,tk}, tlock_tac9T_gndavgbot{ss,tk});
-    statt_audtopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtop{ss,tk}, tlock_aud1A_gndavgbot{ss,tk});
-    statt_nultopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtop{ss,tk},   tlock_nul_gndavgbot{ss,tk});
+    statt_tactopbotwideF{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopwide{ss,tk}, tlock_tac9T_gndavgbotwide{ss,tk});
+    statt_audtopbotwideF{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopwide{ss,tk}, tlock_aud1A_gndavgbotwide{ss,tk});
+    statt_nultopbotwideF{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopwide{ss,tk},   tlock_nul_gndavgbotwide{ss,tk});
   end
 end
-% tac is now signif, aud trend, but nul highly signif!  ???
+% numtr=20;   tac 12,1 p=0.052;    aud 10,1 p=0.04  11,1 p=0.04  12,1 p=0.04  10,2 p=0.058  11,2 p=0.02  12,2 p=0.061;    nul  10,1  p=0.0005  10,2 p=0.006   12,2 p=0.04
+for ss=10:12
+  for tk=1:2
+    statt_tactopbotwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopwideP2N1{ss,tk}, tlock_tac9T_gndavgbotwideP2N1{ss,tk});
+    statt_audtopbotwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopwideP2N1{ss,tk}, tlock_aud1A_gndavgbotwideP2N1{ss,tk});
+    statt_nultopbotwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopwideP2N1{ss,tk},   tlock_nul_gndavgbotwideP2N1{ss,tk});
+  end
+end
+% numtr=20;    tac 12,1 p=0.051     aud 10,2 p=0.074    nul None
+
+% % try for just one channel of main effect and around 100ms and 200ms peaks
+% cfg=[];
+% cfg.channel='Fz';
+% cfg.latency=[.08 .23];
+% cfg.parameter='individual';
+% cfg.method='montecarlo';
+% cfg.numrandomization=2000;
+% cfg.correctm='cluster';
+% cfg.clusteralpha = 0.05;
+% cfg.clusterstatistic = 'maxsum';
+% cfg.statistic='indepsamplesT';
+% cfg.design=zeros(2,2*nsub);
+% cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+% cfg.ivar=1;
+% for ss=10:12
+%   for tk=1:2
+%     statt_tactopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtop{ss,tk}, tlock_tac9T_gndavgbot{ss,tk});
+%     statt_audtopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtop{ss,tk}, tlock_aud1A_gndavgbot{ss,tk});
+%     statt_nultopbotF12{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtop{ss,tk},   tlock_nul_gndavgbot{ss,tk});
+%   end
+% end
+% % numtr:10 tac is now signif, aud trend, but nul highly signif!  ???
 
 
 
@@ -3007,10 +3122,6 @@ subuse=iiuse;
 
 clearvars -except tt sub* edir ddir ii*use *flag sleep* tacaud iter trialkc
 
-coloruse=varycolor(length(subuse));
-cmap=colormap('parula');
-sortplot=[iiuse_bothalfWwideP2N1  iiuse_tophalfWwideP2N1]
-cmapuse=cmap(1:4:4*length(sortplot),:);
 % numtr=10;
 for ii=iiuse
   cd([edir sub{ii} ])
@@ -3037,6 +3148,14 @@ time=tlock_tacall{subuseind}.time;
 
 [sortwideP2N1Wval,sortwideP2N1Wind]=sort(squeeze(mean(tlock_tacavg(match_str(tlock_tacall{subuseind}.label,'Fz'),maxind-30:maxind+30,:),2)-mean(tlock_tacavg(match_str(tlock_tacall{subuseind}.label,'Fz'),minind-30:minind+30,:),2)));
 
+load([edir 'spindles.mat'])
+[cc,pp]=corr(sortwideP2N1Wval,spindles(subuse(sortwideP2N1Wind),:))
+% none significant
+
+coloruse=varycolor(length(subuse));
+sortplot=[iiuse_bothalfWwideP2N1  iiuse_tophalfWwideP2N1]
+cmapuse=cmap(1:4:4*length(sortplot),:);
+
 tophalfWwide=sortwideWind(end-7:end);
 bothalfWwide=sortwideWind(1:8);
 
@@ -3054,7 +3173,7 @@ iiuse_tophalfWwideP2N1=iiuse(tophalfWwideP2N1);
 iiuse_bothalfWwideP2N1=iiuse(bothalfWwideP2N1);
 save([edir 'sortTacWP200.mat'],'iiuse_*');
 
-
+% % % % % %
 
 load([edir 'sortTacWP200.mat']);
 iiBfinal=iiBuse(5:end);
@@ -3099,9 +3218,34 @@ for ss=10:12
   if ss==12,lg=legend({'Top half (Part 2, P200-N100)' 'Bottom half (Part 2, P200-N100)'});set(lg,'fontsize',14);end
   set(gca,'FontSize',20)
 end
-print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1.png'],'-dpng');
-print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1.eps'],'-depsc');
+print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(42,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
 
+figure(43);
+for ss=10:12
+  subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Tactile alone');end
+  if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
+  set(gca,'FontSize',20)
+  subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Auditory alone');end
+  set(gca,'FontSize',20)
+  subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),:,ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Null');end
+  if ss==12,lg=legend({'Top half (Part 2, P200-N100)' 'Bottom half (Part 2, P200-N100)'});set(lg,'fontsize',14);end
+  set(gca,'FontSize',20)
+end
+print(43,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(43,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
 
 tk=1;
 figure(22);
@@ -3169,8 +3313,36 @@ for ss=10:12
   if ss==10,title('Null');end
   set(gca,'FontSize',20)
 end
-print(1,[fdir 'unisensory_sortedWideP2N1_sleep1.png'],'-dpng');
-print(1,[fdir 'unisensory_sortedWideP2N1_sleep1.eps'],'-depsc');
+print(1,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(1,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
+
+tk=1;figure(2)
+for ss=10:12
+  subplot(3,3,1+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time,squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time,squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Tactile alone');end
+  if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
+  set(gca,'FontSize',20)
+  subplot(3,3,2+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time,squeeze(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time,squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Auditory alone');end
+  set(gca,'FontSize',20)
+  subplot(3,3,3+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time,squeeze(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time,squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Null');end
+  set(gca,'FontSize',20)
+end
+print(2,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(2,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
 
 % tk=1;figure(2)
 % for ss=10:12
@@ -3214,6 +3386,27 @@ for ss=10:12
     tlock_tac9T_gndavgbotWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
     tlock_aud1A_gndavgtopWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_tophalfWwideP2N1'))),[3 1 2]);
     tlock_aud1A_gndavgbotWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
+    tlock_nul_gndavgtopWwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_tophalfWwideP2N1'))),[3 1 2]);
+    tlock_nul_gndavgbotWwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
+  end
+end
+for ss=10:12
+  for tk=1:2
+    tlock_tacT_gndavgtopWwideP2N1{ss,tk}=[];
+    tlock_tacT_gndavgtopWwideP2N1{ss,tk}.label=tlock_nul_tlocktmp.label;
+    tlock_tacT_gndavgtopWwideP2N1{ss,tk}.dimord='subj_chan_time';
+    tlock_tacT_gndavgtopWwideP2N1{ss,tk}.time=tlock_nul_tlocktmp.time;
+    
+    tlock_tacT_gndavgbotWwideP2N1{ss,tk}=tlock_tacT_gndavgtopWwideP2N1{ss,tk};
+    tlock_audA_gndavgtopWwideP2N1{ss,tk}=tlock_tacT_gndavgtopWwideP2N1{ss,tk};
+    tlock_audA_gndavgbotWwideP2N1{ss,tk}=tlock_tacT_gndavgtopWwideP2N1{ss,tk};
+    tlock_nul_gndavgtopWwideP2N1{ss,tk}=tlock_tacT_gndavgtopWwideP2N1{ss,tk};
+    tlock_nul_gndavgbotWwideP2N1{ss,tk}=tlock_tacT_gndavgtopWwideP2N1{ss,tk};
+    
+    tlock_tacT_gndavgtopWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_tacT_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_tophalfWwideP2N1'))),[3 1 2]);
+    tlock_tacT_gndavgbotWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_tacT_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
+    tlock_audA_gndavgtopWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_audA_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_tophalfWwideP2N1'))),[3 1 2]);
+    tlock_audA_gndavgbotWwideP2N1{ss,tk}.individual=permute(squeeze(tlock_audA_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
     tlock_nul_gndavgtopWwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_tophalfWwideP2N1'))),[3 1 2]);
     tlock_nul_gndavgbotWwideP2N1{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,ss,tk,dsearchn(subuse',iiuse_bothalfWwideP2N1'))),[3 1 2]);
   end
@@ -3274,6 +3467,19 @@ for ss=10:12
     statt_nultopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWwideP2N1{ss,tk},   tlock_nul_gndavgbotWwideP2N1{ss,tk});
   end
 end
+% numtr=10:  
+% numtr=20:  tac 10,1  p=0.03   12,1 p=0.02   10,2 p=0.051  12,2 p=0.003     aud:  11,1 p=0.09  11,2 p=0.07     nul:  None
+% numtr=20: N  tac 10 7v6  11 8v8 12,1 8v8      aud:  10 6v4   11 8v8  12 8v8     nul:  10 1v5   11 6v7  12  8v8
+for ss=10:12
+  for tk=1:2
+    statt_tacTtopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tacT_gndavgtopWwideP2N1{ss,tk}, tlock_tacT_gndavgbotWwideP2N1{ss,tk});
+    statt_audAtopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_audA_gndavgtopWwideP2N1{ss,tk}, tlock_audA_gndavgbotWwideP2N1{ss,tk});
+  end
+end
+% numtr=20;  tac 11,1 p=0.055  12,1 p=0.01   11,2 p=0.054  12,2 p=0.049     aud:  11,1 p=0.057     
+% numtr=20:  N  tac 10  6v1  11  7v6   8v8;     aud:  10  2v6  11 7v7  12 8v8 
+
+save([edir 'stat_medsplit_sleep1_numtr' num2str(numtr) '.mat'],'stat*')
 
 % for ss=10:12
 %   for tk=1:2
@@ -3325,6 +3531,12 @@ sub_tac9T_amaxtime=squeeze(mean(mean(tlock_tac9T_tlockall(chanind,mxind-length(t
 figure;plot(sub_aud1A_amintime(~isnan(sub_aud1A_amintime)),sub_tac9T_amaxtime(~isnan(sub_aud1A_amaxtime)),'o')
 
 % compare across stages
+
+
+% compare to spindles
+load([edir 'spindles.mat'])
+sortplot=[iiuse_bothalfWwideP2N1  iiuse_tophalfWwideP2N1];
+
 
 
 %% More testing of tactile-alone response, using tacaloneproc=1 flag, phase relationship
