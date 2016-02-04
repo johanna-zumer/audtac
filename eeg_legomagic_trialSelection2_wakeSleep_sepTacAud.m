@@ -133,7 +133,7 @@ end
 tr.stageuse=stageuse;
 tr.trialkc=trialkc;
 
-if usetr
+if usetr==1
   if iter>30
     error('all the usetr flag settings ok for iter<=30. what to do here?')
   end
@@ -144,7 +144,14 @@ if usetr
     load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '.mat'],'tr');
   end
   stageuse=tr.stageuse;
-else
+elseif usetr==2
+  if exist(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'file')
+    load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'tr');
+    stageuse=tr.stageuse;
+  else
+    error('must run with usetr=0 first')
+  end
+elseif usetr==0
   for ss=0:3
     if ~any(ismember(stageuse,ss)) % needs to exist for later code in eeg_legomagic_erp_stats2_sepTacAud
       for ll=soalist
@@ -162,6 +169,8 @@ else
       end
     end
   end
+else
+  error('invalid value of usetr')
 end
 if usetr
   tr_back=tr;
@@ -187,15 +196,17 @@ if ~isempty(stageuse)
         cfg.trials=cfg.trials & data_tac_ref.trialinfo(:,23)==0; % exclude EOG.
       end
       origtrialindex=find(cfgtrialstacorig);
-      if ~isempty(setdiff(find(cfgtrialstacorig),find(cfg.trials)))
-        tacllorig_excluded{soalist(ll),tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialstacorig),find(cfg.trials)));
-        origindex=setdiff(1:length(find(cfgtrialstacorig)),tacllorig_excluded{soalist(ll),tt-2,stage+10});
-        if tacaud==0
-          error('fix tr.tm here also')
+      if usetr==1 && iter<31
+        if ~isempty(setdiff(find(cfgtrialstacorig),find(cfg.trials)))
+          tacllorig_excluded{soalist(ll),tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialstacorig),find(cfg.trials)));
+          origindex=setdiff(1:length(find(cfgtrialstacorig)),tacllorig_excluded{soalist(ll),tt-2,stage+10});
+          if tacaud==0
+            error('fix tr.tm here also')
+          end
+          tr.tlltrialkept_new{soalist(ll),tt-2,stage+10}=dsearchn(origindex',tr.tlltrialkept{soalist(ll),tt-2,stage+10}')';
+        else
+          tacllorig_excluded{soalist(ll),tt-2,stage+10}=[];
         end
-        tr.tlltrialkept_new{soalist(ll),tt-2,stage+10}=dsearchn(origindex',tr.tlltrialkept{soalist(ll),tt-2,stage+10}')';
-      else
-        tacllorig_excluded{soalist(ll),tt-2,stage+10}=[];
       end
       if trialkc>=0
         if trialkc==0
@@ -233,15 +244,17 @@ if ~isempty(stageuse)
       cfg.trials=cfg.trials & data_tac_ref.trialinfo(:,23)==0; % exclude EOG.
     end
     origtrialindex=find(cfgtrialstac10orig);
-    if ~isempty(setdiff(find(cfgtrialstac10orig),find(cfg.trials)))
-      tac10orig_excluded{tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialstac10orig),find(cfg.trials)));
-    else
-      tac10orig_excluded{tt-2,stage+10}=[];
-    end
-    origindex=setdiff(1:length(find(cfgtrialstac10orig)),tac10orig_excluded{tt-2,stage+10});
-    for ll=soalist
-      if ~isempty(origindex) && ~isempty(tr.t10trialkept{ll,tt-2,stage+10})
-        tr.t10trialkept{ll,tt-2,stage+10}=dsearchn(origindex',tr.t10trialkept{ll,tt-2,stage+10}')';
+    if usetr==1 && iter<31
+      if ~isempty(setdiff(find(cfgtrialstac10orig),find(cfg.trials)))
+        tac10orig_excluded{tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialstac10orig),find(cfg.trials)));
+      else
+        tac10orig_excluded{tt-2,stage+10}=[];
+      end
+      origindex=setdiff(1:length(find(cfgtrialstac10orig)),tac10orig_excluded{tt-2,stage+10});
+      for ll=soalist
+        if ~isempty(origindex) && ~isempty(tr.t10trialkept{ll,tt-2,stage+10})
+          tr.t10trialkept{ll,tt-2,stage+10}=dsearchn(origindex',tr.t10trialkept{ll,tt-2,stage+10}')';
+        end
       end
     end
     
@@ -412,7 +425,7 @@ if ~isempty(stageuse)
       cfg.trials=cfg.trials & data_aud_ref.trialinfo(:,23)==0; % exclude EOG.
     end
     %     origcfgtrials=cfg.trials;
-    if usetr
+    if usetr==1 && iter<31
       origtrialindex=find(trialstmp);
       for ll=soalist,
         try
@@ -586,14 +599,16 @@ if ~isempty(stageuse)
       cfg.trials=cfg.trials & data_nul_ref.trialinfo(:,23)==0; % exclude EOG.
     end
     origtrialindex=find(cfgtrialsnul10orig);
-    if ~isempty(origtrialindex) && ~isempty(setdiff(find(cfgtrialsnul10orig),find(cfg.trials)))
-      nul10orig_excluded{tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialsnul10orig),find(cfg.trials)));
-      origindex=setdiff(1:length(find(cfgtrialsnul10orig)),nul10orig_excluded{tt-2,stage+10});
-      for ll=soalist
-        tr.nllttrialkept{ll,tt-2,stage+10}=dsearchn(origindex',tr.nllttrialkept{ll,tt-2,stage+10}')';
+    if usetr==1 && iter<31
+      if ~isempty(origtrialindex) && ~isempty(setdiff(find(cfgtrialsnul10orig),find(cfg.trials)))
+        nul10orig_excluded{tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialsnul10orig),find(cfg.trials)));
+        origindex=setdiff(1:length(find(cfgtrialsnul10orig)),nul10orig_excluded{tt-2,stage+10});
+        for ll=soalist
+          tr.nllttrialkept{ll,tt-2,stage+10}=dsearchn(origindex',tr.nllttrialkept{ll,tt-2,stage+10}')';
+        end
+      else
+        nul10orig_excluded{tt-2,stage+10}=[];
       end
-    else
-      nul10orig_excluded{tt-2,stage+10}=[];
     end
     
     if trialkc>=0
@@ -882,12 +897,29 @@ if ~isempty(stageuse)
         tlock_tac{ll+40,tt,ss}=[];
         continue
       else
-        if ~usetr
+        if usetr==0
           tmrandtr=Shuffle(1:size(tlock_tac{ll,tt,ss}.trial,1));
           turandtr=Shuffle(1:size(tlock_tac{10,tt,ss}.trial,1));
           
           tr.tmtrialkept{ll,tt,ss}=sort(tmrandtr(1:tnumtr(ll,tt,ss)));
           tr.tutrialkept{ll,tt,ss}=sort(turandtr(1:tnumtr(ll,tt,ss)));
+        elseif usetr==2
+          if isempty(setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tmtrialkept{ll,tt,ss}))
+            % no change to tr.tmtrialkept{ll,tt,ss}; using all available trials
+          else
+            newtmrand=Shuffle(tr.tmtrialkept{ll,tt,ss});
+            numnewtm=min(tnumtr(ll,tt,ss),length(setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tmtrialkept{ll,tt,ss})));
+            tr.tmtrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tmtrialkept{ll,tt,ss}) newtmrand(numnewtm+1:end)]);
+            tr.tmtrialkept{ll,tt,ss}=tr.tmtrialkept{ll,tt,ss}(1:tnumtr(ll,tt,ss));
+          end
+          if isempty(setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.tutrialkept{ll,tt,ss}))
+            % no change to tr.tutrialkept{ll,tt,ss}; using all available trials
+          else
+            newturand=Shuffle(tr.tutrialkept{ll,tt,ss});
+            numnewtu=min(tnumtr(ll,tt,ss),length(setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.tutrialkept{ll,tt,ss})));
+            tr.tutrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.tutrialkept{ll,tt,ss}) newturand(numnewtu+1:end)]);
+            tr.tutrialkept{ll,tt,ss}=tr.tutrialkept{ll,tt,ss}(1:tnumtr(ll,tt,ss));
+          end
         end
         
         %         if ll<5
@@ -905,7 +937,12 @@ if ~isempty(stageuse)
       end
       
       if tacaud==0
-        error('fix me with tutrialkept')
+        if usetr==1
+          error('fix me with tutrialkept')
+        end
+        if usetr==2
+          error('fix me')
+        end
         cfg=[];
         % I have thought it through, and no minus sign needed here.
         cfg.offset=round(fsample*(tlock_tac{ll,tt,ss}.trialinfo(tr.tmtrialkept{ll,tt,ss},10)-soades(ll) -soades(ll))); % offset is in samples not seconds; -2*soades required for tactile not auditory
@@ -943,6 +980,7 @@ if ~isempty(stageuse)
       % this subset of tlock_tac{ll,tt,ss} for the Multisensory-Shifted
       % comparison.
       
+      
       cfg=[];
       cfg.trials=tr.tmtrialkept{ll,tt,ss}; % only keep ms trials that have a paired shifted corresponding unisensory trial
       if length(cfg.trials)==1
@@ -966,18 +1004,35 @@ if ~isempty(stageuse)
       %       end
       
       %       if ~isnan(anumtr(ll,ss,tt))
-      if ~usetr
+      if usetr==0
         amrandtr=Shuffle(1:size(tlock_aud{ll,tt,ss}.trial,1));
         aurandtr=Shuffle(1:size(tlock_aud{10,tt,ss}.trial,1));
         
         tr.amtrialkept{ll,tt,ss}=sort(amrandtr(1:anumtr(ll,tt,ss)));
         tr.autrialkept{ll,tt,ss}=sort(aurandtr(1:anumtr(ll,tt,ss)));
+      elseif usetr==2
+        if isempty(setdiff(1:size(tlock_aud{ll,tt,ss}.trial,1),tr.amtrialkept{ll,tt,ss}))
+          % no change to tr.amtrialkept{ll,tt,ss}; using all available trials
+        else
+          newamrand=Shuffle(tr.amtrialkept{ll,tt,ss});
+          numnewam=min(anumtr(ll,tt,ss),length(setdiff(1:size(tlock_aud{ll,tt,ss}.trial,1),tr.amtrialkept{ll,tt,ss})));
+          tr.amtrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_aud{ll,tt,ss}.trial,1),tr.amtrialkept{ll,tt,ss}) newamrand(numnewam+1:end)]);
+          tr.amtrialkept{ll,tt,ss}=tr.amtrialkept{ll,tt,ss}(1:anumtr(ll,tt,ss));
+        end
+        if isempty(setdiff(1:size(tlock_aud{10,tt,ss}.trial,1),tr.autrialkept{ll,tt,ss}))
+          % no change to tr.autrialkept{ll,tt,ss}; using all available trials
+        else
+          newaurand=Shuffle(tr.autrialkept{ll,tt,ss});
+          numnewau=min(anumtr(ll,tt,ss),length(setdiff(1:size(tlock_aud{10,tt,ss}.trial,1),tr.autrialkept{ll,tt,ss})));
+          tr.autrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_aud{10,tt,ss}.trial,1),tr.autrialkept{ll,tt,ss}) newaurand(numnewau+1:end)]);
+          tr.autrialkept{ll,tt,ss}=tr.autrialkept{ll,tt,ss}(1:anumtr(ll,tt,ss));
+        end
       end
       
       if tacaud==1
         cfg=[];
         cfg.trials=tr.autrialkept{ll,tt,ss};
-        if usetr && any(auwrong(soalist,tt,ss))
+        if usetr==1 && iter<31 && any(auwrong(soalist,tt,ss))
           tr.amtrialkept{ll,tt,ss}=tr.amtrialkept{ll,tt,ss}(setdiff(1:length(tr.amtrialkept{ll,tt,ss}),all40excluded{ll,tt,ss}));
         end
         % I have thought it through, and no minus sign needed here.
@@ -1126,7 +1181,7 @@ if ~isempty(stageuse)
             tr.all40trialkept{ll,tt,ss}=sort(all40randtr(1:numcondtfinal(ll,tt,ss)));
             tr.tlltrialkept{ll,tt,ss}=sort(tllrandtr(1:numcondtfinal(ll,tt,ss)));
             tr.nllttrialkept{ll,tt,ss}=sort(nllrandtr(1:numcondtfinal(ll,tt,ss)));
-          elseif usetr && any(auwrong(soalist,tt,ss))
+          elseif usetr==1 && iter<31 && any(auwrong(soalist,tt,ss))
             if numcondtfinal(ll,tt,ss)==size(tlock_aud{ll+40,tt,ss}.trial,1)
               tr.t10trialkept{ll,tt,ss}=tr.t10trialkept{ll,tt,ss}(setdiff(1:length(tr.t10trialkept{ll,tt,ss}),all40excluded{ll,tt,ss}));
               tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(setdiff(1:length(tr.nllttrialkept{ll,tt,ss}),all40excluded{ll,tt,ss}));
@@ -1166,11 +1221,49 @@ if ~isempty(stageuse)
               tr.all40trialkept{ll,tt,ss}=tr.all40trialkept{ll,tt,ss}(1:newmin);
               tr.tlltrialkept{ll,tt,ss}=tr.tlltrialkept{ll,tt,ss}(1:newmin);
             end
+          elseif usetr==2
+            if isempty(setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.t10trialkept{ll,tt,ss}))
+              % no change to tr.t10trialkept{ll,tt,ss}; using all available trials
+            else
+              newt10rand=Shuffle(tr.t10trialkept{ll,tt,ss});
+              numnewt10=min(numcondtfinal(ll,tt,ss),length(setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.t10trialkept{ll,tt,ss})));
+              tr.t10trialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.t10trialkept{ll,tt,ss}) newt10rand(numnewt10+1:end)]);
+              tr.t10trialkept{ll,tt,ss}=tr.t10trialkept{ll,tt,ss}(1:numcondtfinal(ll,tt,ss));
+            end
+            if isempty(setdiff(1:size(tlock_aud{ll+40,tt,ss}.trial,1),tr.all40trialkept{ll,tt,ss}))
+              % no change to tr.all40trialkept{ll,tt,ss}; using all available trials
+            else
+              newall40rand=Shuffle(tr.all40trialkept{ll,tt,ss});
+              numnewall40=min(numcondtfinal(ll,tt,ss),length(setdiff(1:size(tlock_aud{ll+40,tt,ss}.trial,1),tr.all40trialkept{ll,tt,ss})));
+              tr.all40trialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_aud{ll+40,tt,ss}.trial,1),tr.all40trialkept{ll,tt,ss}) newall40rand(numnewall40+1:end)]);
+              tr.all40trialkept{ll,tt,ss}=tr.all40trialkept{ll,tt,ss}(1:numcondtfinal(ll,tt,ss));
+            end
+            if isempty(setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tlltrialkept{ll,tt,ss}))
+              % no change to tr.tlltrialkept{ll,tt,ss}; using all available trials
+            else
+              newtllrand=Shuffle(tr.tlltrialkept{ll,tt,ss});
+              numnewtll=min(numcondtfinal(ll,tt,ss),length(setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tlltrialkept{ll,tt,ss})));
+              tr.tlltrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_tac{ll,tt,ss}.trial,1),tr.tlltrialkept{ll,tt,ss}) newtllrand(numnewtll+1:end)]);
+              tr.tlltrialkept{ll,tt,ss}=tr.tlltrialkept{ll,tt,ss}(1:numcondtfinal(ll,tt,ss));
+            end
+            if isempty(setdiff(1:size(tlock_nul{10,tt,ss}.trial,1),tr.nllttrialkept{ll,tt,ss}))
+              % no change to tr.nlltrialkept{ll,tt,ss}; using all available trials
+            else
+              newnlltrand=Shuffle(tr.nllttrialkept{ll,tt,ss});
+              numnewnllt=min(numcondtfinal(ll,tt,ss),length(setdiff(1:size(tlock_nul{10,tt,ss}.trial,1),tr.nllttrialkept{ll,tt,ss})));
+              tr.nllttrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_nul{10,tt,ss}.trial,1),tr.nllttrialkept{ll,tt,ss}) newnlltrand(numnewnllt+1:end)]);
+              tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(1:numcondtfinal(ll,tt,ss));
+            end
           end
         end
         
         if tacaud==0
-          error('fix me for auwrong')
+          if usetr==1
+            error('fix me for auwrong')
+          end
+          if usetr==2
+            error('not yet coded')
+          end
           if ~usetr
             a10randtr=Shuffle(1:size(tlock_aud{10,tt,ss}.trial,1));
             tll40randtr=Shuffle(1:size(tlock_tac{ll+40,tt,ss}.trial,1));
@@ -1353,6 +1446,7 @@ if ~isempty(stageuse)
       end % if
     end % ll
     
+    if usetr<2
     for ll=[1 3 4] % for multisensory-shifted comparison
       tt=ttin;
       if [tacaud==1 && [isempty(tlock_tac{ll,tt,ss}) || isempty(tlock_tac{10-ll,tt,ss}) || isempty(tlock_tac{5,tt,ss})]] || [tacaud==0 && [isempty(tlock_aud{ll,tt,ss}) || isempty(tlock_aud{10-ll,tt,ss}) || isempty(tlock_aud{5,tt,ss})] ]
@@ -1402,6 +1496,7 @@ if ~isempty(stageuse)
         end
       end
     end % ll
+    end
     
   end % ss
   
@@ -1430,6 +1525,11 @@ end
 
 tr.tacaud=tacaud;
 % save('trialkept.mat','tr','numcond*')
+
+if usetr==2
+  iter=iter+1;
+end
+tr.iter=iter;
 
 calling=dbstack; % find out which function called this one
 if tomflag

@@ -86,22 +86,22 @@ load([edir 'iikeep.mat'])
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
 %%
-usetr=1;
+usetr=2; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
 ttuse=[3];
 tacaloneproc=0;
-phaset0=1;
+phaset0=0;
 phaset0use=2; % 0 = compute Hilbert; 1 = FFT Cz, 2 = FFT FC, 3 = FFT PCA, 4 = Hilb Cz, 5 = Hilb FC, 6 = Hilb PCA
 synchasynch=0;
-binonly=1;
+binonly=0;
 
-for sleep=[1]
+for sleep=[0]
   if sleep
     iiuse=setdiff(iiBuse,3:7);
     %     iiuse=setdiff(iiBuse,[3:7 8]);
   else
     iiuse=iiSuse;
     %         iiuse=setdiff(iiSuse,1:9);
-    %         iiuse=8;
+    %             iiuse=8;
   end
   freqsub=nan(1,max(iiuse));
   for ii=iiuse
@@ -122,8 +122,10 @@ for sleep=[1]
       iteruse=11;
     elseif sleep==0
       trialkc=-1; % always -1
-      iteruse=27; % for main analysis
+      %       iteruse=27; % for main analysis
       %       iteruse=30; % for tacalone analysis
+      % for new 'smart sampling' use 31 and 33
+      iteruse=31; % smart sampling;  set to value of usetr=0 in combination with usetr=2 to get new paired sample (iteruse+1)
     end
     
     % For memory reasons, do TacPlusAud separately from AudPlusTac
@@ -142,6 +144,13 @@ for sleep=[1]
         else
           error('with sleep=1 cant run more than one iter or one tt at once for memory reasons')
         end
+        if usetr==2 && isfield(tr,'iter') && tr.iter~=iter
+          if length(iteruse)>1
+            error('cannot have iteruse more than scalar and usetr=2')
+          end
+          iter=tr.iter;
+        end
+        
         %     profile viewer
         
         % % would love to save out here but really can't; it would be over 13GB for
@@ -2771,23 +2780,23 @@ end % ii
 % figure;imagesc(time,1:subuseind,squeeze(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,:))');caxis([-5 5])
 
 % Get max/min of peaks from awake data
-  [maxval,maxind]=max(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
-  [minval,minind]=min(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
-  
-  % max versus min (peak P200 vs peak N100)
-  for ss=10:12
-    [sortval(:,ss),sortind(:,ss)]=sort(squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind,ss,1,:)-tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind,ss,1,:)));
-  end
-  
-  % wideband P200 versus prestim
-  for ss=10:12
-    [sortwideval(:,ss),sortwideind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),1:500,ss,1,:),2)));
-  end
-  
-  % wideband P200 versus wideband N100
-  for ss=10:12
-    [sortwideP2N1val(:,ss),sortwideP2N1ind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind-30:minind+30,ss,1,:),2)));
-  end
+[maxval,maxind]=max(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
+[minval,minind]=min(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),:,10,1,:),5));
+
+% max versus min (peak P200 vs peak N100)
+for ss=10:12
+  [sortval(:,ss),sortind(:,ss)]=sort(squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind,ss,1,:)-tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind,ss,1,:)));
+end
+
+% wideband P200 versus prestim
+for ss=10:12
+  [sortwideval(:,ss),sortwideind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),1:500,ss,1,:),2)));
+end
+
+% wideband P200 versus wideband N100
+for ss=10:12
+  [sortwideP2N1val(:,ss),sortwideP2N1ind(:,ss)]=sort(squeeze(mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),maxind-30:maxind+30,ss,1,:),2)-mean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),minind-30:minind+30,ss,1,:),2)));
+end
 
 load([edir 'spindles.mat']);
 for ss=10:12
@@ -2870,14 +2879,14 @@ cmapuse=cmap(1:4:4*length(sortplot),:);
 figure(10);
 for ss=10:12
   subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
-%   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
-%   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
-%   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(2),'linestyle',':','linewidth',3);
+  %   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(2),'linestyle',':','linewidth',3);
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,tophalfwide),1),5)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
   hold on;lh=plot(time,squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,chanuse),:,ss,tk,bothalfwide),1),5)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
   subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
@@ -2939,12 +2948,12 @@ for ss=10:12
     tlock_nul_gndavgtop{ss,tk}=tlock_tac9T_gndavgtop{ss,tk};
     tlock_nul_gndavgbot{ss,tk}=tlock_tac9T_gndavgtop{ss,tk};
     
-%     tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,tophalf)),[3 1 2]);    % bug that this was '10' always?
-%     tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,bothalf)),[3 1 2]);
-%     tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,tophalf)),[3 1 2]);
-%     tlock_aud1A_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,bothalf)),[3 1 2]);
-%     tlock_nul_gndavgtop{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,tophalf)),[3 1 2]);
-%     tlock_nul_gndavgbot{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+    %     tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,tophalf)),[3 1 2]);    % bug that this was '10' always?
+    %     tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+    %     tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,tophalf)),[3 1 2]);
+    %     tlock_aud1A_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,10,1,bothalf)),[3 1 2]);
+    %     tlock_nul_gndavgtop{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,tophalf)),[3 1 2]);
+    %     tlock_nul_gndavgbot{ss,tk}.individual  =permute(squeeze(tlock_nul_tlockall(:,:,10,1,bothalf)),[3 1 2]);
     tlock_tac9T_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,tophalf)),[3 1 2]);
     tlock_tac9T_gndavgbot{ss,tk}.individual=permute(squeeze(tlock_tac9T_tlockall(:,:,ss,tk,bothalf)),[3 1 2]);
     tlock_aud1A_gndavgtop{ss,tk}.individual=permute(squeeze(tlock_aud1A_tlockall(:,:,ss,tk,tophalf)),[3 1 2]);
@@ -3038,7 +3047,7 @@ for ss=10:12
     statt_nultopbotwideP2N1{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopwideP2N1{ss,tk},   tlock_nul_gndavgbotwideP2N1{ss,tk});
   end
 end
-% numtr=20;   tac: none;   aud:  none;   nul: 12,1 p=0.036  
+% numtr=20;   tac: none;   aud:  none;   nul: 12,1 p=0.036
 
 % try for just one channel of main effect.
 cfg=[];
@@ -3467,7 +3476,7 @@ for ss=10:12
     statt_nultopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWwideP2N1{ss,tk},   tlock_nul_gndavgbotWwideP2N1{ss,tk});
   end
 end
-% numtr=10:  
+% numtr=10:
 % numtr=20:  tac 10,1  p=0.03   12,1 p=0.02   10,2 p=0.051  12,2 p=0.003     aud:  11,1 p=0.09  11,2 p=0.07     nul:  None
 % numtr=20: N  tac 10 7v6  11 8v8 12,1 8v8      aud:  10 6v4   11 8v8  12 8v8     nul:  10 1v5   11 6v7  12  8v8
 for ss=10:12
@@ -3476,8 +3485,8 @@ for ss=10:12
     statt_audAtopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_audA_gndavgtopWwideP2N1{ss,tk}, tlock_audA_gndavgbotWwideP2N1{ss,tk});
   end
 end
-% numtr=20;  tac 11,1 p=0.055  12,1 p=0.01   11,2 p=0.054  12,2 p=0.049     aud:  11,1 p=0.057     
-% numtr=20:  N  tac 10  6v1  11  7v6   8v8;     aud:  10  2v6  11 7v7  12 8v8 
+% numtr=20;  tac 11,1 p=0.055  12,1 p=0.01   11,2 p=0.054  12,2 p=0.049     aud:  11,1 p=0.057
+% numtr=20:  N  tac 10  6v1  11  7v6   8v8;     aud:  10  2v6  11 7v7  12 8v8
 
 save([edir 'stat_medsplit_sleep1_numtr' num2str(numtr) '.mat'],'stat*')
 
@@ -3672,8 +3681,8 @@ savegrindflag=1;
 iterflag=1; % multiple iterations of random trial assignment
 audtacflag=0;
 runagainflag=0; % 2nd run of erp results (resampling of trials into ERP)
-usetr=0;
-trialkcflag=0; % 0 for ignore trialkc (old results; all trials), or 1 for use trialkc value
+usetr=2;
+trialkcflag=1; % 0 for ignore trialkc (old results; all trials), or 1 for use trialkc value
 tophalfflag=0; % only relevant for sleep=1; tophalf of participants only (see sortTacN2.mat)
 synchasynch=0;
 soalist=[1 3 4 5 6 7 9];
@@ -3690,7 +3699,7 @@ if ftver
   end
 end
 
-mcseed=17;
+mcseed=13;
 
 chanuse_sleep0={'all' '-F4'};
 chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
@@ -3711,8 +3720,9 @@ if sleep
   end
 else
   chanuse=chanuse_sleep0;
-%   warning('change me back to 27!!')
-  iteruse=27;
+  %   warning('change me back to 27!!')
+  %   iteruse=27;
+  iteruse=31;
   trialkc=-1;
 end
 iter=iteruse;
@@ -3752,7 +3762,7 @@ for ll=soalist
   subuse=subuseall; % reset to all for each sleep stage
   
   for ii=subuseall
-    %       for ii=[8 9 10 12 14 15  16 17 18]
+    %           for ii=[8 9]
     cd([edir sub{ii} ])
     %   load(['tlock_diffs_' sub{ii} '.mat']);
     %       load(['tlock_diffs_averef_' sub{ii} '.mat']);
@@ -3775,7 +3785,12 @@ for ll=soalist
       %             end
       if trialkcflag
         load(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
-        tk1=load(['trialkept_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter)  '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+        if usetr==2
+          % load usetr=0 here; then later down load usetr=2
+          tk1=load(['trialkept_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter)  '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat']);
+        else
+          tk1=load(['trialkept_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter)  '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+        end
       else % either trialkc=-1 or not exist
         try
           load(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
@@ -3852,12 +3867,12 @@ for ll=soalist
         %             tlock_tacMSpN_each{ll,subuseind}=tlock_tacMSpN{ll,tt,ss};
         %             tlock_audMSpN_each{ll,subuseind}=tlock_audMSpN{ll,tt,ss};
         %           end
-        tlock_tacPaud_each{subuseind}=tlock_tacPaud{ll,tt,ss};
-        tlock_tacMSpN_each{subuseind}=tlock_tacMSpN{ll,tt,ss};
-        tlock_MStlock_each{subuseind}=tlock_tMSAlone{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
-        tlock_tactlock_each{subuseind}=tlock_tTacAlone{ll,tt,ss}; % ll+20 is tac alone, tac-locked
-        tlock_audtlock_each{subuseind}=tlock_tAudAlone{ll,tt,ss}; % ll+20 is aud alone, aud-locked
-        tlock_nulttlock_each{subuseind}=tlock_tNulAlone{ll,tt,ss}; % ll+50 is nul, tac-locked
+        tlock_tacPaud_each{subuseind,1}=tlock_tacPaud{ll,tt,ss};
+        tlock_tacMSpN_each{subuseind,1}=tlock_tacMSpN{ll,tt,ss};
+        tlock_MStlock_each{subuseind,1}=tlock_tMSAlone{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+        tlock_tactlock_each{subuseind,1}=tlock_tTacAlone{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+        tlock_audtlock_each{subuseind,1}=tlock_tAudAlone{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+        tlock_nulttlock_each{subuseind,1}=tlock_tNulAlone{ll,tt,ss}; % ll+50 is nul, tac-locked
         if audtacflag
           tlock_nulatlock_each{subuseind}=tlock_aNulAlone{ll,tt,ss}; % ll+60 is nul, aud-locked
           tlock_audPtac_each{subuseind}=tlock_audPtac{ll,tt,ss};
@@ -3867,9 +3882,9 @@ for ll=soalist
         cfg=[];
         cfg.operation='subtract';
         cfg.parameter='avg';
-        tlock_tacVSnul_each{subuseind}=ft_math(cfg,tlock_tTacAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
-        tlock_audVSnul_each{subuseind}=ft_math(cfg,tlock_tAudAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
-        tlock_msVSnul_each{subuseind}=ft_math(cfg,tlock_tMSAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        tlock_tacVSnul_each{subuseind,1}=ft_math(cfg,tlock_tTacAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        tlock_audVSnul_each{subuseind,1}=ft_math(cfg,tlock_tAudAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        tlock_msVSnul_each{subuseind,1}=ft_math(cfg,tlock_tMSAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
         if audtacflag
           tlock_tacVSnul_each{subuseind}=ft_math(cfg,tlock_aTacAlone{ll,tt,ss},tlock_aNulAlone{ll,tt,ss});
           tlock_audVSnul_each{subuseind}=ft_math(cfg,tlock_aAudAlone{ll,tt,ss},tlock_aNulAlone{ll,tt,ss});
@@ -3923,57 +3938,87 @@ for ll=soalist
     end
     %       clear *_s0
     clear tlock*N tlock*tac tlock*aud
+    
+    if usetr==2
+      load(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter+1) '_trialkc' num2str(trialkc) '.mat'])
+      tk1=load(['trialkept_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1)  '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+      tlock_tacPaud_each{subuseind,2}=tlock_tacPaud{ll,tt,ss};
+      tlock_tacMSpN_each{subuseind,2}=tlock_tacMSpN{ll,tt,ss};
+      tlock_MStlock_each{subuseind,2}=tlock_tMSAlone{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+      tlock_tactlock_each{subuseind,2}=tlock_tTacAlone{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+      tlock_audtlock_each{subuseind,2}=tlock_tAudAlone{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+      tlock_nulttlock_each{subuseind,2}=tlock_tNulAlone{ll,tt,ss}; % ll+50 is nul, tac-locked
+      cfg=[];
+      cfg.operation='subtract';
+      cfg.parameter='avg';
+      tlock_tacVSnul_each{subuseind,2}=ft_math(cfg,tlock_tTacAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+      tlock_audVSnul_each{subuseind,2}=ft_math(cfg,tlock_tAudAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+      tlock_msVSnul_each{subuseind,2}=ft_math(cfg,tlock_tMSAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+    end
+    clear tlock*N tlock*tac tlock*aud
+    
   end % ii
   subuseindfinal=subuseind
   %     end
   
   
   
-  
-  %       if plotflag
-  if 0
-    %         figure(20);
-    %         %     plotind=1;
-    %         %     for ii=1:length(subuse)
-    %         for ii=1:subuseindfinal
-    %           cfg=[];
-    %           cfg.parameter='avg';
-    %           cfg.operation='subtract';
-    %           diff{ii}=ft_math(cfg,tlock_tacPaud_each{ii},tlock_tacMSpN_each{ii});
-    %           subplot(3,subuseindfinal,ii);imagesc(tlock_tacPaud_each{ii}.time,1:63,tlock_tacPaud_each{ii}.avg);caxis([-6 6])
-    %           subplot(3,subuseindfinal,subuseindfinal+ii);imagesc(tlock_tacMSpN_each{ii}.time,1:63,tlock_tacMSpN_each{ii}.avg);caxis([-6 6])
-    %           subplot(3,subuseindfinal,2*subuseindfinal+ii);imagesc(diff{ii}.time,1:63,diff{ii}.avg);caxis([-6 6])
-    %           %       plotind=plotind+1;
-    %         end
-    %         %       if allcond_sameN
-    %         if printflag
-    %           print(20,['D:\audtac\figs\sumuni_mspn_diff_ta_cond' num2str(ll) num2str(tt) num2str(sleep) '.png'],'-dpng')
-    %         end
-    %         %       else
-    %         %         print(20,['D:\audtac\figs\sumuni_mspn_diff_ta_cond' num2str(ll) num2str(tt) 'a.png'],'-dpng')
-    %         %       end
-    %         if audtacflag
-    %           figure(21);
-    %           %     plotind=1;
-    %           for ii=1:subuseindfinal
-    %             cfg=[];
-    %             cfg.parameter='avg';
-    %             cfg.operation='subtract';
-    %             diff{ii}=ft_math(cfg,tlock_audPtac_each{ii},tlock_audMSpN_each{ii});
-    %             subplot(3,subuseindfinal,ii);imagesc(tlock_audPtac_each{ii}.time,1:63,tlock_audPtac_each{ii}.avg);caxis([-6 6])
-    %             subplot(3,subuseindfinal,subuseindfinal+ii);imagesc(tlock_audMSpN_each{ii}.time,1:63,tlock_audMSpN_each{ii}.avg);caxis([-6 6])
-    %             subplot(3,subuseindfinal,2*subuseindfinal+ii);imagesc(diff{ii}.time,1:63,diff{ii}.avg);caxis([-6 6])
-    %             %       plotind=plotind+1;
-    %           end
-    %           %       if allcond_sameN
-    %           if printflag
-    %             print(21,['D:\audtac\figs\sumuni_mspn_diff_at_cond' num2str(ll) num2str(tt) num2str(sleep) '.png'],'-dpng')
-    %           end
-    %           %       else
-    %           %         print(21,['D:\audtac\figs\sumuni_mspn_diff_at_cond' num2str(ll) num2str(tt) 'a.png'],'-dpng')
-    %           %       end
-    %         end
+  for ii=1:subuseindfinal
+    cfg=[];
+    cfg.operation='subtract';
+    cfg.parameter='avg';
+    cfg.channel=chanuse;
+    if ~usetr
+      iterind=1;
+    end
+    for iterind=1:usetr
+      tlock_TPA_MSPN{ii,iterind}=ft_math(cfg,tlock_tacPaud_each{ii,iterind},tlock_tacMSpN_each{ii,iterind});
+    end
+    if synchasynch && ll<5
+      tlock_TMSs_TMSa{ii}=ft_math(cfg,tlock_tMSsynch_each{ii},tlock_tMSasynch_each{ii});
+    end
+    if audtacflag
+      tlock_APT_MSPN{ii}=ft_math(cfg,tlock_audPtac_each{ii},tlock_audMSpN_each{ii});
+      if ll<5
+        tlock_AMSs_AMSa{ii}=ft_math(cfg,tlock_aMSsynch_each{ii},tlock_aMSasynch_each{ii});
+      end
+    end
+    if usetr==2
+      cfg.operation='(x1+x2)/2';
+      tlock_TPA_MSPN_usetr2{ii}=ft_math(cfg,tlock_TPA_MSPN{ii,:});
+      tlock_tacPaud_tmp{ii}=ft_math(cfg,tlock_tacPaud_each{ii,:});
+      tlock_tacMSpN_tmp{ii}=ft_math(cfg,tlock_tacMSpN_each{ii,:});
+      tlock_tactlock_tmp{ii}=ft_math(cfg,tlock_tactlock_each{ii,:});
+      tlock_audtlock_tmp{ii}=ft_math(cfg,tlock_audtlock_each{ii,:});
+      tlock_nulttlock_tmp{ii}=ft_math(cfg,tlock_nulttlock_each{ii,:});
+      tlock_MStlock_tmp{ii}=ft_math(cfg,tlock_MStlock_each{ii,:});
+    end
   end
+  if usetr==2
+    tlock_tacPaud_each=tlock_tacPaud_tmp;
+    tlock_tacMSpN_each=tlock_tacMSpN_tmp;
+    tlock_tactlock_each=tlock_tactlock_tmp;
+    tlock_audtlock_each=tlock_audtlock_tmp;
+    tlock_nulttlock_each=tlock_nulttlock_tmp;
+    tlock_MStlock_each=tlock_MStlock_tmp;
+  end
+  cfg=[];
+  cfg.channel=chanuse;
+  if usetr<2
+    grave_TPA_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN{:});
+  else
+    grave_TPA_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_usetr2{:});
+  end
+  if synchasynch && ll<5
+    grave_TMSs_TMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TMSs_TMSa{:});
+  end
+  if audtacflag
+    grave_APT_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_APT_MSPN{:});
+    if ll<5
+      grave_AMSs_AMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_AMSs_AMSa{:});
+    end
+  end
+  
   
   cfg=[];
   cfg.keepindividual='yes';
@@ -3984,6 +4029,9 @@ for ll=soalist
   grind_audtlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_each{:});
   grind_nultlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_each{:});
   grind_MStlock_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_each{:});
+  if usetr==2
+    grind_TPA_MSPN=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_usetr2{:});
+  end
   if synchasynch && ll<5
     grind_tMSsynch=ft_timelockgrandaverage(cfg,tlock_tMSsynch_each{:});
     grind_tMSasynch=ft_timelockgrandaverage(cfg,tlock_tMSasynch_each{:});
@@ -4018,9 +4066,11 @@ for ll=soalist
       grave_aMSasynch=ft_timelockgrandaverage(cfg,tlock_aMSasynch_each{:});
     end
   end
-  grave_tacVSnul=ft_timelockgrandaverage(cfg,tlock_tacVSnul_each{:});
-  grave_audVSnul=ft_timelockgrandaverage(cfg,tlock_audVSnul_each{:});
-  grave_msVSnul=ft_timelockgrandaverage(cfg,tlock_msVSnul_each{:});
+  if usetr<2
+    grave_tacVSnul=ft_timelockgrandaverage(cfg,tlock_tacVSnul_each{:});
+    grave_audVSnul=ft_timelockgrandaverage(cfg,tlock_audVSnul_each{:});
+    grave_msVSnul=ft_timelockgrandaverage(cfg,tlock_msVSnul_each{:});
+  end
   
   
   % unisensory Figure 1 sleep paper
@@ -4080,43 +4130,6 @@ for ll=soalist
   end
   
   
-  if 0
-    %         if plotflag
-    %           %       if 0
-    %           topoplot_highlight(11,grave_tacPaud,[-0.5 0.8],[]);
-    %           topoplot_highlight(13,grave_tacMSpN,[-0.5 0.8],[]);
-    %           if printflag
-    %             %       if allcond_sameN
-    %             print(11,['D:\audtac\figs\gravetacPaud_topoOverTime_cond' num2str(ll) num2str(tt) num2str(sleep)  '.png'],'-dpng')
-    %             %       else
-    %             %         print(11,['D:\audtac\figs\gravetacPaud_topoOverTime_cond' num2str(ll) num2str(tt)  '_28.png'],'-dpng')
-    %             %       end
-    %             %       if allcond_sameN
-    %             print(13,['D:\audtac\figs\gravetacMSpN_topoOverTime_cond' num2str(ll) num2str(tt) num2str(sleep)  '.png'],'-dpng')
-    %             %       else
-    %             %         print(13,['D:\audtac\figs\gravetacMSpN_topoOverTime_cond' num2str(ll) num2str(tt)  '_28.png'],'-dpng')
-    %             %       end
-    %           end
-    %
-    %
-    %           if audtacflag
-    %             topoplot_highlight(12,grave_audPtac,[-0.1 1.1],[]);
-    %             topoplot_highlight(14,grave_audMSpN,[-0.1 1.1],[]);
-    %             if printflag
-    %               %       if allcond_sameN
-    %               print(12,['D:\audtac\figs\graveaudPtac_topoOverTime_cond' num2str(ll) num2str(tt) num2str(sleep)  '.png'],'-dpng')
-    %               %       else
-    %               %         print(12,['D:\audtac\figs\graveaudPtac_topoOverTime_cond' num2str(ll) num2str(tt)  '_28.png'],'-dpng')
-    %               %       end
-    %               %       if allcond_sameN
-    %               print(14,['D:\audtac\figs\graveaudMSpN_topoOverTime_cond' num2str(ll) num2str(tt) num2str(sleep)  '.png'],'-dpng')
-    %               %       else
-    %               %         print(14,['D:\audtac\figs\graveaudMSpN_topoOverTime_cond' num2str(ll) num2str(tt)  '_28.png'],'-dpng')
-    %               %       end
-    %             end
-    %           end
-    %         end
-  end
   
   
   % butteryfly plots (as in MEG-UK poster)
@@ -4351,83 +4364,6 @@ for ll=soalist
   figind=figind+1;
   %       end
   
-  
-  for ii=1:subuseindfinal
-    cfg=[];
-    cfg.operation='subtract';
-    cfg.parameter='avg';
-    cfg.channel=chanuse;
-    tlock_TPA_MSPN{ii}=ft_math(cfg,tlock_tacPaud_each{ii},tlock_tacMSpN_each{ii});
-    if synchasynch && ll<5
-      tlock_TMSs_TMSa{ii}=ft_math(cfg,tlock_tMSsynch_each{ii},tlock_tMSasynch_each{ii});
-    end
-    if audtacflag
-      tlock_APT_MSPN{ii}=ft_math(cfg,tlock_audPtac_each{ii},tlock_audMSpN_each{ii});
-      if ll<5
-        tlock_AMSs_AMSa{ii}=ft_math(cfg,tlock_aMSsynch_each{ii},tlock_aMSasynch_each{ii});
-      end
-    end
-  end
-  cfg=[];
-  cfg.channel=chanuse;
-  grave_TPA_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN{:});
-  if synchasynch && ll<5
-    grave_TMSs_TMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_TMSs_TMSa{:});
-  end
-  if audtacflag
-    grave_APT_MSPN{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_APT_MSPN{:});
-    if ll<5
-      grave_AMSs_AMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_AMSs_AMSa{:});
-    end
-  end
-  
-  
-  % figure;
-  % % define parameters for plotting
-  % timestep = 0.025;      %(in seconds)
-  % fsample=1/(tlock_tacMSpN{1}.time(2)-tlock_tacMSpN{1}.time(1));
-  % sample_count = length(grave_TPA_MSPN.time);
-  % j = [-0.1:timestep:0.5];   % Temporal endpoints (in seconds) of the ERP average computed in each subplot
-  % m = [1:timestep*fsample:sample_count];  % temporal endpoints in MEEG samples
-  % % plot
-  % for k = 1:24;
-  %      subplot(4,6,k);
-  %      cfg = [];
-  %      cfg.xlim=[j(k) j(k+1)];
-  %      cfg.zlim = [-1.5 1.5];
-  % %      pos_int = all(pos(:, m(k):m(k+1)), 2);
-  % %      cfg.highlight = 'on';
-  % %      cfg.highlightchannel = find(pos_int);
-  %      cfg.comment = 'xlim';
-  %      cfg.commentpos = 'title';
-  %      cfg.layout = 'elec1010.lay';
-  %      ft_topoplotER(cfg, grave_TPA_MSPN);
-  % end
-  %
-  % figure;
-  % % define parameters for plotting
-  % timestep = 0.025;      %(in seconds)
-  % fsample=1/(tlock_tacMSpN{1}.time(2)-tlock_tacMSpN{1}.time(1));
-  % sample_count = length(grave_TAmMS.time);
-  % j = [-0.1:timestep:0.5];   % Temporal endpoints (in seconds) of the ERP average computed in each subplot
-  % m = [1:timestep*fsample:sample_count];  % temporal endpoints in MEEG samples
-  % % plot
-  % for k = 1:24;
-  %      subplot(4,6,k);
-  %      cfg = [];
-  %      cfg.xlim=[j(k) j(k+1)];
-  %      cfg.zlim = [-1.5 1.5];
-  % %      pos_int = all(pos(:, m(k):m(k+1)), 2);
-  % %      cfg.highlight = 'on';
-  % %      cfg.highlightchannel = find(pos_int);
-  %      cfg.comment = 'xlim';
-  %      cfg.commentpos = 'title';
-  %      cfg.layout = 'elec1010.lay';
-  %      ft_topoplotER(cfg, grave_APT_MSPN);
-  % end
-  %
-  
-  
   % save out for later
   cfg=[];
   %         cfg.latency=[statt_mc{ll,tt,ss}.time(1) statt_mc{ll,tt,ss}.time(end)];
@@ -4540,171 +4476,53 @@ for ll=soalist
     cfg.uvar=2;
     cfg.randomseed=mcseed;
     disp('test1')
-    statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
+    if usetr==2
+      grind_TPA_MSPN_zeros=grind_TPA_MSPN;
+      grind_TPA_MSPN_zeros.individual=zeros(size(grind_TPA_MSPN.individual));
+      statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_TPA_MSPN, grind_TPA_MSPN_zeros);
+    else
+      statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
+    end
     if audtacflag
       stata_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
     end
     %           if tacaudmsnul_earlyflag
-    statt_tacmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-    statt_audmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-    statt_msmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
-    save([edir 'tlock_statmc_early_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*early');
-    %             continue
-    %           end
-    
-    if ~length(statt_mc{ll,tt,ss}.time)
-      keyboard
-    end
-    
-    % late component
-    cfg=[];
-    if audtacflag==0
-      if sleep
-        %           cfg.latency=[.1 .8]; % longer to allow for Kc
-        if ll==1 || ll==3 || ll==4 || ll==5
-          cfg.latency=[.1 .8];
-        elseif ll==6
-          cfg.latency=[.12 .82];
-        elseif ll==7
-          cfg.latency=[.17 .87];
-        elseif ll==9
-          cfg.latency=[.6 1.3];
-        end
-      else
-        %           cfg.latency=[.1 .5]; % previously [-.1 .5]
-        if ll==1 || ll==3 || ll==4 || ll==5
-          cfg.latency=[.45 .9];
-        elseif ll==6
-          cfg.latency=[.47 .92];
-        elseif ll==7
-          cfg.latency=[.47 .97];
-        elseif ll==9
-          cfg.latency=[.95 1.4];
-        end
+    if usetr<2
+      statt_tacmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+      statt_audmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+      statt_msmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
+      save([edir 'tlock_statmc_early_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*early');
+      %             continue
+      %           end
+      
+      if ~length(statt_mc{ll,tt,ss}.time)
+        keyboard
       end
-    else
-      disp('need to make appropriate latencies here')
-      keyboard
-    end
-    cfg.channel=chanuse;
-    cfg.neighbours=neighbours;
-    % cfg.parameter='avg';
-    cfg.parameter='individual';
-    cfg.method='montecarlo';
-    % cfg.method='analytic';
-    cfg.numrandomization=2000;
-    % cfg.correctm='holm';
-    cfg.correctm='cluster';
-    cfg.clusteralpha = 0.05;
-    cfg.clusterstatistic = 'maxsum';
-    cfg.minnbchan = 2;
-    cfg.statistic='depsamplesT';
-    % cfg.statistic='indepsamplesregrT';
-    % cfg.statistic='indepsamplesT';
-    cfg.design=zeros(2,2*nsub);
-    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-    cfg.design(2,:)=[1:nsub 1:nsub];
-    cfg.ivar=1;
-    cfg.uvar=2;
-    cfg.randomseed=mcseed;
-    disp('test2')
-    statt_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
-    if audtacflag
-      stata_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
-    end
-    
-    cfg.avgovertime='yes';
-    disp('test3')
-    statt_late{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
-    if audtacflag
-      stata_late{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
-    end
-    
-    % early and late all together
-    cfg=[];
-    if audtacflag==0
-      if sleep
-        %           cfg.latency=[.1 .8]; % longer to allow for Kc
-        if ll==1 || ll==3 || ll==4 || ll==5
-          cfg.latency=[.05 1];
-        elseif ll==6
-          cfg.latency=[.05 1]+.02;
-        elseif ll==7
-          cfg.latency=[.05 1]+.07;
-        elseif ll==9
-          cfg.latency=[.05 1]+.5;
-        end
-      else
-        %           cfg.latency=[.1 .5]; % previously [-.1 .5]
-        if ll==1 || ll==3 || ll==4 || ll==5
-          cfg.latency=[.05 .8];
-        elseif ll==6
-          cfg.latency=[.07 .82];
-        elseif ll==7
-          cfg.latency=[.12 .87];
-        elseif ll==9
-          cfg.latency=[.55 1.3];
-        end
-      end
-    else
-      disp('need to make appropriate latencies here')
-      keyboard
-    end
-    cfg.channel=chanuse;
-    cfg.neighbours=neighbours;
-    % cfg.parameter='avg';
-    cfg.parameter='individual';
-    cfg.method='montecarlo';
-    % cfg.method='analytic';
-    cfg.numrandomization=2000;
-    % cfg.correctm='holm';
-    cfg.correctm='cluster';
-    cfg.clusteralpha = 0.05;
-    cfg.clusterstatistic = 'maxsum';
-    cfg.minnbchan = 2;
-    cfg.statistic='depsamplesT';
-    % cfg.statistic='indepsamplesregrT';
-    % cfg.statistic='indepsamplesT';
-    cfg.design=zeros(2,2*nsub);
-    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-    cfg.design(2,:)=[1:nsub 1:nsub];
-    cfg.ivar=1;
-    cfg.uvar=2;
-    cfg.randomseed=mcseed;
-    disp('test4')
-    statt_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
-    disp('test5')
-    statt_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-    disp('test6')
-    statt_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-    disp('test7')
-    statt_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
-    if audtacflag
-      stata_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
-      stata_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-      stata_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-      stata_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
-    end
-    
-    % Funny/Uta temporal (in)congruent contrast: (AT70 + TA70) vs (Simult + Simult_shift70)
-    if synchasynch && ll<5
+      
+      % late component
       cfg=[];
       if audtacflag==0
         if sleep
-          if ll==4
+          %           cfg.latency=[.1 .8]; % longer to allow for Kc
+          if ll==1 || ll==3 || ll==4 || ll==5
+            cfg.latency=[.1 .8];
+          elseif ll==6
             cfg.latency=[.12 .82];
-          elseif ll==3
+          elseif ll==7
             cfg.latency=[.17 .87];
-          elseif ll==1
+          elseif ll==9
             cfg.latency=[.6 1.3];
           end
         else
-          if ll==4
-            cfg.latency=[.12 .47];
-          elseif ll==3
-            cfg.latency=[.17 .52];
-          elseif ll==1
-            cfg.latency=[.6 .95];
+          %           cfg.latency=[.1 .5]; % previously [-.1 .5]
+          if ll==1 || ll==3 || ll==4 || ll==5
+            cfg.latency=[.45 .9];
+          elseif ll==6
+            cfg.latency=[.47 .92];
+          elseif ll==7
+            cfg.latency=[.47 .97];
+          elseif ll==9
+            cfg.latency=[.95 1.4];
           end
         end
       else
@@ -4731,12 +4549,139 @@ for ll=soalist
       cfg.design(2,:)=[1:nsub 1:nsub];
       cfg.ivar=1;
       cfg.uvar=2;
-      disp('test8')
-      statt_synch{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tMSsynch, grind_tMSasynch);
+      cfg.randomseed=mcseed;
+      disp('test2')
+      statt_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
       if audtacflag
-        stata_synch{ll,tt,ss}=ft_timelockstatistics(cfg, grind_aMSsynch, grind_aMSasynch);
+        stata_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
+      end
+      
+      cfg.avgovertime='yes';
+      disp('test3')
+      statt_late{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
+      if audtacflag
+        stata_late{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
+      end
+      
+      % early and late all together
+      cfg=[];
+      if audtacflag==0
+        if sleep
+          %           cfg.latency=[.1 .8]; % longer to allow for Kc
+          if ll==1 || ll==3 || ll==4 || ll==5
+            cfg.latency=[.05 1];
+          elseif ll==6
+            cfg.latency=[.05 1]+.02;
+          elseif ll==7
+            cfg.latency=[.05 1]+.07;
+          elseif ll==9
+            cfg.latency=[.05 1]+.5;
+          end
+        else
+          %           cfg.latency=[.1 .5]; % previously [-.1 .5]
+          if ll==1 || ll==3 || ll==4 || ll==5
+            cfg.latency=[.05 .8];
+          elseif ll==6
+            cfg.latency=[.07 .82];
+          elseif ll==7
+            cfg.latency=[.12 .87];
+          elseif ll==9
+            cfg.latency=[.55 1.3];
+          end
+        end
+      else
+        disp('need to make appropriate latencies here')
+        keyboard
+      end
+      cfg.channel=chanuse;
+      cfg.neighbours=neighbours;
+      % cfg.parameter='avg';
+      cfg.parameter='individual';
+      cfg.method='montecarlo';
+      % cfg.method='analytic';
+      cfg.numrandomization=2000;
+      % cfg.correctm='holm';
+      cfg.correctm='cluster';
+      cfg.clusteralpha = 0.05;
+      cfg.clusterstatistic = 'maxsum';
+      cfg.minnbchan = 2;
+      cfg.statistic='depsamplesT';
+      % cfg.statistic='indepsamplesregrT';
+      % cfg.statistic='indepsamplesT';
+      cfg.design=zeros(2,2*nsub);
+      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+      cfg.design(2,:)=[1:nsub 1:nsub];
+      cfg.ivar=1;
+      cfg.uvar=2;
+      cfg.randomseed=mcseed;
+      disp('test4')
+      statt_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
+      disp('test5')
+      statt_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+      disp('test6')
+      statt_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+      disp('test7')
+      statt_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
+      if audtacflag
+        stata_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
+        stata_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+        stata_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
+        stata_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
+      end
+      
+      % Funny/Uta temporal (in)congruent contrast: (AT70 + TA70) vs (Simult + Simult_shift70)
+      if synchasynch && ll<5
+        cfg=[];
+        if audtacflag==0
+          if sleep
+            if ll==4
+              cfg.latency=[.12 .82];
+            elseif ll==3
+              cfg.latency=[.17 .87];
+            elseif ll==1
+              cfg.latency=[.6 1.3];
+            end
+          else
+            if ll==4
+              cfg.latency=[.12 .47];
+            elseif ll==3
+              cfg.latency=[.17 .52];
+            elseif ll==1
+              cfg.latency=[.6 .95];
+            end
+          end
+        else
+          disp('need to make appropriate latencies here')
+          keyboard
+        end
+        cfg.channel=chanuse;
+        cfg.neighbours=neighbours;
+        % cfg.parameter='avg';
+        cfg.parameter='individual';
+        cfg.method='montecarlo';
+        % cfg.method='analytic';
+        cfg.numrandomization=2000;
+        % cfg.correctm='holm';
+        cfg.correctm='cluster';
+        cfg.clusteralpha = 0.05;
+        cfg.clusterstatistic = 'maxsum';
+        cfg.minnbchan = 2;
+        cfg.statistic='depsamplesT';
+        % cfg.statistic='indepsamplesregrT';
+        % cfg.statistic='indepsamplesT';
+        cfg.design=zeros(2,2*nsub);
+        cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+        cfg.design(2,:)=[1:nsub 1:nsub];
+        cfg.ivar=1;
+        cfg.uvar=2;
+        disp('test8')
+        statt_synch{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tMSsynch, grind_tMSasynch);
+        if audtacflag
+          stata_synch{ll,tt,ss}=ft_timelockstatistics(cfg, grind_aMSsynch, grind_aMSasynch);
+        end
       end
     end
+    
     %   save([edir 'tlock_statmc.mat'],'stat*','grave*'); % no point, as grave* isn't ll,tt,ss dependent
     if iterflag
       if sleep
@@ -4746,7 +4691,7 @@ for ll=soalist
         %                 save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '.mat'],'stat*');
         %               end
       else
-        save([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*');
+        save([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*');
       end
     else
       if runagain==1
@@ -5035,7 +4980,7 @@ if savegrindflag
     if sleep
       save([edir 'tlock_grind_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'grave*T*','grind_*save','plv');
     else
-      save([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'grave*T*','grind_*save','plv');
+      save([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'grave*T*','grind_*save','plv');
     end
   end
 end
@@ -5632,16 +5577,23 @@ iterflag=1;
 sleep=0;
 tt=3;
 statwinorig=0;  % =1 means the latency range of .1 to .45 (first way);  =0 means 0 to .5 (final /better way)
+ftver=0;
+mcseed=17;
+usetr=2;
 
 if sleep
   iter=11;
   ss=12;
   trialkc=0;
 else
-  iter=27;
+%   iter=27;  % previous result
+  iter=31;  % smart sampling
   ss=10;
   trialkc=-1;
 end
+
+tlock_statmc_sleep0_iter31_usetr2_statwinorig0_ftver0mcseed17
+tlock_grind_sleep0_iter31_usetr2_statwinorig0_ftver0
 
 if iterflag
   if sleep
@@ -5654,11 +5606,16 @@ if iterflag
     end
   else
     try
-      load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
-      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
+      load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat']);
+      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat']);
     catch
-      load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
-      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
+      try
+        load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
+        load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
+      catch
+        load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
+        load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
+      end
     end
   end
 else
@@ -6009,7 +5966,7 @@ end
 close all;
 % funny 'temporal' (in)congruency contrast
 for ll=soalist
-  if ll<5 
+  if ll<5
     cfg=[];
     cfg.operation='subtract';
     cfg.parameter='individual';
