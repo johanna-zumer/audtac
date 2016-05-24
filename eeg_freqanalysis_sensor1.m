@@ -98,7 +98,7 @@ timestepfft=0.02;
 timestepplv=0.01;
 
 dofftadd=0;
-usetr=1; % this means use existing trial selection
+usetr=2; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
 synchasynch=0;
 use23=0;
 phaset0=0;
@@ -117,7 +117,7 @@ else
   trialkc=-1;
 end
 for ii=iiuse;
-  % for ii=setdiff(iiuse,1:27)
+% for ii=setdiff(iiuse,1:8)
   cd([edir sub{ii} ])
   clearvars -except ii sub *dir ii*use sleep minnumcomb hostname timestep* soades dofftadd statst use* synchasynch iteruse trialkc phaset0
   [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
@@ -133,6 +133,13 @@ for ii=iiuse;
     if sleep==0
       tlock_aud{10,tt,12}=[];
       tlock_aud{10,tt,13}=[];
+    end
+    
+    if usetr==2
+      if length(iteruse)>1
+        error('only one iteruse at a time for usetr2')
+      end
+      iter=tr.iter;
     end
     
     %  Frequency analysis
@@ -1790,7 +1797,8 @@ for ii=iiuse;
               if numtests>2
                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
               else
-                save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+%                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+                save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
               end
             end
           end
@@ -1812,7 +1820,8 @@ for ii=iiuse;
         if numtests>2
           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
         else
-          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+%           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
         end
       end
     end
@@ -3496,12 +3505,12 @@ ylimhi=[30 45; 55 80];
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
 plotflag=0;
 printflag=0;
-statsflag=1;
 audtacflag=0;
 comb2flag=1;
 fftaddflag=0;
 synchasynch=0;
 mcseed=13;  % montecarlo cfg.randomseed
+usetr=3;
 
 soalist=[1 3 4 5 6 7 9];
 % soalist=[3 4 5 6 7 9];
@@ -3522,32 +3531,36 @@ figind=1;
 
 
 for ll=soalist
-  % for ll=[3 4 5 6 7 9];
-  clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed
+% for ll=[4 5 6 7 9];
+  clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed usetr
   
-  if sleep
+  statsflag=1;
+
+if sleep
     subuseall=iiBuse;
     iter=11;
     trialkc=0;
   else
     subuseall=setdiff(iiSuse,[])
-    iter=27;
+%     iter=27;
+    iter=31;
     trialkc=-1;
   end
   
   submin=subuseall(1)-1;
   subuseind=0;
-  usetr=1;
   
   % Baseline correct each participant prior to entering to stats???? NO
   for ii=subuseall
+%   for ii=8:9
     cd([edir sub{ii} ])
     %       load(['freq_diffs_averef_' sub{ii} '.mat']);
     try
       if fftaddflag
         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
       else
-        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+%         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
       end
       if audtacflag
         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '_tt' num2str(tt) '.mat'])
@@ -3564,7 +3577,12 @@ for ll=soalist
       tka=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(0) '_iter' num2str(iter) '_usetr' num2str(usetr) '.mat']);
     end
     try
-      tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_usetr' num2str(usetr) '.mat']);
+      if usetr==2
+        % load usetr=0 here; then later down load usetr=2
+        tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_usetr' num2str(3) '_trialkc' num2str(trialkc) '.mat']);
+      else
+        tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_usetr' num2str(usetr) '.mat']);
+      end
     catch
       tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
     end
@@ -3601,22 +3619,22 @@ for ll=soalist
       subuse=setdiff(subuse,ii);
     else
       subuseind=subuseind+1;
-      freqloall_tacPaud_comb1{subuseind}=freqlo_tacPaud_comb{ll,tt,ss,1};
-      freqloall_tacMSpN_comb1{subuseind}=freqlo_tacMSpN_comb{ll,tt,ss,1};
-      freqhiall_tacPaud_comb1{subuseind}=freqhi_tacPaud_comb{ll,tt,ss,1};
-      freqhiall_tacMSpN_comb1{subuseind}=freqhi_tacMSpN_comb{ll,tt,ss,1};
-      freqhiall_tNulAlone_comb{subuseind}=freqhi_tNulAlone_comb{ll,tt,ss};
-      freqloall_tNulAlone_comb{subuseind}=freqlo_tNulAlone_comb{ll,tt,ss};
-      freqhiall_tTacAlone_comb{subuseind}=freqhi_tTacAlone_comb{ll,tt,ss};
-      freqloall_tTacAlone_comb{subuseind}=freqlo_tTacAlone_comb{ll,tt,ss};
-      freqhiall_tAudAlone_comb{subuseind}=freqhi_tAudAlone_comb{ll,tt,ss};
-      freqloall_tAudAlone_comb{subuseind}=freqlo_tAudAlone_comb{ll,tt,ss};
-      freqhiall_tMSAlone_comb{subuseind}=freqhi_tMSAlone_comb{ll,tt,ss};
-      freqloall_tMSAlone_comb{subuseind}=freqlo_tMSAlone_comb{ll,tt,ss};
-      freqloall_tacPaud_comb1{subuseind}.dimord='chan_freq_time';
-      freqloall_tacMSpN_comb1{subuseind}.dimord='chan_freq_time';
-      freqhiall_tacPaud_comb1{subuseind}.dimord='chan_freq_time';
-      freqhiall_tacMSpN_comb1{subuseind}.dimord='chan_freq_time';
+      freqloall_tacPaud_comb1{subuseind,1}=freqlo_tacPaud_comb{ll,tt,ss,1};
+      freqloall_tacMSpN_comb1{subuseind,1}=freqlo_tacMSpN_comb{ll,tt,ss,1};
+      freqhiall_tacPaud_comb1{subuseind,1}=freqhi_tacPaud_comb{ll,tt,ss,1};
+      freqhiall_tacMSpN_comb1{subuseind,1}=freqhi_tacMSpN_comb{ll,tt,ss,1};
+      freqhiall_tNulAlone_comb{subuseind,1}=freqhi_tNulAlone_comb{ll,tt,ss};
+      freqloall_tNulAlone_comb{subuseind,1}=freqlo_tNulAlone_comb{ll,tt,ss};
+      freqhiall_tTacAlone_comb{subuseind,1}=freqhi_tTacAlone_comb{ll,tt,ss};
+      freqloall_tTacAlone_comb{subuseind,1}=freqlo_tTacAlone_comb{ll,tt,ss};
+      freqhiall_tAudAlone_comb{subuseind,1}=freqhi_tAudAlone_comb{ll,tt,ss};
+      freqloall_tAudAlone_comb{subuseind,1}=freqlo_tAudAlone_comb{ll,tt,ss};
+      freqhiall_tMSAlone_comb{subuseind,1}=freqhi_tMSAlone_comb{ll,tt,ss};
+      freqloall_tMSAlone_comb{subuseind,1}=freqlo_tMSAlone_comb{ll,tt,ss};
+      freqloall_tacPaud_comb1{subuseind,1}.dimord='chan_freq_time';
+      freqloall_tacMSpN_comb1{subuseind,1}.dimord='chan_freq_time';
+      freqhiall_tacPaud_comb1{subuseind,1}.dimord='chan_freq_time';
+      freqhiall_tacMSpN_comb1{subuseind,1}.dimord='chan_freq_time';
       if synchasynch && ll<5
         freqloall_tMSasynch_comb1{subuseind}=freqlo_tMSasynch_comb{ll,tt,ss};
         freqloall_tMSsynch_comb1{subuseind}=freqlo_tMSsynch_comb{ll,tt,ss};
@@ -3628,14 +3646,14 @@ for ll=soalist
         freqhiall_tMSsynch_comb1{subuseind}.dimord='chan_freq_time';
       end
       if comb2flag
-        freqloall_tacPaud_comb2{subuseind}=freqlo_tacPaud_comb{ll,tt,ss,2};
-        freqloall_tacMSpN_comb2{subuseind}=freqlo_tacMSpN_comb{ll,tt,ss,2};
-        freqhiall_tacPaud_comb2{subuseind}=freqhi_tacPaud_comb{ll,tt,ss,2};
-        freqhiall_tacMSpN_comb2{subuseind}=freqhi_tacMSpN_comb{ll,tt,ss,2};
-        freqloall_tacPaud_comb2{subuseind}.dimord='chan_freq_time';
-        freqloall_tacMSpN_comb2{subuseind}.dimord='chan_freq_time';
-        freqhiall_tacPaud_comb2{subuseind}.dimord='chan_freq_time';
-        freqhiall_tacMSpN_comb2{subuseind}.dimord='chan_freq_time';
+        freqloall_tacPaud_comb2{subuseind,1}=freqlo_tacPaud_comb{ll,tt,ss,2};
+        freqloall_tacMSpN_comb2{subuseind,1}=freqlo_tacMSpN_comb{ll,tt,ss,2};
+        freqhiall_tacPaud_comb2{subuseind,1}=freqhi_tacPaud_comb{ll,tt,ss,2};
+        freqhiall_tacMSpN_comb2{subuseind,1}=freqhi_tacMSpN_comb{ll,tt,ss,2};
+        freqloall_tacPaud_comb2{subuseind,1}.dimord='chan_freq_time';
+        freqloall_tacMSpN_comb2{subuseind,1}.dimord='chan_freq_time';
+        freqhiall_tacPaud_comb2{subuseind,1}.dimord='chan_freq_time';
+        freqhiall_tacMSpN_comb2{subuseind,1}.dimord='chan_freq_time';
         if synchasynch ll<5
           freqloall_tMSasynch_comb2{subuseind}=freqlo_tMSasynch_comb{ll,tt,ss};
           freqloall_tMSsynch_comb2{subuseind}=freqlo_tMSsynch_comb{ll,tt,ss};
@@ -3647,14 +3665,14 @@ for ll=soalist
           freqhiall_tMSsynch_comb2{subuseind}.dimord='chan_freq_time';
         end
       end
-      freqhiall_tNulAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqloall_tNulAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqhiall_tTacAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqloall_tTacAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqhiall_tAudAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqloall_tAudAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqhiall_tMSAlone_comb{subuseind}.dimord='chan_freq_time';
-      freqloall_tMSAlone_comb{subuseind}.dimord='chan_freq_time';
+      freqhiall_tNulAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqloall_tNulAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqhiall_tTacAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqloall_tTacAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqhiall_tAudAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqloall_tAudAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqhiall_tMSAlone_comb{subuseind,1}.dimord='chan_freq_time';
+      freqloall_tMSAlone_comb{subuseind,1}.dimord='chan_freq_time';
       if fftaddflag
         freqloall_tacPaud_fftadd{subuseind}=freqlo_tacPaud_fftadd{ll,tt,ss};
         freqloall_tacMSpN_fftadd{subuseind}=freqlo_tacMSpN_fftadd{ll,tt,ss};
@@ -3771,7 +3789,226 @@ for ll=soalist
     end
     %         end % ss
     clear freqlo_* freqhi_*
+    
+    if usetr==2
+      load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_trialkc' num2str(trialkc) '.mat'])
+%       tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_usetr' num2str(2) '_trialkc' num2str(trialkc) '.mat']);
+
+      freqloall_tacPaud_comb1{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,1};
+      freqloall_tacMSpN_comb1{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,1};
+      freqloall_tNulAlone_comb{subuseind,2}=freqlo_tNulAlone_comb{ll,tt,ss};
+      freqloall_tTacAlone_comb{subuseind,2}=freqlo_tTacAlone_comb{ll,tt,ss};
+      freqloall_tAudAlone_comb{subuseind,2}=freqlo_tAudAlone_comb{ll,tt,ss};
+      freqloall_tMSAlone_comb{subuseind,2}=freqlo_tMSAlone_comb{ll,tt,ss};
+      freqloall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
+      freqloall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
+      freqloall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqloall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqloall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqloall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      if comb2flag
+        freqloall_tacPaud_comb2{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,2};
+        freqloall_tacMSpN_comb2{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,2};
+        freqloall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
+      end
+      freqhiall_tacPaud_comb1{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,1};
+      freqhiall_tacMSpN_comb1{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,1};
+      freqhiall_tNulAlone_comb{subuseind,2}=freqhi_tNulAlone_comb{ll,tt,ss};
+      freqhiall_tTacAlone_comb{subuseind,2}=freqhi_tTacAlone_comb{ll,tt,ss};
+      freqhiall_tAudAlone_comb{subuseind,2}=freqhi_tAudAlone_comb{ll,tt,ss};
+      freqhiall_tMSAlone_comb{subuseind,2}=freqhi_tMSAlone_comb{ll,tt,ss};
+      freqhiall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
+      freqhiall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
+      freqhiall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqhiall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqhiall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      freqhiall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
+      if comb2flag
+        freqhiall_tacPaud_comb2{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,2};
+        freqhiall_tacMSpN_comb2{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,2};
+        freqhiall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
+      end
+    end
   end % ii
+  
+  
+  
+  for ii=1:subuseind
+    cfg=[];
+    cfg.operation='subtract';
+    cfg.parameter='powspctrm';
+    if fftaddflag
+      freqloall_TPA_MSPN_fftadd{ii}=ft_math(cfg,freqloall_tacPaud_fftadd{ii},freqloall_tacMSpN_fftadd{ii});
+      freqhiall_TPA_MSPN_fftadd{ii}=ft_math(cfg,freqhiall_tacPaud_fftadd{ii},freqhiall_tacMSpN_fftadd{ii});
+      if 0
+        freqloall_TPA_MSPN_fftaddbn{ii}=ft_math(cfg,freqloall_tacPaud_fftaddbn{ii},freqloall_tacMSpN_fftaddbn{ii});
+        freqhiall_TPA_MSPN_fftaddbn{ii}=ft_math(cfg,freqhiall_tacPaud_fftaddbn{ii},freqhiall_tacMSpN_fftaddbn{ii});
+        freqloall_TPA_MSPN_comb1bn{ii}=ft_math(cfg,freqloall_tacPaud_comb1bn{ii},freqloall_tacMSpN_comb1bn{ii});
+        freqhiall_TPA_MSPN_comb1bn{ii}=ft_math(cfg,freqhiall_tacPaud_comb1bn{ii},freqhiall_tacMSpN_comb1bn{ii});
+      end
+      
+      if audtacflag
+        freqloall_APT_MSPN_fftadd{ii}=ft_math(cfg,freqloall_audPtac_fftadd{ii},freqloall_audMSpN_fftadd{ii});
+        freqhiall_APT_MSPN_fftadd{ii}=ft_math(cfg,freqhiall_audPtac_fftadd{ii},freqhiall_audMSpN_fftadd{ii});
+        if 0
+          freqloall_APT_MSPN_fftaddbn{ii}=ft_math(cfg,freqloall_audPtac_fftaddbn{ii},freqloall_audMSpN_fftaddbn{ii});
+          freqhiall_APT_MSPN_fftaddbn{ii}=ft_math(cfg,freqhiall_audPtac_fftaddbn{ii},freqhiall_audMSpN_fftaddbn{ii});
+          freqloall_APT_MSPN_comb1bn{ii}=ft_math(cfg,freqloall_audPtac_comb1bn{ii},freqloall_audMSpN_comb1bn{ii});
+          freqhiall_APT_MSPN_comb1bn{ii}=ft_math(cfg,freqhiall_audPtac_comb1bn{ii},freqhiall_audMSpN_comb1bn{ii});
+        end
+      end
+    end
+    cfg.parameter={'powspctrm' 'plvspctrm'};
+    if usetr~=2
+      iterinduse=1;
+    else
+      iterinduse=2;
+    end
+    for iterind=1:iterinduse
+      freqloall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb1{ii,iterind},freqloall_tacMSpN_comb1{ii,iterind});
+      freqhiall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb1{ii,iterind},freqhiall_tacMSpN_comb1{ii,iterind});
+    end
+    if synchasynch && ll<5
+      freqloall_TMSs_TMSa_comb1{ii}=ft_math(cfg,freqloall_tMSsynch_comb1{ii},freqloall_tMSasynch_comb1{ii});
+      freqhiall_TMSs_TMSa_comb1{ii}=ft_math(cfg,freqhiall_tMSsynch_comb1{ii},freqhiall_tMSasynch_comb1{ii});
+    end
+    if comb2flag
+      for iterind=1:iterinduse
+        freqloall_TPA_MSPN_comb2{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb2{ii,iterind},freqloall_tacMSpN_comb2{ii,iterind});
+        freqhiall_TPA_MSPN_comb2{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb2{ii,iterind},freqhiall_tacMSpN_comb2{ii,iterind});
+      end
+      if synchasynch && ll<5
+        freqloall_TMSs_TMSa_comb2{ii}=ft_math(cfg,freqloall_tMSsynch_comb2{ii},freqloall_tMSasynch_comb2{ii});
+        freqhiall_TMSs_TMSa_comb2{ii}=ft_math(cfg,freqhiall_tMSsynch_comb2{ii},freqhiall_tMSasynch_comb2{ii});
+      end
+    end
+    
+    if audtacflag
+      freqloall_APT_MSPN_comb1{ii}=ft_math(cfg,freqloall_audPtac_comb1{ii},freqloall_audMSpN_comb1{ii});
+      freqhiall_APT_MSPN_comb1{ii}=ft_math(cfg,freqhiall_audPtac_comb1{ii},freqhiall_audMSpN_comb1{ii});
+      if comb2flag
+        freqloall_APT_MSPN_comb2{ii}=ft_math(cfg,freqloall_audPtac_comb2{ii},freqloall_audMSpN_comb2{ii});
+        freqhiall_APT_MSPN_comb2{ii}=ft_math(cfg,freqhiall_audPtac_comb2{ii},freqhiall_audMSpN_comb2{ii});
+      end
+    end
+    if usetr==2
+      cfg.operation='(x1+x2)/2';
+      freqloall_TPA_MSPN_comb1_usetr2{ii}=ft_math(cfg,freqloall_TPA_MSPN_comb1{ii,:});
+      freqhiall_TPA_MSPN_comb1_usetr2{ii}=ft_math(cfg,freqhiall_TPA_MSPN_comb1{ii,:});
+      freqloall_TPA_MSPN_comb2_usetr2{ii}=ft_math(cfg,freqloall_TPA_MSPN_comb2{ii,:});
+      freqhiall_TPA_MSPN_comb2_usetr2{ii}=ft_math(cfg,freqhiall_TPA_MSPN_comb2{ii,:});
+      freqloall_tacPaud_comb1tmp{ii}=ft_math(cfg,freqloall_tacPaud_comb1{ii,:});
+      freqloall_tacPaud_comb2tmp{ii}=ft_math(cfg,freqloall_tacPaud_comb2{ii,:});
+      freqhiall_tacPaud_comb1tmp{ii}=ft_math(cfg,freqhiall_tacPaud_comb1{ii,:});
+      freqhiall_tacPaud_comb2tmp{ii}=ft_math(cfg,freqhiall_tacPaud_comb2{ii,:});
+      freqloall_tacMSpN_comb1tmp{ii}=ft_math(cfg,freqloall_tacMSpN_comb1{ii,:});
+      freqloall_tacMSpN_comb2tmp{ii}=ft_math(cfg,freqloall_tacMSpN_comb2{ii,:});
+      freqhiall_tacMSpN_comb1tmp{ii}=ft_math(cfg,freqhiall_tacMSpN_comb1{ii,:});
+      freqhiall_tacMSpN_comb2tmp{ii}=ft_math(cfg,freqhiall_tacMSpN_comb2{ii,:});
+      freqloall_tTacAlone_combtmp{ii}=ft_math(cfg,freqloall_tTacAlone_comb{ii,:});
+      freqloall_tAudAlone_combtmp{ii}=ft_math(cfg,freqloall_tAudAlone_comb{ii,:});
+      freqloall_tNulAlone_combtmp{ii}=ft_math(cfg,freqloall_tNulAlone_comb{ii,:});
+      freqloall_tMSAlone_combtmp{ii}=ft_math(cfg,freqloall_tMSAlone_comb{ii,:});
+      freqhiall_tTacAlone_combtmp{ii}=ft_math(cfg,freqhiall_tTacAlone_comb{ii,:});
+      freqhiall_tAudAlone_combtmp{ii}=ft_math(cfg,freqhiall_tAudAlone_comb{ii,:});
+      freqhiall_tNulAlone_combtmp{ii}=ft_math(cfg,freqhiall_tNulAlone_comb{ii,:});
+      freqhiall_tMSAlone_combtmp{ii}=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
+    end
+  end % end ii
+  if usetr==2
+    freqloall_tacPaud_comb1=freqloall_tacPaud_comb1tmp;
+    freqloall_tacPaud_comb2=freqloall_tacPaud_comb2tmp;
+    freqhiall_tacPaud_comb1=freqhiall_tacPaud_comb1tmp;
+    freqhiall_tacPaud_comb2=freqhiall_tacPaud_comb2tmp;
+    freqloall_tacMSpN_comb1=freqloall_tacMSpN_comb1tmp;
+    freqloall_tacMSpN_comb2=freqloall_tacMSpN_comb2tmp;
+    freqhiall_tacMSpN_comb1=freqhiall_tacMSpN_comb1tmp;
+    freqhiall_tacMSpN_comb2=freqhiall_tacMSpN_comb2tmp;
+    freqloall_tTacAlone_comb=freqloall_tTacAlone_combtmp;
+    freqloall_tAudAlone_comb=freqloall_tAudAlone_combtmp;
+    freqloall_tNulAlone_comb=freqloall_tNulAlone_combtmp;
+    freqloall_tMSAlone_comb=freqloall_tMSAlone_combtmp;
+    freqhiall_tTacAlone_comb=freqhiall_tTacAlone_combtmp;
+    freqhiall_tAudAlone_comb=freqhiall_tAudAlone_combtmp;
+    freqhiall_tNulAlone_comb=freqhiall_tNulAlone_combtmp;
+    freqhiall_tMSAlone_comb=freqhiall_tMSAlone_combtmp;
+    clear freq*tmp
+  end
+  
+  cfg=[];
+  if fftaddflag
+    gravelo_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftadd{:});
+    gravehi_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftadd{:});
+    if 0
+      gravelo_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftaddbn{:});
+      gravehi_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftaddbn{:});
+      gravelo_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1bn{:});
+      gravehi_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1bn{:});
+    end
+    
+    if audtacflag
+      gravelo_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftadd{:});
+      gravehi_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftadd{:});
+      if 0
+        gravelo_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftaddbn{:});
+        gravehi_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftaddbn{:});
+        gravelo_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1bn{:});
+        gravehi_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1bn{:});
+      end
+    end
+  end
+  cfg.parameter={'powspctrm' 'plvspctrm'};
+  if usetr==2
+    gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
+    gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+  else
+    gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{:});
+    gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{:});
+  end
+  if synchasynch && ll<5
+    gravelo_TMSs_TMSa_comb1=ft_freqgrandaverage(cfg,freqloall_TMSs_TMSa_comb1{:});
+    gravehi_TMSs_TMSa_comb1=ft_freqgrandaverage(cfg,freqhiall_TMSs_TMSa_comb1{:});
+  end
+  if comb2flag
+    if usetr==2
+      gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
+      gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+    else
+      gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{:});
+      gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{:});
+    end
+    if synchasynch && ll<5
+      gravelo_TMSs_TMSa_comb2=ft_freqgrandaverage(cfg,freqloall_TMSs_TMSa_comb2{:});
+      gravehi_TMSs_TMSa_comb2=ft_freqgrandaverage(cfg,freqhiall_TMSs_TMSa_comb2{:});
+    end
+  end
+  if audtacflag
+    gravelo_APT_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1{:});
+    gravehi_APT_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1{:});
+    if comb2flag
+      gravelo_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb2{:});
+      gravehi_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb2{:});
+    end
+  end
+  
+  if 0
+    figure;
+    cfg=[];
+    cfg.layout='elec1010.lay';
+    cfg.baselinetype='relchange';
+    cfg.baseline=[-1.2 tacbasemax(ll)];
+    cfg.zlim='maxabs';
+    cfg.parameter='powspctrm';
+    ft_multiplotTFR(cfg,gravehi_TPA_MSPN_comb1);
+    ft_multiplotTFR(cfg,gravelo_TPA_MSPN_comb1);
+    cfg.parameter='plvavgabs';
+    ft_multiplotTFR(cfg,gravehi_TPA_MSPN_comb1);
+    ft_multiplotTFR(cfg,gravelo_TPA_MSPN_comb1);
+  end
+  
+  
   
   % assessing unisensory
   if 0
@@ -3999,6 +4236,14 @@ for ll=soalist
   grindhi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
   grindlo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
   grindhi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  if usetr==2
+    grindlo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
+    grindhi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+    if comb2flag
+      grindlo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
+      grindhi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+    end
+  end
   
   if audtacflag
     grindlo_audPtac_comb1=ft_freqgrandaverage(cfg,freqloall_audPtac_comb1{:});
@@ -4682,122 +4927,12 @@ for ll=soalist
   end
   
   
-  for ii=1:subuseind
-    cfg=[];
-    cfg.operation='subtract';
-    cfg.parameter='powspctrm';
-    if fftaddflag
-      freqloall_TPA_MSPN_fftadd{ii}=ft_math(cfg,freqloall_tacPaud_fftadd{ii},freqloall_tacMSpN_fftadd{ii});
-      freqhiall_TPA_MSPN_fftadd{ii}=ft_math(cfg,freqhiall_tacPaud_fftadd{ii},freqhiall_tacMSpN_fftadd{ii});
-      if 0
-        freqloall_TPA_MSPN_fftaddbn{ii}=ft_math(cfg,freqloall_tacPaud_fftaddbn{ii},freqloall_tacMSpN_fftaddbn{ii});
-        freqhiall_TPA_MSPN_fftaddbn{ii}=ft_math(cfg,freqhiall_tacPaud_fftaddbn{ii},freqhiall_tacMSpN_fftaddbn{ii});
-        freqloall_TPA_MSPN_comb1bn{ii}=ft_math(cfg,freqloall_tacPaud_comb1bn{ii},freqloall_tacMSpN_comb1bn{ii});
-        freqhiall_TPA_MSPN_comb1bn{ii}=ft_math(cfg,freqhiall_tacPaud_comb1bn{ii},freqhiall_tacMSpN_comb1bn{ii});
-      end
-      
-      if audtacflag
-        freqloall_APT_MSPN_fftadd{ii}=ft_math(cfg,freqloall_audPtac_fftadd{ii},freqloall_audMSpN_fftadd{ii});
-        freqhiall_APT_MSPN_fftadd{ii}=ft_math(cfg,freqhiall_audPtac_fftadd{ii},freqhiall_audMSpN_fftadd{ii});
-        if 0
-          freqloall_APT_MSPN_fftaddbn{ii}=ft_math(cfg,freqloall_audPtac_fftaddbn{ii},freqloall_audMSpN_fftaddbn{ii});
-          freqhiall_APT_MSPN_fftaddbn{ii}=ft_math(cfg,freqhiall_audPtac_fftaddbn{ii},freqhiall_audMSpN_fftaddbn{ii});
-          freqloall_APT_MSPN_comb1bn{ii}=ft_math(cfg,freqloall_audPtac_comb1bn{ii},freqloall_audMSpN_comb1bn{ii});
-          freqhiall_APT_MSPN_comb1bn{ii}=ft_math(cfg,freqhiall_audPtac_comb1bn{ii},freqhiall_audMSpN_comb1bn{ii});
-        end
-      end
-    end
-    cfg.parameter={'powspctrm' 'plvspctrm'};
-    freqloall_TPA_MSPN_comb1{ii}=ft_math(cfg,freqloall_tacPaud_comb1{ii},freqloall_tacMSpN_comb1{ii});
-    freqhiall_TPA_MSPN_comb1{ii}=ft_math(cfg,freqhiall_tacPaud_comb1{ii},freqhiall_tacMSpN_comb1{ii});
-    if synchasynch && ll<5
-      freqloall_TMSs_TMSa_comb1{ii}=ft_math(cfg,freqloall_tMSsynch_comb1{ii},freqloall_tMSasynch_comb1{ii});
-      freqhiall_TMSs_TMSa_comb1{ii}=ft_math(cfg,freqhiall_tMSsynch_comb1{ii},freqhiall_tMSasynch_comb1{ii});
-    end
-    if comb2flag
-      freqloall_TPA_MSPN_comb2{ii}=ft_math(cfg,freqloall_tacPaud_comb2{ii},freqloall_tacMSpN_comb2{ii});
-      freqhiall_TPA_MSPN_comb2{ii}=ft_math(cfg,freqhiall_tacPaud_comb2{ii},freqhiall_tacMSpN_comb2{ii});
-      if synchasynch && ll<5
-        freqloall_TMSs_TMSa_comb2{ii}=ft_math(cfg,freqloall_tMSsynch_comb2{ii},freqloall_tMSasynch_comb2{ii});
-        freqhiall_TMSs_TMSa_comb2{ii}=ft_math(cfg,freqhiall_tMSsynch_comb2{ii},freqhiall_tMSasynch_comb2{ii});
-      end
-    end
-    
-    if audtacflag
-      freqloall_APT_MSPN_comb1{ii}=ft_math(cfg,freqloall_audPtac_comb1{ii},freqloall_audMSpN_comb1{ii});
-      freqhiall_APT_MSPN_comb1{ii}=ft_math(cfg,freqhiall_audPtac_comb1{ii},freqhiall_audMSpN_comb1{ii});
-      if comb2flag
-        freqloall_APT_MSPN_comb2{ii}=ft_math(cfg,freqloall_audPtac_comb2{ii},freqloall_audMSpN_comb2{ii});
-        freqhiall_APT_MSPN_comb2{ii}=ft_math(cfg,freqhiall_audPtac_comb2{ii},freqhiall_audMSpN_comb2{ii});
-      end
-    end
-  end % end ii
-  
-  cfg=[];
-  if fftaddflag
-    gravelo_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftadd{:});
-    gravehi_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftadd{:});
-    if 0
-      gravelo_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftaddbn{:});
-      gravehi_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftaddbn{:});
-      gravelo_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1bn{:});
-      gravehi_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1bn{:});
-    end
-    
-    if audtacflag
-      gravelo_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftadd{:});
-      gravehi_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftadd{:});
-      if 0
-        gravelo_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftaddbn{:});
-        gravehi_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftaddbn{:});
-        gravelo_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1bn{:});
-        gravehi_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1bn{:});
-      end
-    end
-  end
-  cfg.parameter={'powspctrm' 'plvspctrm'};
-  gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{:});
-  gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{:});
-  if synchasynch && ll<5
-    gravelo_TMSs_TMSa_comb1=ft_freqgrandaverage(cfg,freqloall_TMSs_TMSa_comb1{:});
-    gravehi_TMSs_TMSa_comb1=ft_freqgrandaverage(cfg,freqhiall_TMSs_TMSa_comb1{:});
-  end
-  if comb2flag
-    gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{:});
-    gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{:});
-    if synchasynch && ll<5
-      gravelo_TMSs_TMSa_comb2=ft_freqgrandaverage(cfg,freqloall_TMSs_TMSa_comb2{:});
-      gravehi_TMSs_TMSa_comb2=ft_freqgrandaverage(cfg,freqhiall_TMSs_TMSa_comb2{:});
-    end
-  end
-  if audtacflag
-    gravelo_APT_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1{:});
-    gravehi_APT_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1{:});
-    if comb2flag
-      gravelo_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb2{:});
-      gravehi_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb2{:});
-    end
-  end
-  
-  if 0
-    figure;
-    cfg=[];
-    cfg.layout='elec1010.lay';
-    cfg.baselinetype='relchange';
-    cfg.baseline=[-1.2 tacbasemax(ll)];
-    cfg.zlim='maxabs';
-    cfg.parameter='powspctrm';
-    ft_multiplotTFR(cfg,gravehi_TPA_MSPN_comb1);
-    ft_multiplotTFR(cfg,gravelo_TPA_MSPN_comb1);
-    cfg.parameter='plvavgabs';
-    ft_multiplotTFR(cfg,gravehi_TPA_MSPN_comb1);
-    ft_multiplotTFR(cfg,gravelo_TPA_MSPN_comb1);
-  end
   
   % % % Stats begins  % % %
   
   nsub=length(freqloall_tAudAlone_comb);
   
+  if statsflag && nsub>1
   cfg=[];
   %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
   cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
@@ -4817,43 +4952,65 @@ for ll=soalist
   cfg.ivar=1;
   cfg.uvar=2;
   cfg.randomseed=mcseed;
-  if fftaddflag
-    stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
-    statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
-  end
-  stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-  statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-  if comb2flag
-    stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-    statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-  end
-  %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
-  %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
-  %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
-  %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
-  if synchasynch && ll<5
-    cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-    stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-    statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-    stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-    statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-  end
-  
-  if audtacflag
-    cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
-    statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
-    statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
-    statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-    statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+  if usetr==2
+    grindlo_TPA_MSPN_comb1_zeros=grindlo_TPA_MSPN_comb1;
+    grindlo_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb1.powspctrm));
+    grindlo_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb1.plvspctrm));
+    grindhi_TPA_MSPN_comb1_zeros=grindhi_TPA_MSPN_comb1;
+    grindhi_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb1.powspctrm));
+    grindhi_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb1.plvspctrm));
+    stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+    statth_mc_comb1=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
     if comb2flag
-      statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-      statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+      grindlo_TPA_MSPN_comb2_zeros=grindlo_TPA_MSPN_comb2;
+      grindlo_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb2.powspctrm));
+      grindlo_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb2.plvspctrm));
+      grindhi_TPA_MSPN_comb2_zeros=grindhi_TPA_MSPN_comb2;
+      grindhi_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb2.powspctrm));
+      grindhi_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb2.plvspctrm));
+      stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+      statth_mc_comb2=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
     end
-    %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
-    %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
-    %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
-    %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
-  end
+  else
+    if fftaddflag
+      stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
+      statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
+    end
+    stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+    statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+    if comb2flag
+      stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+      statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+    end
+    %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
+    %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
+    %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
+    %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
+    if synchasynch && ll<5
+      cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+      stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+      statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+      stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+      statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+    end
+    
+    if audtacflag
+      cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
+      statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
+      statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
+      statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+      statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+      if comb2flag
+        statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+        statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+      end
+      %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
+      %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
+      %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
+      %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
+    end
+  end % usetr
+  
   %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
   cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
   cfg.statistic='diff_itc';
@@ -4867,6 +5024,14 @@ for ll=soalist
   %         statth_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
   %       end
   cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+  if usetr==2
+    stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+    statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
+    if comb2flag
+      stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+      statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
+    end
+  else
   stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
   statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
   if comb2flag
@@ -4940,6 +5105,8 @@ for ll=soalist
       statah_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
     end
   end
+  end % usetr
+  end % statsflag
   
   if plotflag
     plvabsdiffmaxz=plvabsmaxz/2;
@@ -5389,9 +5556,10 @@ for ll=soalist
   end % plotflag
   
   %   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
-  save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+%   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+  save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
   
-  clear stat* gr*
+  clear stat*mc* gr*
   
   
   
@@ -5401,6 +5569,40 @@ for ll=soalist
 end % ll
 %   end % tt
 % end % sleep
+
+% keeping record of stats
+tt=3;ss=10;sleep=0;usetr=3;mcseed=13;iter=31;
+soalist=[1 3 4 5 6 7 9];
+for ll=soalist
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*')
+  comb_pvalues{ll,1,1,1}=unique(stattl_mc_comb1.prob(:));
+  comb_pvalues{ll,2,1,1}=unique(stattl_mc_comb2.prob(:));
+  comb_pvalues{ll,1,1,2}=unique(statth_mc_comb1.prob(:));
+  comb_pvalues{ll,2,1,2}=unique(statth_mc_comb2.prob(:));
+  comb_pvalues{ll,1,2,1}=unique(stattl_mc_comb1plvdai.prob(:));
+  comb_pvalues{ll,2,2,1}=unique(stattl_mc_comb2plvdai.prob(:));
+  comb_pvalues{ll,1,2,2}=unique(statth_mc_comb1plvdai.prob(:));
+  comb_pvalues{ll,2,2,2}=unique(statth_mc_comb2plvdai.prob(:));
+  clear stat*
+end
+save([edir 'comb_pvalues_TFR_' num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'comb*')
+
+tt=3;ss=10;sleep=0;
+soalist=[1 3 4 5 6 7 9];
+for ll=soalist
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*')
+  comb_pvalues{ll,1,1,1}=unique(stattl_mc_comb1.prob(:));
+  comb_pvalues{ll,2,1,1}=unique(stattl_mc_comb2.prob(:));
+  comb_pvalues{ll,1,1,2}=unique(statth_mc_comb1.prob(:));
+  comb_pvalues{ll,2,1,2}=unique(statth_mc_comb2.prob(:));
+  comb_pvalues{ll,1,2,1}=unique(stattl_mc_comb1plvdai.prob(:));
+  comb_pvalues{ll,2,2,1}=unique(stattl_mc_comb2plvdai.prob(:));
+  comb_pvalues{ll,1,2,2}=unique(statth_mc_comb1plvdai.prob(:));
+  comb_pvalues{ll,2,2,2}=unique(statth_mc_comb2plvdai.prob(:));
+  clear stat*
+end
+save([edir 'comb_pvalues_TFR_' num2str(ss) num2str(sleep) '.mat'],'comb*')
+
 
 %% Extra stats for comb2
 % allcond_sameN=1;
