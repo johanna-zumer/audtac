@@ -2687,8 +2687,8 @@ time=latuse(1):1/fsample:latuse(end);
 coloruse=varycolor(length(subuse));
 cmap=colormap('parula');
 
-numtr=10; % for BACN
-% numtr=20;
+% numtr=10; % for BACN
+numtr=20;
 
 for ii=iiuse
   cd([edir sub{ii} ])
@@ -3161,9 +3161,6 @@ load([edir 'spindles.mat'])
 [cc,pp]=corr(sortwideP2N1Wval,spindles(subuse(sortwideP2N1Wind),:))
 % none significant
 
-coloruse=varycolor(length(subuse));
-sortplot=[iiuse_bothalfWwideP2N1  iiuse_tophalfWwideP2N1]
-cmapuse=cmap(1:4:4*length(sortplot),:);
 
 tophalfWwide=sortwideWind(end-7:end);
 bothalfWwide=sortwideWind(1:8);
@@ -3186,6 +3183,10 @@ save([edir 'sortTacWP200.mat'],'iiuse_*');
 
 load([edir 'sortTacWP200.mat']);
 iiBfinal=iiBuse(5:end);
+
+coloruse=varycolor(length(subuse));
+sortplot=[iiuse_bothalfWwideP2N1  iiuse_tophalfWwideP2N1]
+cmapuse=cmap(1:4:4*length(sortplot),:);
 
 figure(20);
 for ss=10:12
@@ -3255,6 +3256,34 @@ for ss=10:12
 end
 print(43,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
 print(43,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
+
+tk=1;
+figure(44);
+timeinduse=1:1001;
+for ss=10:12
+  subplot(3,3,1+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Tactile alone');end
+  if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
+  set(gca,'FontSize',20)
+  subplot(3,3,2+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Auditory alone');end
+  set(gca,'FontSize',20)
+  subplot(3,3,3+(ss-10)*3);axis([-inf inf -5 5])
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_tophalfWwideP2N1')),5),1)),'Color',cmapuse(end,:));set(lh(1),'linewidth',3);
+  hold on;lh=plot(time(timeinduse),squeeze(nanmean(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,{'Fz' 'C1' 'C2' 'FC1' 'FC2'}),(timeinduse),ss,tk,dsearchn(iiBfinal',iiuse_bothalfWwideP2N1')),5),1)),'Color',cmapuse(1,:));set(lh(1),'linewidth',3);
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Null');end
+  if ss==12,lg=legend({'Top half (Part 2, P200-N100)' 'Bottom half (Part 2, P200-N100)'});set(lg,'fontsize',14);end
+  set(gca,'FontSize',20)
+end
+print(44,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(44,[fdir 'unisensory_mediansplitWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
 
 tk=1;
 figure(22);
@@ -3352,6 +3381,34 @@ for ss=10:12
 end
 print(2,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
 print(2,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
+
+tk=1;figure(3)
+for ss=10:12
+  subplot(3,3,1+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time(timeinduse),squeeze(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time(timeinduse),squeeze(nanmean(tlock_tac9T_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Tactile alone');end
+  if ss==10,ylabel('Awake'),elseif ss==11,ylabel('N1');elseif ss==12,ylabel('N2');end
+  set(gca,'FontSize',20)
+  subplot(3,3,2+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time(timeinduse),squeeze(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time(timeinduse),squeeze(nanmean(tlock_aud1A_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Auditory alone');end
+  set(gca,'FontSize',20)
+  subplot(3,3,3+(ss-10)*3);
+  for ii=1:length(sortplot),plot(time(timeinduse),squeeze(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,dsearchn(subuse',sortplot(ii)))),'Color',cmapuse(ii,:));hold on;end;axis([-inf inf -7 7])
+  hold on;
+  plot(time(timeinduse),squeeze(nanmean(tlock_nul_tlockall(match_str(tlock_nul_tlocktmp.label,'Fz'),timeinduse,ss,tk,:),5)),'k','LineWidth',3');
+  if ss==12,xlabel('Time (s)');end
+  if ss==10,title('Null');end
+  set(gca,'FontSize',20)
+end
+print(3,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.png'],'-dpng');
+print(3,[fdir 'unisensory_sortedWideP2N1_sleep1_numtr' num2str(numtr) '.eps'],'-depsc');
 
 % tk=1;figure(2)
 % for ss=10:12
@@ -3681,7 +3738,7 @@ savegrindflag=1;
 iterflag=1; % multiple iterations of random trial assignment
 audtacflag=0;
 runagainflag=0; % 2nd run of erp results (resampling of trials into ERP)
-usetr=2;
+usetr=0;
 trialkcflag=1; % 0 for ignore trialkc (old results; all trials), or 1 for use trialkc value
 tophalfflag=0; % only relevant for sleep=1; tophalf of participants only (see sortTacN2.mat)
 synchasynch=0;
@@ -3709,12 +3766,12 @@ chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
 % allcond_sameN=1; % means using ii>=8, but we doing that anyway with iiuse
 % for tacaud=[1 0]
 % for sleep=[1]
-sleep=0;
+sleep=1;
 if sleep
   chanuse=chanuse_sleep1;
   iteruse=11;
   if trialkcflag
-    trialkc=0;  % 0 (no Kc) or 1 (with Kc)
+    trialkc=0;  % 0 (no Kc) or 1 (only Kc) or -1 (all trials)
   else
     trialkc=-1;
   end
@@ -3818,7 +3875,7 @@ for ll=soalist
       elseif sleep==1
         % % % Which Stage??  % %
         ss=12; % N2
-        ss=11; % N1
+%         ss=11; % N1
         ss=10; % W
         sleepcond='Sleep W';
         
@@ -3968,10 +4025,10 @@ for ll=soalist
     cfg.operation='subtract';
     cfg.parameter='avg';
     cfg.channel=chanuse;
-    if ~usetr
-      iterind=1;
+    if usetr==0
+      iterinduse=1;
     end
-    for iterind=1:usetr
+    for iterind=1:iterinduse
       tlock_TPA_MSPN{ii,iterind}=ft_math(cfg,tlock_tacPaud_each{ii,iterind},tlock_tacMSpN_each{ii,iterind});
     end
     if synchasynch && ll<5
@@ -4680,7 +4737,7 @@ for ll=soalist
           stata_synch{ll,tt,ss}=ft_timelockstatistics(cfg, grind_aMSsynch, grind_aMSasynch);
         end
       end
-    end
+    end % usetr
     
     %   save([edir 'tlock_statmc.mat'],'stat*','grave*'); % no point, as grave* isn't ll,tt,ss dependent
     if iterflag
@@ -5578,7 +5635,7 @@ sleep=0;
 tt=3;
 statwinorig=0;  % =1 means the latency range of .1 to .45 (first way);  =0 means 0 to .5 (final /better way)
 ftver=0;
-mcseed=17;
+mcseed=13;
 usetr=2;
 
 if sleep
@@ -5591,9 +5648,6 @@ else
   ss=10;
   trialkc=-1;
 end
-
-tlock_statmc_sleep0_iter31_usetr2_statwinorig0_ftver0mcseed17
-tlock_grind_sleep0_iter31_usetr2_statwinorig0_ftver0
 
 if iterflag
   if sleep
@@ -5645,6 +5699,7 @@ coloruse=varycolor(10);
 
 close all
 clear tmp*
+clear grind_TPA_MSPN
 for ll=soalist
   cfg=[];
   cfg.operation='subtract';
@@ -5958,6 +6013,26 @@ for ll=soalist
   end
 end
 
+
+% plotting stat pvalues in front-to-back channel order
+cfg=[];cfg.layout='elec1010';layout=ft_prepare_layout(cfg);
+for lb=1:length(statt_mc{5,3,10}.label),layoutind(lb)=match_str(layout.label,statt_mc{5,3,10}.label(lb));end
+[sortval,sortind]=sort(layoutind);
+for ll=soalist
+  figure(ll);imagesc(statt_mc{ll,3,10}.time,1:61,statt_mc{ll,3,10}.prob(sortind,:));caxis([0 1]);colorbar
+end
+for ll=soalist
+  figure(ll);
+  h=imagesc(statt_mc{ll,3,10}.time,1:61,statt_mc{ll,3,10}.stat(sortind,:));caxis([-4 4]);colorbar
+  set(h,'AlphaData',0.5)
+  hold on
+  f=imagesc(statt_mc{ll,3,10}.time,1:61,statt_mc{ll,3,10}.stat(sortind,:));caxis([-4 4]);colorbar
+  set(f,'AlphaData',statt_mc{ll,3,10}.mask(sortind,:))
+  hold off
+  fighand=get(ll,'Children');
+  set(fighand(1),'FontSize',20)
+  print(ll,[fdir 'erp_maskedTstat_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc')
+end
 
 
 
@@ -6863,6 +6938,8 @@ soalist=[1 3 4 5 6 7 9];
 tt=3;
 sleep=1;
 tacaud=1;
+mcseed=13;
+
 if sleep
   ss=12;
   iter=11;
@@ -6897,11 +6974,13 @@ for ii=iiuse
       tlockavg_nulllcon1_phasebin{ll,bb}{subuseind}=tlock_nul4mscon1_phasebin{ll,3,ss,bb};
       tlockavg_msllcon2_phasebin{ll,bb}{subuseind}=tlock_ms4mscon2_phasebin{ll,3,ss,bb};
       tlockavg_nulllcon2_phasebin{ll,bb}{subuseind}=tlock_nul4mscon2_phasebin{ll,3,ss,bb};
+      tlockavg_audllcon1_phasebin{ll,bb}{subuseind}=tlock_aud4mscon1_phasebin{ll,3,ss,bb};
       if sleep
         tlockavg_msllcon1_absbin{ll,bb}{subuseind}=tlock_ms4mscon1_absbin{ll,3,ss,bb};
         tlockavg_nulllcon1_absbin{ll,bb}{subuseind}=tlock_nul4mscon1_absbin{ll,3,ss,bb};
         tlockavg_msllcon2_absbin{ll,bb}{subuseind}=tlock_ms4mscon2_absbin{ll,3,ss,bb};
         tlockavg_nulllcon2_absbin{ll,bb}{subuseind}=tlock_nul4mscon2_absbin{ll,3,ss,bb};
+        tlockavg_audllcon1_absbin{ll,bb}{subuseind}=tlock_aud4mscon1_absbin{ll,3,ss,bb};
       end
     end % ll
     
@@ -6974,18 +7053,21 @@ for bb=1:4,
     grave_nulllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_phasebin{ll,bb}{:});
     grave_msllcon2_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_phasebin{ll,bb}{:});
     grave_nulllcon2_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_phasebin{ll,bb}{:});
+    grave_audllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_audllcon1_phasebin{ll,bb}{:});
     cfg=[];
     cfg.keepindividual='yes';
     grind_msllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_phasebin{ll,bb}{:});
     grind_nulllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_phasebin{ll,bb}{:});
     grind_msllcon2_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_phasebin{ll,bb}{:});
     grind_nulllcon2_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_phasebin{ll,bb}{:});
+    grind_audllcon1_pb{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_audllcon1_phasebin{ll,bb}{:});
     
     cfg=[];
     cfg.parameter='individual';
     cfg.operation='subtract';
     grind_msMnul1_pb{ll,bb}=ft_math(cfg,grind_msllcon1_pb{ll,bb},grind_nulllcon1_pb{ll,bb});
     grind_msMnul2_pb{ll,bb}=ft_math(cfg,grind_msllcon2_pb{ll,bb},grind_nulllcon2_pb{ll,bb});
+    grind_msMaud1_pb{ll,bb}=ft_math(cfg,grind_msllcon1_pb{ll,bb},grind_audllcon1_pb{ll,bb});
     
     grave_msMnul1_pb{ll,bb}=grind_msMnul1_pb{ll,bb};
     grave_msMnul1_pb{ll,bb}.avg=squeeze(mean(grave_msMnul1_pb{ll,bb}.individual,1));
@@ -6997,24 +7079,32 @@ for bb=1:4,
     grave_msMnul2_pb{ll,bb}=rmfield(grave_msMnul2_pb{ll,bb},'individual');
     grave_msMnul2_pb{ll,bb}.dimord='chan_time';
     
+    grave_msMaud1_pb{ll,bb}=grind_msMaud1_pb{ll,bb};
+    grave_msMaud1_pb{ll,bb}.avg=squeeze(mean(grave_msMaud1_pb{ll,bb}.individual,1));
+    grave_msMaud1_pb{ll,bb}=rmfield(grave_msMaud1_pb{ll,bb},'individual');
+    grave_msMaud1_pb{ll,bb}.dimord='chan_time';
+
     if sleep
       cfg=[];
       grave_msllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_absbin{ll,bb}{:});
       grave_nulllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_absbin{ll,bb}{:});
       grave_msllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_absbin{ll,bb}{:});
       grave_nulllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_absbin{ll,bb}{:});
+      grave_audllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_audllcon1_absbin{ll,bb}{:});
       cfg=[];
       cfg.keepindividual='yes';
       grind_msllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon1_absbin{ll,bb}{:});
       grind_nulllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon1_absbin{ll,bb}{:});
       grind_msllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_msllcon2_absbin{ll,bb}{:});
       grind_nulllcon2_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_nulllcon2_absbin{ll,bb}{:});
+      grind_audllcon1_ab{ll,bb}=ft_timelockgrandaverage(cfg,tlockavg_audllcon1_absbin{ll,bb}{:});
       
       cfg=[];
       cfg.parameter='individual';
       cfg.operation='subtract';
       grind_msMnul1_ab{ll,bb}=ft_math(cfg,grind_msllcon1_ab{ll,bb},grind_nulllcon1_ab{ll,bb});
       grind_msMnul2_ab{ll,bb}=ft_math(cfg,grind_msllcon2_ab{ll,bb},grind_nulllcon2_ab{ll,bb});
+      grind_msMaud1_ab{ll,bb}=ft_math(cfg,grind_msllcon1_ab{ll,bb},grind_audllcon1_ab{ll,bb});
       
       grave_msMnul1_ab{ll,bb}=grind_msMnul1_ab{ll,bb};
       grave_msMnul1_ab{ll,bb}.avg=squeeze(mean(grave_msMnul1_ab{ll,bb}.individual,1));
@@ -7025,6 +7115,12 @@ for bb=1:4,
       grave_msMnul2_ab{ll,bb}.avg=squeeze(mean(grave_msMnul2_ab{ll,bb}.individual,1));
       grave_msMnul2_ab{ll,bb}=rmfield(grave_msMnul2_ab{ll,bb},'individual');
       grave_msMnul2_ab{ll,bb}.dimord='chan_time';
+
+      grave_msMaud1_ab{ll,bb}=grind_msMaud1_ab{ll,bb};
+      grave_msMaud1_ab{ll,bb}.avg=squeeze(mean(grave_msMaud1_ab{ll,bb}.individual,1));
+      grave_msMaud1_ab{ll,bb}=rmfield(grave_msMaud1_ab{ll,bb},'individual');
+      grave_msMaud1_ab{ll,bb}.dimord='chan_time';
+      
     end
   end % ll
 end % bb
@@ -7050,6 +7146,7 @@ if statsflag
   cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub)];
   cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub];
   cfg.tail=1;
+  cfg.randomseed=mcseed;
   
   if sleep
     cfg.latency=[.1 .75];
@@ -7089,11 +7186,13 @@ if statsflag
     end
     stat_msMnul1_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul1_pb{ll,:});
     stat_msMnul2_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul2_pb{ll,:});
+    stat_msMaud1_pb{ll}=ft_timelockstatistics(cfg, grind_msMaud1_pb{ll,:});
     if sleep
       stat_msMnul1_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul1_ab{ll,:});
       stat_msMnul2_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul2_ab{ll,:});
+      stat_msMaud1_ab{ll}=ft_timelockstatistics(cfg, grind_msMaud1_ab{ll,:});
     end
-    save([edir 'stat_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
+    save([edir 'stat_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_mcseed' num2str(mcseed) '.mat'],'stat*')
   end % ll
   
 end % statsflag
@@ -7143,6 +7242,11 @@ if plotflag
         grave_msMnul2_pb{ll,bb}=rmfield(grave_msMnul2_pb{ll,bb},'individual');
         grave_msMnul2_pb{ll,bb}.dimord='chan_time';
         
+        grave_msMaud1_pb{ll,bb}=grind_msMaud1_pb{ll,bb};
+        grave_msMaud1_pb{ll,bb}.avg=squeeze(mean(grave_msMaud1_pb{ll,bb}.individual,1))
+        grave_msMaud1_pb{ll,bb}=rmfield(grave_msMaud1_pb{ll,bb},'individual');
+        grave_msMaud1_pb{ll,bb}.dimord='chan_time';
+
         if sleep
           grave_msMnul1_ab{ll,bb}=grind_msMnul1_ab{ll,bb};
           grave_msMnul1_ab{ll,bb}.avg=squeeze(mean(grave_msMnul1_ab{ll,bb}.individual,1))
@@ -7153,6 +7257,11 @@ if plotflag
           grave_msMnul2_ab{ll,bb}.avg=squeeze(mean(grave_msMnul2_ab{ll,bb}.individual,1))
           grave_msMnul2_ab{ll,bb}=rmfield(grave_msMnul2_ab{ll,bb},'individual');
           grave_msMnul2_ab{ll,bb}.dimord='chan_time';
+          
+          grave_msMaud1_ab{ll,bb}=grind_msMaud1_ab{ll,bb};
+          grave_msMaud1_ab{ll,bb}.avg=squeeze(mean(grave_msMaud1_ab{ll,bb}.individual,1))
+          grave_msMaud1_ab{ll,bb}=rmfield(grave_msMaud1_ab{ll,bb},'individual');
+          grave_msMaud1_ab{ll,bb}.dimord='chan_time';
         end
       end
       
@@ -7221,6 +7330,15 @@ if plotflag
     %     legend({'Peak' 'P to T' 'Trough' 'T to P'})
     %     title('AT*-N')
     
+    cfg=[];
+    cfg.channel=chanplot{1};
+    cfg.xlim=[-0.5 1.1];
+    cfg.ylim=[-7 7];
+    figure(20+ll);
+    ft_singleplotER(cfg, grave_msMaud1_pb{ll,:})
+    legend({'Peak' 'P to T' 'Trough' 'T to P'})
+    title('AT*-N')
+
     if sleep
       cfg=[];
       cfg.channel=chanplot{1};
@@ -7239,79 +7357,21 @@ if plotflag
       %       ft_singleplotER(cfg, grave_msMnul2_ab{ll,:})
       %       legend({'Low' 'Mid-low' 'Mid-high' 'High'})
       %       title('AT*-N')
+
+      cfg=[];
+      cfg.channel=chanplot{1};
+      cfg.xlim=[-0.5 1.1];
+      cfg.ylim=[-7 7];
+      figure(30+ll);
+      ft_singleplotER(cfg, grave_msMaud1_ab{ll,:})
+      legend({'Low' 'Mid-low' 'Mid-high' 'High'})
+      title('AT*-N')
     end
   end
   
 end
 
 % followup stats
-if statsflag
-  load eeg1010_neighb
-  nsub=subuseind-1;
-  cfg=[];
-  cfg.neighbours=neighbours;
-  cfg.parameter='individual';
-  cfg.method='montecarlo';
-  cfg.numrandomization=1000;
-  cfg.correctm='cluster';
-  cfg.clusteralpha = 0.05;
-  cfg.clusterstatistic = 'maxsum';
-  cfg.minnbchan = 2;
-  cfg.ivar=1;
-  cfg.uvar=2;
-  cfg.statistic='depsamplesFunivariate';
-  cfg.design=zeros(2,4*nsub);
-  cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub)];
-  cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub];
-  cfg.tail=1;
-  
-  if sleep
-    cfg.latency=[.1 .75];
-  else
-    cfg.latency=[.1 .45];
-  end
-  
-  stat_tacMnul_pb=ft_timelockstatistics(cfg, grind_tacMnul_pb{:});
-  stat_audMnul_pb=ft_timelockstatistics(cfg, grind_audMnul_pb{:});
-  
-  if sleep
-    stat_tacMnul_ab=ft_timelockstatistics(cfg, grind_tacMnul_ab{:});
-    stat_audMnul_ab=ft_timelockstatistics(cfg, grind_audMnul_ab{:});
-  end
-  
-  for ll=soalist
-    if sleep
-      if ll==1 || ll==3 || ll==4 || ll==5
-        cfg.latency=[.1 .75];
-      elseif ll==6
-        cfg.latency=[.12 .77];
-      elseif ll==7
-        cfg.latency=[.17 .82];
-      elseif ll==9
-        cfg.latency=[.6 1.25];
-      end
-    else
-      if ll==1 || ll==3 || ll==4 || ll==5
-        cfg.latency=[.1 .45];
-      elseif ll==6
-        cfg.latency=[.12 .47];
-      elseif ll==7
-        cfg.latency=[.17 .52];
-      elseif ll==9
-        cfg.latency=[.6 .95];
-      end
-    end
-    stat_msMnul1_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul1_pb{ll,:});
-    stat_msMnul2_pb{ll}=ft_timelockstatistics(cfg, grind_msMnul2_pb{ll,:});
-    if sleep
-      stat_msMnul1_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul1_ab{ll,:});
-      stat_msMnul2_ab{ll}=ft_timelockstatistics(cfg, grind_msMnul2_ab{ll,:});
-    end
-    save([edir 'stat_pb_uninul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*')
-  end % ll
-  
-end % statsflag
-
 
 
 
