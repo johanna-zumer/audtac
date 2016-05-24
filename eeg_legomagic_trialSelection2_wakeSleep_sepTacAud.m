@@ -169,6 +169,12 @@ elseif usetr==0
       end
     end
   end
+elseif usetr==3 % this means as if '1' (use a previous usetr0) but without the auwrong business of iter<31
+  if iter<31
+    error('usetr=3 is only meant for iter>=31')
+  end
+  load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'tr');
+  stageuse=tr.stageuse;
 else
   error('invalid value of usetr')
 end
@@ -920,6 +926,8 @@ if ~isempty(stageuse)
             tr.tutrialkept{ll,tt,ss}=sort([setdiff(1:size(tlock_tac{10,tt,ss}.trial,1),tr.tutrialkept{ll,tt,ss}) newturand(numnewtu+1:end)]);
             tr.tutrialkept{ll,tt,ss}=tr.tutrialkept{ll,tt,ss}(1:tnumtr(ll,tt,ss));
           end
+        elseif usetr==3
+          % no change to tr
         end
         
         %         if ll<5
@@ -1171,7 +1179,7 @@ if ~isempty(stageuse)
         end
         
         if tacaud==1
-          if ~usetr
+          if usetr==0
             t10randtr=Shuffle(1:size(tlock_tac{10,tt,ss}.trial,1));
             all40randtr=Shuffle(1:size(tlock_aud{ll+40,tt,ss}.trial,1));
             tllrandtr=Shuffle(1:size(tlock_tac{ll,tt,ss}.trial,1));
