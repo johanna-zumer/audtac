@@ -6010,18 +6010,22 @@ else
   ss=10;
   iter=31;
   usetr=3;
+  mcseed=13;
 end
 
-
+pre30plot=0;
 
 % for all ll, print at least a TFR even if nothing significant.
 for ll=soalist
   % for ll=[5 7 9]
   close all
   clear grave* stat*
-  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
+  if pre30plot
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   %   load([stdir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
+  else
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat']);
+  end
   
   for combval=1
     close all
@@ -6268,6 +6272,12 @@ for ll=soalist
         %       cfg.xlim=[.16 .3];
       elseif sleep==0 && ll==1 && combval==1
         cfg.ylim=[8 14];
+      elseif sleep==0 && ll==4 && combval==1 & iter==31
+        cfg.ylim=[10 12];
+      elseif sleep==0 && ll==5 && combval==1 & iter==31
+        cfg.ylim=[8 12];
+      elseif sleep==0 && ll==7 && combval==1 & iter==31
+        cfg.ylim=[8 12];
       else
         disp('get ylim right per ll alpha')
         keyboard
@@ -6320,6 +6330,10 @@ for ll=soalist
         cfg.ylim=[14 28];
       elseif sleep==0 && ll==6 && combval==1
         cfg.ylim=[16 28];
+      elseif sleep==0 && ll==4 && combval==1 && iter==31
+        cfg.ylim=[14 30];
+      elseif sleep==0 && ll==7 && combval==1 && iter==31
+        cfg.ylim=[14 22];
       else
         disp('get ylim right per ll beta')
         keyboard
@@ -6546,6 +6560,8 @@ for ll=soalist
           cfg.ylim=[5 6.5];
         elseif sleep==0 && ll==7
           cfg.ylim=[4 6.5];
+        elseif sleep==0 && ll==7 && iter==31
+          cfg.ylim=[4 8.5];
         else
           disp('get ylim right per ll theta plv')
           keyboard
@@ -6622,6 +6638,10 @@ for ll=soalist
           cfg.ylim=[9 12];
         elseif sleep==0 && ll==3 && combval==2 && adda==1
           cfg.ylim=[8 9];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+          cfg.ylim=[8 14]; 
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+          cfg.ylim=[8 9]; 
         else
           disp('get ylim right per ll alpha plv')
           keyboard
@@ -6688,6 +6708,10 @@ for ll=soalist
           cfg.xlim=[-.06 -.06];
         elseif sleep==0 && ll==3 && combval==2 && adda==1
           cfg.xlim=[.21 .21];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+          cfg.xlim=[.2 .2];
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+          cfg.xlim=[.11 .11]; % fist possible time point.
         else
           disp('get xlim right per ll alpha plv')
           keyboard
@@ -6713,6 +6737,10 @@ for ll=soalist
           cfg.ylim=[13 15];
         elseif sleep==1 && ll==1
           cfg.ylim=[13 21];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+          cfg.ylim=[13 15];
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+          cfg.ylim=[15 25];
         else
           disp('get ylim right per ll beta plv')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -6759,6 +6787,10 @@ for ll=soalist
           cfg.xlim=[-.06 -.06];
         elseif sleep==1 && ll==1 && adda==2
           cfg.xlim=[0.05 0.61];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+          cfg.xlim=[.05 .05]; % this is beginning time for sign period; is that consistent with done above/previously?
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+          cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
         else
           disp('get xlim right per ll beta plv')
           tmp.time(find(mean(mean(tmp.mask,2),3)))
