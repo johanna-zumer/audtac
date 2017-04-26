@@ -96,6 +96,8 @@ minnumcomb=2; % don't let minnumcomb go higher than 1000.
 
 timestepfft=0.02;
 timestepplv=0.01;
+toibeg=min(soades,0)-.7;
+toiend=max(soades,0)+1.3;
 
 dofftadd=0;
 usetr=2; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
@@ -113,13 +115,14 @@ if sleep
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:30);
-  iteruse=31;
+  iteruse=31;  % iteruse=31 with usetr3 for final iter31; iteruse=31 with usetr2 for final iter32
+  % 1 june 2016, re-run iter 31/32 with updated cfg.toi
   trialkc=-1;
 end
 for ii=iiuse;
-% for ii=setdiff(iiuse,1:8)
+  % for ii=setdiff(iiuse,1:8)
   cd([edir sub{ii} ])
-  clearvars -except ii sub *dir ii*use sleep minnumcomb hostname timestep* soades dofftadd statst use* synchasynch iteruse trialkc phaset0
+  clearvars -except ii sub *dir ii*use sleep minnumcomb hostname timestep* soades dofftadd statst use* synchasynch iteruse trialkc phaset0 toibeg toiend
   [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
   
   %% Do TacPlusAud first
@@ -538,7 +541,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               cfg.output='powandcsd';  % doesn't make sense to look at PLV for each condition separately in 'way 1'
               % cfg.output='fourier'; % fourier automatically sets keeptrials=yes
@@ -553,7 +556,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='powandcsd';
               freqhi_tac{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
@@ -570,7 +573,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               cfg.output='powandcsd';
               freqlo_aud{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll,tt,ss});
@@ -580,7 +583,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='powandcsd';
               freqhi_aud{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll,tt,ss});
@@ -598,7 +601,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               cfg.output='powandcsd';
               freqlo_nul{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll,tt,ss});
@@ -608,7 +611,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepfft:1.3;
+              cfg.toi=toibeg(ll):timestepfft:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='powandcsd';
               freqhi_nul{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll,tt,ss});
@@ -698,7 +701,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='powandcsd';  % doesn't make sense to look at PLV for each condition separately in 'way 1'
                 freqlo_tacMSshift1{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tacMSshift1{ll,tt,ss});
@@ -713,7 +716,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='powandcsd';
                 freqhi_tacMSshift1{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tacMSshift1{ll,tt,ss});
@@ -1052,7 +1055,7 @@ for ii=iiuse;
           cfg.pad=4;
           cfg.foi=4:2:30;
           cfg.taper='hanning';
-          cfg.toi=-1.2:timestepplv:1.3;
+          cfg.toi=toibeg(ll):timestepplv:toiend(ll);
           cfg.t_ftimwin=4./cfg.foi;
           %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
           cfg.output='fourier';
@@ -1099,7 +1102,7 @@ for ii=iiuse;
           cfg.foi=[30:5:45 55:5:80];
           cfg.taper='dpss';
           cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-          cfg.toi=-1.2:timestepplv:1.3;
+          cfg.toi=toibeg(ll):timestepplv:toiend(ll);
           cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
           cfg.output='fourier';
           freqhi_tTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
@@ -1179,7 +1182,7 @@ for ii=iiuse;
             cfg.pad=4;
             cfg.foi=4:2:30;
             cfg.taper='hanning';
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
@@ -1195,7 +1198,7 @@ for ii=iiuse;
             cfg.foi=[30:5:45 55:5:80];
             cfg.taper='dpss';
             cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
             cfg.output='fourier';
             freqhi_tacPaud_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1322,7 +1325,7 @@ for ii=iiuse;
             cfg.pad=4;
             cfg.foi=4:2:30;
             cfg.taper='hanning';
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
@@ -1336,7 +1339,7 @@ for ii=iiuse;
             cfg.foi=[30:5:45 55:5:80];
             cfg.taper='dpss';
             cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
             cfg.output='fourier';
             freqhi_tacMSpN_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1513,7 +1516,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               cfg.output='fourier';
               freqlo_tMSasynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1526,7 +1529,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='fourier';
               freqhi_tMSasynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1639,7 +1642,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               cfg.output='fourier';
               freqlo_tMSsynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1652,7 +1655,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='fourier';
               freqhi_tMSsynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -1797,7 +1800,7 @@ for ii=iiuse;
               if numtests>2
                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
               else
-%                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+                %                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
                 save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
               end
             end
@@ -1820,7 +1823,7 @@ for ii=iiuse;
         if numtests>2
           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
         else
-%           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+          %           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
         end
       end
@@ -2264,7 +2267,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='powandcsd';
                 %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
@@ -2277,7 +2280,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='powandcsd';
                 freqhi_aud{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll,tt,ss});
@@ -2294,7 +2297,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='powandcsd';
                 freqlo_tac{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
@@ -2304,7 +2307,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='powandcsd';
                 freqhi_tac{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
@@ -2322,7 +2325,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='powandcsd';
                 freqlo_nul{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll,tt,ss});
@@ -2332,7 +2335,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='powandcsd';
                 freqhi_nul{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll,tt,ss});
@@ -2416,7 +2419,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='powandcsd';
                 freqlo_audMSshift1{ll,tt,ss}=ft_freqanalysis(cfg,tlock_audMSshift1{ll,tt,ss});
@@ -2430,7 +2433,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepfft:1.3;
+                cfg.toi=toibeg(ll):timestepfft:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='powandcsd';
                 freqhi_audMSshift1{ll,tt,ss}=ft_freqanalysis(cfg,tlock_audMSshift1{ll,tt,ss});
@@ -2506,7 +2509,7 @@ for ii=iiuse;
             cfg.pad=4;
             cfg.foi=4:2:30;
             cfg.taper='hanning';
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
@@ -2535,7 +2538,7 @@ for ii=iiuse;
             cfg.foi=[30:5:45 55:5:80];
             cfg.taper='dpss';
             cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-            cfg.toi=-1.2:timestepplv:1.3;
+            cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
             cfg.output='fourier';
             freqhi_aTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+40,tt,ss});
@@ -2598,7 +2601,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
               cfg.output='fourier';
@@ -2612,7 +2615,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='fourier';
               freqhi_audPtac_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -2714,7 +2717,7 @@ for ii=iiuse;
               cfg.pad=4;
               cfg.foi=4:2:30;
               cfg.taper='hanning';
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=4./cfg.foi;
               %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
               cfg.output='fourier';
@@ -2728,7 +2731,7 @@ for ii=iiuse;
               cfg.foi=[30:5:45 55:5:80];
               cfg.taper='dpss';
               cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-              cfg.toi=-1.2:timestepplv:1.3;
+              cfg.toi=toibeg(ll):timestepplv:toiend(ll);
               cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
               cfg.output='fourier';
               freqhi_audMSpN_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -2856,7 +2859,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepplv:1.3;
+                cfg.toi=toibeg(ll):timestepplv:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='fourier';
                 freqlo_aMSasynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -2869,7 +2872,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepplv:1.3;
+                cfg.toi=toibeg(ll):timestepplv:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='fourier';
                 freqhi_aMSasynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -2949,7 +2952,7 @@ for ii=iiuse;
                 cfg.pad=4;
                 cfg.foi=4:2:30;
                 cfg.taper='hanning';
-                cfg.toi=-1.2:timestepplv:1.3;
+                cfg.toi=toibeg(ll):timestepplv:toiend(ll);
                 cfg.t_ftimwin=4./cfg.foi;
                 cfg.output='fourier';
                 freqlo_aMSsynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -2962,7 +2965,7 @@ for ii=iiuse;
                 cfg.foi=[30:5:45 55:5:80];
                 cfg.taper='dpss';
                 cfg.tapsmofrq=7*ones(1,length(cfg.foi));
-                cfg.toi=-1.2:timestepplv:1.3;
+                cfg.toi=toibeg(ll):timestepplv:toiend(ll);
                 cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
                 cfg.output='fourier';
                 freqhi_aMSsynch_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
@@ -3510,7 +3513,8 @@ comb2flag=1;
 fftaddflag=0;
 synchasynch=0;
 mcseed=13;  % montecarlo cfg.randomseed
-usetr=3;
+usetr=2;
+resetusetr=0;
 
 soalist=[1 3 4 5 6 7 9];
 % soalist=[3 4 5 6 7 9];
@@ -3531,19 +3535,23 @@ figind=1;
 
 
 for ll=soalist
-% for ll=[4 5 6 7 9];
-  clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed usetr
+  % for ll=[4 5 6 7 9];
+  clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed *tr
   
   statsflag=1;
-
-if sleep
+  if resetusetr
+    usetr=2;
+  end
+  
+  if sleep
     subuseall=iiBuse;
     iter=11;
+
     trialkc=0;
   else
     subuseall=setdiff(iiSuse,[])
-%     iter=27;
-    iter=31;
+    %     iter=27;
+    iter=32;
     trialkc=-1;
   end
   
@@ -3552,14 +3560,14 @@ if sleep
   
   % Baseline correct each participant prior to entering to stats???? NO
   for ii=subuseall
-%   for ii=8:9
+    %   for ii=8:9
     cd([edir sub{ii} ])
     %       load(['freq_diffs_averef_' sub{ii} '.mat']);
     try
       if fftaddflag
         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
       else
-%         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+        %         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
       end
       if audtacflag
@@ -3791,51 +3799,68 @@ if sleep
     clear freqlo_* freqhi_*
     
     if usetr==2
-      load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_trialkc' num2str(trialkc) '.mat'])
-%       tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_usetr' num2str(2) '_trialkc' num2str(trialkc) '.mat']);
-
-      freqloall_tacPaud_comb1{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,1};
-      freqloall_tacMSpN_comb1{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,1};
-      freqloall_tNulAlone_comb{subuseind,2}=freqlo_tNulAlone_comb{ll,tt,ss};
-      freqloall_tTacAlone_comb{subuseind,2}=freqlo_tTacAlone_comb{ll,tt,ss};
-      freqloall_tAudAlone_comb{subuseind,2}=freqlo_tAudAlone_comb{ll,tt,ss};
-      freqloall_tMSAlone_comb{subuseind,2}=freqlo_tMSAlone_comb{ll,tt,ss};
-      freqloall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
-      freqloall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
-      freqloall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqloall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqloall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqloall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      if comb2flag
-        freqloall_tacPaud_comb2{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,2};
-        freqloall_tacMSpN_comb2{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,2};
-        freqloall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
-        freqloall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
-      end
-      freqhiall_tacPaud_comb1{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,1};
-      freqhiall_tacMSpN_comb1{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,1};
-      freqhiall_tNulAlone_comb{subuseind,2}=freqhi_tNulAlone_comb{ll,tt,ss};
-      freqhiall_tTacAlone_comb{subuseind,2}=freqhi_tTacAlone_comb{ll,tt,ss};
-      freqhiall_tAudAlone_comb{subuseind,2}=freqhi_tAudAlone_comb{ll,tt,ss};
-      freqhiall_tMSAlone_comb{subuseind,2}=freqhi_tMSAlone_comb{ll,tt,ss};
-      freqhiall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
-      freqhiall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
-      freqhiall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqhiall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqhiall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      freqhiall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
-      if comb2flag
-        freqhiall_tacPaud_comb2{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,2};
-        freqhiall_tacMSpN_comb2{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,2};
-        freqhiall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
-        freqhiall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
+      try
+        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_trialkc' num2str(trialkc) '.mat'])
+        %       tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter+1) '_usetr' num2str(2) '_trialkc' num2str(trialkc) '.mat']);
+        
+        freqloall_tacPaud_comb1{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,1};
+        freqloall_tacMSpN_comb1{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,1};
+        freqloall_tNulAlone_comb{subuseind,2}=freqlo_tNulAlone_comb{ll,tt,ss};
+        freqloall_tTacAlone_comb{subuseind,2}=freqlo_tTacAlone_comb{ll,tt,ss};
+        freqloall_tAudAlone_comb{subuseind,2}=freqlo_tAudAlone_comb{ll,tt,ss};
+        freqloall_tMSAlone_comb{subuseind,2}=freqlo_tMSAlone_comb{ll,tt,ss};
+        freqloall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqloall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        if comb2flag
+          freqloall_tacPaud_comb2{subuseind,2}=freqlo_tacPaud_comb{ll,tt,ss,2};
+          freqloall_tacMSpN_comb2{subuseind,2}=freqlo_tacMSpN_comb{ll,tt,ss,2};
+          freqloall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
+          freqloall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
+        end
+        freqhiall_tacPaud_comb1{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,1};
+        freqhiall_tacMSpN_comb1{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,1};
+        freqhiall_tNulAlone_comb{subuseind,2}=freqhi_tNulAlone_comb{ll,tt,ss};
+        freqhiall_tTacAlone_comb{subuseind,2}=freqhi_tTacAlone_comb{ll,tt,ss};
+        freqhiall_tAudAlone_comb{subuseind,2}=freqhi_tAudAlone_comb{ll,tt,ss};
+        freqhiall_tMSAlone_comb{subuseind,2}=freqhi_tMSAlone_comb{ll,tt,ss};
+        freqhiall_tacPaud_comb1{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tacMSpN_comb1{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tNulAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tTacAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tAudAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        freqhiall_tMSAlone_comb{subuseind,2}.dimord='chan_freq_time';
+        if comb2flag
+          freqhiall_tacPaud_comb2{subuseind,2}=freqhi_tacPaud_comb{ll,tt,ss,2};
+          freqhiall_tacMSpN_comb2{subuseind,2}=freqhi_tacMSpN_comb{ll,tt,ss,2};
+          freqhiall_tacPaud_comb2{subuseind,2}.dimord='chan_freq_time';
+          freqhiall_tacMSpN_comb2{subuseind,2}.dimord='chan_freq_time';
+        end
+      catch
+        if ~exist(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat'],'file')
+          error('something not right with this iter/usetr combination')
+        end
       end
     end
   end % ii
   
   
   
-  for ii=1:subuseind
+    resetusetr=0;
+    keyboard
+    if usetr~=2
+      iterinduse=1;
+    elseif usetr==2 && size(freqloall_tacPaud_comb1,2)==1
+      iterinduse=1;
+      usetr=3;
+      resetusetr=1;
+    else
+      iterinduse=2;
+    end
+ for ii=1:subuseind
     cfg=[];
     cfg.operation='subtract';
     cfg.parameter='powspctrm';
@@ -3861,12 +3886,7 @@ if sleep
       end
     end
     cfg.parameter={'powspctrm' 'plvspctrm'};
-    if usetr~=2
-      iterinduse=1;
-    else
-      iterinduse=2;
-    end
-    for iterind=1:iterinduse
+     for iterind=1:iterinduse
       freqloall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb1{ii,iterind},freqloall_tacMSpN_comb1{ii,iterind});
       freqhiall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb1{ii,iterind},freqhiall_tacMSpN_comb1{ii,iterind});
     end
@@ -4933,179 +4953,179 @@ if sleep
   nsub=length(freqloall_tAudAlone_comb);
   
   if statsflag && nsub>1
-  cfg=[];
-  %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
-  cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
-  cfg.neighbours=neighbours;
-  cfg.parameter='powspctrm';
-  cfg.method='montecarlo';
-  cfg.numrandomization=2000;
-  % cfg.correctm='holm';
-  cfg.correctm='cluster';
-  cfg.clusteralpha = 0.05;
-  cfg.clusterstatistic = 'maxsum';
-  cfg.minnbchan = 2;
-  cfg.statistic='depsamplesT';
-  cfg.design=zeros(2,2*nsub);
-  cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-  cfg.design(2,:)=[1:nsub 1:nsub];
-  cfg.ivar=1;
-  cfg.uvar=2;
-  cfg.randomseed=mcseed;
-  if usetr==2
-    grindlo_TPA_MSPN_comb1_zeros=grindlo_TPA_MSPN_comb1;
-    grindlo_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb1.powspctrm));
-    grindlo_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb1.plvspctrm));
-    grindhi_TPA_MSPN_comb1_zeros=grindhi_TPA_MSPN_comb1;
-    grindhi_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb1.powspctrm));
-    grindhi_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb1.plvspctrm));
-    stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
-    statth_mc_comb1=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
-    if comb2flag
-      grindlo_TPA_MSPN_comb2_zeros=grindlo_TPA_MSPN_comb2;
-      grindlo_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb2.powspctrm));
-      grindlo_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb2.plvspctrm));
-      grindhi_TPA_MSPN_comb2_zeros=grindhi_TPA_MSPN_comb2;
-      grindhi_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb2.powspctrm));
-      grindhi_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb2.plvspctrm));
-      stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
-      statth_mc_comb2=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
-    end
-  else
-    if fftaddflag
-      stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
-      statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
-    end
-    stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-    statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-    if comb2flag
-      stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-      statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-    end
-    %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
-    %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
-    %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
-    %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
-    if synchasynch && ll<5
-      cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-      stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-      statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-      stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-      statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-    end
-    
-    if audtacflag
-      cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
-      statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
-      statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
-      statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-      statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    cfg=[];
+    %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
+    cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+    cfg.neighbours=neighbours;
+    cfg.parameter='powspctrm';
+    cfg.method='montecarlo';
+    cfg.numrandomization=2000;
+    % cfg.correctm='holm';
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.minnbchan = 2;
+    cfg.statistic='depsamplesT';
+    cfg.design=zeros(2,2*nsub);
+    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+    cfg.design(2,:)=[1:nsub 1:nsub];
+    cfg.ivar=1;
+    cfg.uvar=2;
+    cfg.randomseed=mcseed;
+    if usetr==2
+      grindlo_TPA_MSPN_comb1_zeros=grindlo_TPA_MSPN_comb1;
+      grindlo_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb1.powspctrm));
+      grindlo_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb1.plvspctrm));
+      grindhi_TPA_MSPN_comb1_zeros=grindhi_TPA_MSPN_comb1;
+      grindhi_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb1.powspctrm));
+      grindhi_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb1.plvspctrm));
+      stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+      statth_mc_comb1=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
       if comb2flag
-        statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-        statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        grindlo_TPA_MSPN_comb2_zeros=grindlo_TPA_MSPN_comb2;
+        grindlo_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb2.powspctrm));
+        grindlo_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb2.plvspctrm));
+        grindhi_TPA_MSPN_comb2_zeros=grindhi_TPA_MSPN_comb2;
+        grindhi_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb2.powspctrm));
+        grindhi_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb2.plvspctrm));
+        stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+        statth_mc_comb2=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
       end
-      %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
-      %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
-      %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
-      %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
-    end
-  end % usetr
-  
-  %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
-  cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
-  cfg.statistic='diff_itc';
-  cfg.parameter='plvspctrm';
-  cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
-  %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-  %       stattl_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-  %       statth_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-  %       if comb2flag
-  %         stattl_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-  %         statth_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-  %       end
-  cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-  if usetr==2
-    stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
-    statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
-    if comb2flag
-      stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
-      statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
-    end
-  else
-  stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-  statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-  if comb2flag
-    stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-    statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-  end
-  if synchasynch && ll<5
-    cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-    stattl_synch_comb1plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-    statth_synch_comb1plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-    stattl_synch_comb2plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-    statth_synch_comb2plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-  end
-  if audtacflag
-    cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
-    %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-    %         statal_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-    %         statah_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-    %         if comb2flag
-    %           statal_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-    %           statah_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-    %         end
+    else
+      if fftaddflag
+        stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
+        statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
+      end
+      stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+      statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+      if comb2flag
+        stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+        statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+      end
+      %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
+      %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
+      %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
+      %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
+      if synchasynch && ll<5
+        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+        stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+        statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+        stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+        statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+      end
+      
+      if audtacflag
+        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
+        statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
+        statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
+        statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+        statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+        if comb2flag
+          statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+          statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        end
+        %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
+        %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
+        %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
+        %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
+      end
+    end % usetr
+    
+    %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
+    cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+    cfg.statistic='diff_itc';
+    cfg.parameter='plvspctrm';
+    cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+    %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+    %       stattl_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+    %       statth_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+    %       if comb2flag
+    %         stattl_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+    %         statth_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+    %       end
     cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-    statal_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-    statah_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-    if comb2flag
-      statal_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-      statah_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-    end
-  end
-  
-  %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
-  cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
-  cfg.complex='absdiff'; % sensitive to phase difference between conditions
-  %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-  %       stattl_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-  %       statth_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-  %       if comb2flag
-  %         stattl_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-  %         statth_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-  %       end
-  cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-  stattl_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-  statth_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-  if comb2flag
-    stattl_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-    statth_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-  end
-  if synchasynch && ll<5
-    cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-    stattl_synch_comb1plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-    statth_synch_comb1plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-    stattl_synch_comb2plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-    statth_synch_comb2plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-  end
-  
-  if audtacflag
-    cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
-    %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-    %         statal_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-    %         statah_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-    %         if comb2flag
-    %           statal_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-    %           statah_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-    %         end
-    cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-    statal_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-    statah_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-    if comb2flag
-      statal_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-      statah_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-    end
-  end
-  end % usetr
+    if usetr==2
+      stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+      statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
+      if comb2flag
+        stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+        statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
+      end
+    else
+      stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+      statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+      if comb2flag
+        stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+        statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+      end
+      if synchasynch && ll<5
+        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+        stattl_synch_comb1plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+        statth_synch_comb1plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+        stattl_synch_comb2plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+        statth_synch_comb2plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+      end
+      if audtacflag
+        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
+        %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+        %         statal_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+        %         statah_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+        %         if comb2flag
+        %           statal_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+        %           statah_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        %         end
+        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        statal_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+        statah_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+        if comb2flag
+          statal_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+          statah_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        end
+      end
+      
+      %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
+      cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+      cfg.complex='absdiff'; % sensitive to phase difference between conditions
+      %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+      %       stattl_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+      %       statth_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+      %       if comb2flag
+      %         stattl_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+      %         statth_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+      %       end
+      cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+      stattl_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+      statth_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+      if comb2flag
+        stattl_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+        statth_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+      end
+      if synchasynch && ll<5
+        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+        stattl_synch_comb1plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+        statth_synch_comb1plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+        stattl_synch_comb2plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+        statth_synch_comb2plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+      end
+      
+      if audtacflag
+        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
+        %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+        %         statal_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+        %         statah_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+        %         if comb2flag
+        %           statal_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+        %           statah_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        %         end
+        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        statal_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+        statah_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+        if comb2flag
+          statal_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+          statah_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+        end
+      end
+    end % usetr
   end % statsflag
   
   if plotflag
@@ -5556,7 +5576,7 @@ if sleep
   end % plotflag
   
   %   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
-%   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+  %   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
   
   clear stat*mc* gr*
@@ -5988,15 +6008,18 @@ if sleep
   ss=12;
 else
   ss=10;
+  iter=31;
+  usetr=3;
 end
 
 
 
 % for all ll, print at least a TFR even if nothing significant.
-% for ll=soalist
-for ll=[5 7 9]
+for ll=soalist
+  % for ll=[5 7 9]
   close all
   clear grave* stat*
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   %   load([stdir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   
@@ -6444,7 +6467,11 @@ for ll=[5 7 9]
       
       
       % plot TFR of plv abs and plv ang, for each suplot: u and m and difference.
+      if pre30plot
       zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+      else
+      zlim=[0 0.5; .1 .25;   -20 400; -10 300];
+      end
       
       if 0
         pow{1}=gravelo_tMSAlone_comb;
@@ -6471,10 +6498,17 @@ for ll=[5 7 9]
         tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
       end
       
+      clear pow
+      if pre30plot
       pow{1}=gravelo_tMSAlone_comb;
       pow{2}=tmpuA;
       pow{3}=tmpsA;
       pow{4}=tmpA;
+      else
+      pow{1}=tmpuA;
+      pow{2}=tmpsA;
+      pow{3}=tmpA;        
+      end
       
       chansel=chanplot{1};
       figinds=[100*ll;  100*ll+10];
@@ -6746,7 +6780,7 @@ for ll=[5 7 9]
     
   end % combval
   
-  %%
+  % %
   
   if synchasynch && ll<5
     for combval=1

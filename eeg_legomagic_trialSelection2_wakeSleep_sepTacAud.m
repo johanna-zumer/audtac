@@ -133,7 +133,7 @@ end
 tr.stageuse=stageuse;
 tr.trialkc=trialkc;
 
-if usetr==1
+if usetr==1  % loads usetr0 for iter<=30
   if iter>30
     error('all the usetr flag settings ok for iter<=30. what to do here?')
   end
@@ -144,7 +144,7 @@ if usetr==1
     load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '.mat'],'tr');
   end
   stageuse=tr.stageuse;
-elseif usetr==2
+elseif usetr==2  % loads usetr0 but later will set tr.iter=iter+1 (end of this function)
   if exist(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'file')
     load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'tr');
     stageuse=tr.stageuse;

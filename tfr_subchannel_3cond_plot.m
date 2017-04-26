@@ -47,8 +47,8 @@ for pp=1:length(pow)
   axis([cfg.xlim(1) cfg.xlim(2) tmp{1}.freq(1) tmp{1}.freq(end)]);
 end
 tmpfig=get(figinds(1));
-for ff=2:2:8, set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
-for ff=2:2:8, set(tmpfig.Children(ff).Title,'Visible','off'); end
+for ff=2:2:(2*length(pow)), set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
+for ff=2:2:(2*length(pow)), set(tmpfig.Children(ff).Title,'Visible','off'); end
 % print(figinds(1),figstrings{1},'-dpng')
 print(figinds(1),figstrings{1},'-depsc2')
 
@@ -74,8 +74,8 @@ for pp=1:length(pow)
   axis([cfg.xlim(1) cfg.xlim(2) tmp{1}.freq(1) tmp{1}.freq(end)]);
 end
 tmpfig=get(figinds(2));
-for ff=2:2:8, set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
-for ff=2:2:8, set(tmpfig.Children(ff).Title,'Visible','off'); end
+for ff=2:2:(2*length(pow)), set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
+for ff=2:2:(2*length(pow)), set(tmpfig.Children(ff).Title,'Visible','off'); end
 % print(figinds(2),figstrings{2},'-dpng')
 print(figinds(2),figstrings{2},'-depsc2')
 

@@ -71,13 +71,19 @@ sub{31}='e31';
 sub{32}='e32';
 
 if ispc
+  warning off
   rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
   rmpath(genpath('D:\fieldtrip_svn\'))
-  addpath('D:\fieldtrip_svn\')
+  rmpath(genpath('D:\fieldtrip_git\'))
+  warning on 
+  addpath('D:\fieldtrip_git\')
 else
+  warning off
   rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
   rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
-  addpath('/mnt/hgfs/D/fieldtrip_svn/')
+  rmpath(genpath('/mnt/hgfs/D/fieldtrip_git/'))
+  warning on 
+  addpath('/mnt/hgfs/D/fieldtrip_git/')
 end
 which ft_defaults.m
 ft_defaults;
@@ -6305,7 +6311,13 @@ for ll=soalist
   
 end
 
-
+% % Not useful, as it plots one topo for every data sample (thus ever
+% 1000hz)
+% for ll=soalist
+%   cfg=[];
+%   cfg.layout='elec1010.lay';
+%   ft_clusterplot(cfg,statt_mc{ll,tt,ss});
+% end
 
 %%  Comparing awake to asleep
 
