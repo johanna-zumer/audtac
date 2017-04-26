@@ -38,9 +38,9 @@ cfg.xlim=[-.6 1.6];
 figure(figinds(1));
 for pp=1:length(pow)
   subplot(length(pow),1,pp);
-  if pp<4
+  if pp<length(pow)
     cfg.zlim=zlim(1,:);
-  elseif pp==4
+  elseif pp==length(pow)
     cfg.zlim=zlim(2,:);
   end
   ft_singleplotTFR(cfg,tmp{pp});
@@ -65,9 +65,9 @@ figure(figinds(2));
 cfg.parameter='plvavgang';
 for pp=1:length(pow)
   subplot(length(pow),1,pp);
-  if pp<4
+  if pp<length(pow)
     cfg.zlim=zlim(3,:);
-  elseif pp==4
+  elseif pp==length(pow)
     cfg.zlim=zlim(4,:);
   end
   ft_singleplotTFR(cfg,tmp{pp});
