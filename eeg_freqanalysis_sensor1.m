@@ -6009,7 +6009,7 @@ if sleep
 else
   ss=10;
   iter=31;
-  usetr=3;
+  usetr=2;
   mcseed=13;
 end
 
@@ -6017,7 +6017,7 @@ pre30plot=0;
 
 % for all ll, print at least a TFR even if nothing significant.
 for ll=soalist
-  % for ll=[5 7 9]
+% for ll=[7 9]
   close all
   clear grave* stat*
   if pre30plot
@@ -6195,7 +6195,13 @@ for ll=soalist
       cfg.parameter='powspctrm';
       cfg.layout='elec1010.lay';
       cfg.maskalpha=0.5;
-      cfg.ylim=[4 6.5];
+      if sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
+        cfg.ylim=[4 8.5]; % theta here includes 8 hz (nothing in alpha above 8)
+      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
+        cfg.ylim=[4 10.5]; % theta here includes 8 hz (nothing in alpha above 8)
+      else
+        cfg.ylim=[4 6.5];
+      end
       cfg.zlim=[-1.4 1.4];
       cfg.highlight='on';
       cfg.comment='no';
@@ -6262,26 +6268,39 @@ for ll=soalist
     end
     
     % alpha topo
+    skipplot=0;
     if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
       cfg=[];
-      if sleep==0 && ll==3 && combval==1  % ??
+      if sleep==0 && ll==3 && combval==1  && pre30plot==1 % ??
         cfg.ylim=[10 12];
         %       cfg.xlim=[0 .1];
         %       elseif ll==7
         %         cfg.ylim=[8 10];
         %       cfg.xlim=[.16 .3];
-      elseif sleep==0 && ll==1 && combval==1
+      elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
         cfg.ylim=[8 14];
-      elseif sleep==0 && ll==4 && combval==1 & iter==31
-        cfg.ylim=[10 12];
-      elseif sleep==0 && ll==5 && combval==1 & iter==31
+      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
+        skipplot=1; % theta goes up to 8Hz
+      elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
+        cfg.ylim=[8 13];
+      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
+        cfg.ylim=[10 14];
+      elseif sleep==0 && ll==5 && combval==1 && iter==31 && usetr==3
         cfg.ylim=[8 12];
-      elseif sleep==0 && ll==7 && combval==1 & iter==31
+      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
+        cfg.ylim=[8 12];
+      elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
+        cfg.ylim=[8 12];
+      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
+        skipplot=1; % theta goes up to 10Hz
+      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
         cfg.ylim=[8 12];
       else
         disp('get ylim right per ll alpha')
+          tmp.freq(find(mean(mean(tmp.mask,1),3)))
         keyboard
       end
+      if skipplot==0
       masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
       cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
       cfg.parameter='powspctrm';
@@ -6316,6 +6335,7 @@ for ll=soalist
         baseline=[tmp.time(1) tmp.time(9)];
         tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
       end
+      end % skipplot
     end
     
     % beta topo
@@ -6324,18 +6344,25 @@ for ll=soalist
       if sleep==0 && ll==5
         cfg.ylim=[14 30];
         %       cfg.xlim=[.2 .28];
-      elseif sleep==0 && ll==1 && combval==1
+      elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
         cfg.ylim=[13 15];
-      elseif sleep==0 && ll==3 && combval==1
+      elseif sleep==0 && ll==3 && combval==1 && pre30plot==1
         cfg.ylim=[14 28];
-      elseif sleep==0 && ll==6 && combval==1
+      elseif sleep==0 && ll==6 && combval==1 && pre30plot==1
         cfg.ylim=[16 28];
-      elseif sleep==0 && ll==4 && combval==1 && iter==31
+      elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
         cfg.ylim=[14 30];
-      elseif sleep==0 && ll==7 && combval==1 && iter==31
+      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
+        cfg.ylim=[16 30];
+      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
         cfg.ylim=[14 22];
+      elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
+        cfg.ylim=[14 22];
+      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
+        cfg.ylim=[14 30];
       else
         disp('get ylim right per ll beta')
+          tmp.freq(find(mean(mean(tmp.mask,1),3)))
         keyboard
       end
       masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
@@ -6554,16 +6581,23 @@ for ll=soalist
       % theta topo
       if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
         cfg=[];
-        if sleep==0 && ll==3
+        if sleep==0 && ll==3 && pre30plot==1
           cfg.ylim=[4 6.5];
-        elseif sleep==0 && ll==6 && adda==1
+        elseif sleep==0 && ll==6 && adda==1 && pre30plot==1
           cfg.ylim=[5 6.5];
-        elseif sleep==0 && ll==7
+        elseif sleep==0 && ll==7 && pre30plot==1
           cfg.ylim=[4 6.5];
-        elseif sleep==0 && ll==7 && iter==31
+        elseif sleep==0 && ll==3 && iter==31 && usetr==3
           cfg.ylim=[4 8.5];
+        elseif sleep==0 && ll==7 && iter==31 && usetr==3
+          cfg.ylim=[4 8.5];
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[5.5 8.5];
+        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[4 6.5];
         else
           disp('get ylim right per ll theta plv')
+          tmp.freq(find(mean(mean(tmp.mask,1),3)))
           keyboard
         end
         masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
@@ -6599,18 +6633,27 @@ for ll=soalist
         end
         
         cfg.parameter='plvavgangwrap';
-        if sleep==0 && ll==3
+        if sleep==0 && ll==3 && pre30plot==1
           cfg.xlim=[0.19 0.19];
-        elseif sleep==0 && ll==6 && combval==1 && adda==1
+        elseif sleep==0 && ll==6 && combval==1 && adda==1 && pre30plot==1
           cfg.xlim=[0.41 0.41];
-        elseif sleep==0 && ll==6 && combval==2 && adda==1
+        elseif sleep==0 && ll==6 && combval==2 && adda==1 && pre30plot==1
           cfg.xlim=[0.32 0.32];
-        elseif sleep==0 && ll==7 && combval==1
+        elseif sleep==0 && ll==7 && combval==1 && pre30plot==1
           cfg.xlim=[.21 .21];
-        elseif sleep==0 && ll==7 && combval==2
+        elseif sleep==0 && ll==7 && combval==2 && pre30plot==1
           cfg.xlim=[.23 .23];
+        elseif sleep==0 && ll==3 && iter==31 && usetr==3
+          cfg.xlim=[.16 .16];
+        elseif sleep==0 && ll==7 && iter==31 && usetr==3
+          cfg.xlim=[.11 .11];
+        elseif sleep==0 && ll==3 && iter==32 && usetr==3
+          cfg.xlim=[.03 .03];
+        elseif sleep==0 && ll==7 && iter==32 && usetr==3
+          cfg.xlim=[.11 .11];
         else
           disp('get xlim right per ll theta plv')
+          tmp.time(find(mean(mean(tmp.mask,2),3)))
           keyboard
         end
         cfg.zlim=[-4 4];
@@ -6626,26 +6669,44 @@ for ll=soalist
       end
       
       % alpha topo
+      skipplot=0;
       if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
         cfg=[];
-        if sleep==0 && ll==6 && [adda==1 || (combval==2 && adda==2)]
+        if sleep==0 && ll==6 && [adda==1 || (combval==2 && adda==2)] && pre30plot==1
           cfg.ylim=[8 11];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
           cfg.ylim=[8 14]; % slightly into beta but then no beta
-        elseif sleep==0 && ll==3 && combval==1 && adda==1
+        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
           cfg.ylim=[8 12];
-        elseif sleep==0 && ll==3 && adda==2
+        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
           cfg.ylim=[9 12];
-        elseif sleep==0 && ll==3 && combval==2 && adda==1
+        elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
           cfg.ylim=[8 9];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==31 && usetr==3
+          skipplot=1;
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
           cfg.ylim=[8 14]; 
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
-          cfg.ylim=[8 9]; 
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+          cfg.ylim=[8 15]; % 2 clusters: early beta and later alpha
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+          skipplot=1;
+        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[8 11]; 
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[8 14]; 
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[8 14]; 
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+          % only at 8Hz, so will tie in with theta
+          skipplot=1;
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
+          cfg.ylim=[8 12];
         else
           disp('get ylim right per ll alpha plv')
+          tmp.freq(find(mean(mean(tmp.mask,1),3)))
           keyboard
         end
+        if skipplot==0
         masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
         difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
         clear masktime
@@ -6702,18 +6763,23 @@ for ll=soalist
         cfg.parameter='plvavgangwrap';
         if sleep==0 && ll==6
           cfg.xlim=[.34 .34];
-        elseif sleep==0 && ll==3 && combval==1 && adda==1
+        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
           cfg.xlim=[0 0];
-        elseif sleep==0 && ll==3 && adda==2
+        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
           cfg.xlim=[-.06 -.06];
-        elseif sleep==0 && ll==3 && combval==2 && adda==1
+        elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
           cfg.xlim=[.21 .21];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
           cfg.xlim=[.2 .2];
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
-          cfg.xlim=[.11 .11]; % fist possible time point.
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+          cfg.xlim=[.2 .2];
+        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.xlim=[.17 .17];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.xlim=[.11 .11];
         else
           disp('get xlim right per ll alpha plv')
+          tmp.time(find(mean(mean(tmp.mask,2),3)))
           keyboard
         end
         cfg.zlim=[-4 4];
@@ -6726,47 +6792,63 @@ for ll=soalist
         figure(100*ll+7+10);
         ft_topoplotTFR(cfg,tmpA);
         print(100*ll+7+10,[fdir 'plvanglo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      end
+        end % skipplot
+      end 
       
       % beta topo
+      skipplot=0;
       if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
         cfg=[];
-        if sleep==0 && ll==6 && combval==1 && adda==2
+        if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
           cfg.ylim=[13 15];
-        elseif sleep==0 && ll==3
+        elseif sleep==0 && ll==3 && pre30plot==1
           cfg.ylim=[13 15];
-        elseif sleep==1 && ll==1
+        elseif sleep==1 && ll==1 && pre30plot==1
           cfg.ylim=[13 21];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
-          cfg.ylim=[13 15];
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
+          % only 14 hz, tied on with alpha; ignore
+          skipplot=1;
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+          cfg.ylim=[11 27]; % there are 2 clusters: early beta and later alpha
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
           cfg.ylim=[15 25];
+        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+          % only '6' (14 hz), tied on with alpha; ignore
+          skipplot=1;
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
+          % only '6' (14 hz), tied on with alpha; ignore
+          skipplot=1;
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+          cfg.ylim=[15 25];
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
+          cfg.ylim=[13 19];
         else
           disp('get ylim right per ll beta plv')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
           keyboard
         end
-        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        cfg.parameter='plvavgabs';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        %     cfg.zlim='maxabs';
-        cfg.highlight='on';
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        cfg.baseline=baseline2;
-        cfg.zlim=[-.15 .15];
-        cfg.comment='no';
-        figure(100*ll+5);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+5,[fdir 'plvabslo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+6);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+6,[fdir 'plvabslo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-.1 .1];
-        figure(100*ll+7);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        if skipplot==0
+          masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+          cfg.parameter='plvavgabs';
+          cfg.layout='elec1010.lay';
+          cfg.maskalpha=0.5;
+          %     cfg.zlim='maxabs';
+          cfg.highlight='on';
+          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+          cfg.baseline=baseline2;
+          cfg.zlim=[-.15 .15];
+          cfg.comment='no';
+          figure(100*ll+5);
+          ft_topoplotTFR(cfg,tmpuA);
+          print(100*ll+5,[fdir 'plvabslo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+6);
+          ft_topoplotTFR(cfg,tmpsA);
+          print(100*ll+6,[fdir 'plvabslo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          cfg.zlim=[-.1 .1];
+          figure(100*ll+7);
+          ft_topoplotTFR(cfg,tmpA);
+          print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
         
         if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
           chansel=cfg.highlightchannel;
@@ -6779,17 +6861,19 @@ for ll=soalist
         end
         
         cfg.parameter='plvavgangwrap';
-        if sleep==0 && ll==6 && combval==1 && adda==2
+        if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
           cfg.xlim=[.32 .32];
-        elseif sleep==0 && ll==3 && combval==1 && adda==1
+        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
           cfg.xlim=[0 0];
-        elseif sleep==0 && ll==3 && adda==2
+        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
           cfg.xlim=[-.06 -.06];
-        elseif sleep==1 && ll==1 && adda==2
+        elseif sleep==1 && ll==1 && adda==2 && pre30plot==1
           cfg.xlim=[0.05 0.61];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31
-          cfg.xlim=[.05 .05]; % this is beginning time for sign period; is that consistent with done above/previously?
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31
+        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+          cfg.xlim=[.12 .12]; 
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+          cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
+        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
           cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
         else
           disp('get xlim right per ll beta plv')
@@ -6806,7 +6890,8 @@ for ll=soalist
         figure(100*ll+7+10);
         ft_topoplotTFR(cfg,tmpA);
         print(100*ll+7+10,[fdir 'plvanglo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      end
+        end % skippplot
+      end 
       
     end % adda
     
