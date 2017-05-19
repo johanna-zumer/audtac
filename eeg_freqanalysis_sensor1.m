@@ -100,7 +100,7 @@ toibeg=min(soades,0)-.7;
 toiend=max(soades,0)+1.3;
 
 dofftadd=0;
-usetr=2; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
+usetr=3; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
 synchasynch=0;
 use23=0;
 phaset0=0;
@@ -929,7 +929,7 @@ for ii=iiuse;
               freqlo_tTacAlone_chanPCA_time0{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac_pca);
               freqlo_tNulAlone_chanPCA_time0{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul_pca);
             end
-            if ll==1
+            if ll==1 % time of first stimulus
               cfg.toi=[-0.5:.05:0]-.5;
             elseif ll==3
               cfg.toi=[-0.5:.05:0]-.07;
@@ -943,7 +943,7 @@ for ii=iiuse;
             if sleep==0
               freqlo_tMSAlone_first_chanPCA_time0{ll,tt,ss}=ft_freqanalysis(cfg,tlock_ms_pca);
             end
-            if ll==1 || ll==3 || ll==4 || ll==5
+            if ll==1 || ll==3 || ll==4 || ll==5  % time of second stimulus
               cfg.toi=[-0.5:.05:0]+0;
             elseif ll==6
               cfg.toi=[-0.5:.05:0]+0.02;
@@ -1064,6 +1064,7 @@ for ii=iiuse;
           freqlo_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
           freqlo_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
           
+          disp('study getplv'), keyboard
           freqlo_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
           freqlo_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
           freqlo_tTacAlone_comb{ll,tt,ss}=rmfield(freqlo_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
@@ -1186,6 +1187,9 @@ for ii=iiuse;
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
+            
+            disp('study getplv'), keyboard
+            
             freqlo_tacPaud_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
             freqlo_tacPaud_tmp{cc}.powspctrm=squeeze(mean(abs(freqlo_tacPaud_tmp{cc}.fourierspctrm).^2,1));
             freqlo_tacPaud_tmp{cc}.plvspctrm=getplv(freqlo_tacPaud_tmp{cc}.fourierspctrm);
@@ -1328,7 +1332,9 @@ for ii=iiuse;
             cfg.toi=toibeg(ll):timestepplv:toiend(ll);
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
-            cfg.output='fourier';
+            cfg.output='fourier'; % this forces keeptrials to be 'yes'
+            disp('study getplv'), keyboard
+            
             freqlo_tacMSpN_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
             freqlo_tacMSpN_tmp{cc}.powspctrm=squeeze(mean(abs(freqlo_tacMSpN_tmp{cc}.fourierspctrm).^2,1));
             freqlo_tacMSpN_tmp{cc}.plvspctrm=getplv(freqlo_tacMSpN_tmp{cc}.fourierspctrm);
@@ -3546,12 +3552,12 @@ for ll=soalist
   if sleep
     subuseall=iiBuse;
     iter=11;
-
+    
     trialkc=0;
   else
     subuseall=setdiff(iiSuse,[])
     %     iter=27;
-    iter=32;
+    iter=31;
     trialkc=-1;
   end
   
@@ -3849,18 +3855,18 @@ for ll=soalist
   
   
   
-    resetusetr=0;
-    keyboard
-    if usetr~=2
-      iterinduse=1;
-    elseif usetr==2 && size(freqloall_tacPaud_comb1,2)==1
-      iterinduse=1;
-      usetr=3;
-      resetusetr=1;
-    else
-      iterinduse=2;
-    end
- for ii=1:subuseind
+  resetusetr=0;
+  keyboard
+  if usetr~=2
+    iterinduse=1;
+  elseif usetr==2 && size(freqloall_tacPaud_comb1,2)==1
+    iterinduse=1;
+    usetr=3;
+    resetusetr=1;
+  else
+    iterinduse=2;
+  end
+  for ii=1:subuseind
     cfg=[];
     cfg.operation='subtract';
     cfg.parameter='powspctrm';
@@ -3886,7 +3892,7 @@ for ll=soalist
       end
     end
     cfg.parameter={'powspctrm' 'plvspctrm'};
-     for iterind=1:iterinduse
+    for iterind=1:iterinduse
       freqloall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb1{ii,iterind},freqloall_tacMSpN_comb1{ii,iterind});
       freqhiall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb1{ii,iterind},freqhiall_tacMSpN_comb1{ii,iterind});
     end
@@ -3915,6 +3921,8 @@ for ll=soalist
     end
     if usetr==2
       cfg.operation='(x1+x2)/2';
+      cfg.parameter={'powspctrm'};
+      
       freqloall_TPA_MSPN_comb1_usetr2{ii}=ft_math(cfg,freqloall_TPA_MSPN_comb1{ii,:});
       freqhiall_TPA_MSPN_comb1_usetr2{ii}=ft_math(cfg,freqhiall_TPA_MSPN_comb1{ii,:});
       freqloall_TPA_MSPN_comb2_usetr2{ii}=ft_math(cfg,freqloall_TPA_MSPN_comb2{ii,:});
@@ -3935,6 +3943,50 @@ for ll=soalist
       freqhiall_tAudAlone_combtmp{ii}=ft_math(cfg,freqhiall_tAudAlone_comb{ii,:});
       freqhiall_tNulAlone_combtmp{ii}=ft_math(cfg,freqhiall_tNulAlone_comb{ii,:});
       freqhiall_tMSAlone_combtmp{ii}=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
+      cfg.parameter={'plvspctrm'};
+      cfg.operation='abs(x1./abs(x1) + x2./abs(x2))/2';
+      keyboard
+      tmp=ft_math(cfg,freqloall_TPA_MSPN_comb1{ii,:});
+      freqloall_TPA_MSPN_comb1_usetr2{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_TPA_MSPN_comb1{ii,:});
+      freqhiall_TPA_MSPN_comb1_usetr2{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_TPA_MSPN_comb2{ii,:});
+      freqloall_TPA_MSPN_comb2_usetr2{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_TPA_MSPN_comb2{ii,:});
+      freqhiall_TPA_MSPN_comb2_usetr2{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacPaud_comb1{ii,:});
+      freqloall_tacPaud_comb1tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacPaud_comb2{ii,:});
+      freqloall_tacPaud_comb2tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacPaud_comb1{ii,:});
+      freqhiall_tacPaud_comb1tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacPaud_comb2{ii,:});
+      freqhiall_tacPaud_comb2tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacMSpN_comb1{ii,:});
+      freqloall_tacMSpN_comb1tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacMSpN_comb2{ii,:});
+      freqloall_tacMSpN_comb2tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacMSpN_comb1{ii,:});
+      freqhiall_tacMSpN_comb1tmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacMSpN_comb2{ii,:});
+      freqhiall_tacMSpN_comb2tmp{ii}.plvspctrm.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tTacAlone_comb{ii,:});
+      freqloall_tTacAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tAudAlone_comb{ii,:});
+      freqloall_tAudAlone_combtmp{ii}=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tNulAlone_comb{ii,:});
+      freqloall_tNulAlone_combtmp{ii}.plvspctrm.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tMSAlone_comb{ii,:});
+      freqloall_tMSAlone_combtmp{ii}=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tTacAlone_comb{ii,:});
+      freqhiall_tTacAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tAudAlone_comb{ii,:});
+      freqhiall_tAudAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tNulAlone_comb{ii,:});
+      freqhiall_tNulAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
+      freqhiall_tMSAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
+      
     end
   end % end ii
   if usetr==2
@@ -6017,14 +6069,14 @@ pre30plot=0;
 
 % for all ll, print at least a TFR even if nothing significant.
 for ll=soalist
-% for ll=[7 9]
+  % for ll=[7 9]
   close all
   clear grave* stat*
   if pre30plot
-  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
-  %   load([stdir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
+    load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
+    %   load([stdir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   else
-  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat']);
+    load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat']);
   end
   
   for combval=1
@@ -6297,44 +6349,44 @@ for ll=soalist
         cfg.ylim=[8 12];
       else
         disp('get ylim right per ll alpha')
-          tmp.freq(find(mean(mean(tmp.mask,1),3)))
+        tmp.freq(find(mean(mean(tmp.mask,1),3)))
         keyboard
       end
       if skipplot==0
-      masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-      cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-      cfg.parameter='powspctrm';
-      cfg.layout='elec1010.lay';
-      cfg.maskalpha=0.5;
-      %       cfg.zlim=[-1.4 1.4];
-      cfg.zlim=[-9 9];
-      cfg.highlight='on';
-      cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-      cfg.baseline=baseline2;
-      %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
-      figure(10*ll+5);
-      ft_topoplotTFR(cfg,tmpuA);
-      print(10*ll+5,[fdir 'tfrlo_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      figure(10*ll+6);
-      ft_topoplotTFR(cfg,tmpsA);
-      print(10*ll+6,[fdir 'tfrlo_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      %       cfg.zlim=[-1.4 1.4];
-      cfg.zlim=[-9 9];
-      %     cfg.zlim='maxabs';
-      %     cfg.baseline='no';
-      figure(10*ll+7);
-      ft_topoplotTFR(cfg,tmpA);
-      print(10*ll+7,[fdir 'tfrlo_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-      
-      if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-        chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-        zlim=[-3 3];
-        figinds=10*ll+1000+1;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        baseline=[tmp.time(1) tmp.time(9)];
-        tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-      end
+        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+        cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+        cfg.parameter='powspctrm';
+        cfg.layout='elec1010.lay';
+        cfg.maskalpha=0.5;
+        %       cfg.zlim=[-1.4 1.4];
+        cfg.zlim=[-9 9];
+        cfg.highlight='on';
+        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+        cfg.baseline=baseline2;
+        %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
+        figure(10*ll+5);
+        ft_topoplotTFR(cfg,tmpuA);
+        print(10*ll+5,[fdir 'tfrlo_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        figure(10*ll+6);
+        ft_topoplotTFR(cfg,tmpsA);
+        print(10*ll+6,[fdir 'tfrlo_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        %       cfg.zlim=[-1.4 1.4];
+        cfg.zlim=[-9 9];
+        %     cfg.zlim='maxabs';
+        %     cfg.baseline='no';
+        figure(10*ll+7);
+        ft_topoplotTFR(cfg,tmpA);
+        print(10*ll+7,[fdir 'tfrlo_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        
+        if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+          chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+          zlim=[-3 3];
+          figinds=10*ll+1000+1;
+          figstrings=[];
+          figstrings{1}=[fdir 'tfrlo_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          baseline=[tmp.time(1) tmp.time(9)];
+          tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+        end
       end % skipplot
     end
     
@@ -6362,7 +6414,7 @@ for ll=soalist
         cfg.ylim=[14 30];
       else
         disp('get ylim right per ll beta')
-          tmp.freq(find(mean(mean(tmp.mask,1),3)))
+        tmp.freq(find(mean(mean(tmp.mask,1),3)))
         keyboard
       end
       masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
@@ -6509,9 +6561,9 @@ for ll=soalist
       
       % plot TFR of plv abs and plv ang, for each suplot: u and m and difference.
       if pre30plot
-      zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+        zlim=[0 0.6; -.25 .25; -20 400; -10 300];
       else
-      zlim=[0 0.5; .1 .25;   -20 400; -10 300];
+        zlim=[0 0.5; .1 .25;   -20 400; -10 300];
       end
       
       if 0
@@ -6541,14 +6593,14 @@ for ll=soalist
       
       clear pow
       if pre30plot
-      pow{1}=gravelo_tMSAlone_comb;
-      pow{2}=tmpuA;
-      pow{3}=tmpsA;
-      pow{4}=tmpA;
+        pow{1}=gravelo_tMSAlone_comb;
+        pow{2}=tmpuA;
+        pow{3}=tmpsA;
+        pow{4}=tmpA;
       else
-      pow{1}=tmpuA;
-      pow{2}=tmpsA;
-      pow{3}=tmpA;        
+        pow{1}=tmpuA;
+        pow{2}=tmpsA;
+        pow{3}=tmpA;
       end
       
       chansel=chanplot{1};
@@ -6685,17 +6737,17 @@ for ll=soalist
         elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==31 && usetr==3
           skipplot=1;
         elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.ylim=[8 14]; 
+          cfg.ylim=[8 14];
         elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
           cfg.ylim=[8 15]; % 2 clusters: early beta and later alpha
         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
           skipplot=1;
         elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 11]; 
+          cfg.ylim=[8 11];
         elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 14]; 
+          cfg.ylim=[8 14];
         elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 14]; 
+          cfg.ylim=[8 14];
         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
           % only at 8Hz, so will tie in with theta
           skipplot=1;
@@ -6707,93 +6759,93 @@ for ll=soalist
           keyboard
         end
         if skipplot==0
-        masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
-        clear masktime
-        if any(difftimes>1)
-          finddifftimes=find(difftimes>1);
-          for dd=1:length(finddifftimes)+1
-            if dd==1
-              masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
-            elseif dd==length(finddifftimes)+1
-              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
-            else
-              masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+          masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+          difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          clear masktime
+          if any(difftimes>1)
+            finddifftimes=find(difftimes>1);
+            for dd=1:length(finddifftimes)+1
+              if dd==1
+                masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
+              elseif dd==length(finddifftimes)+1
+                masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
+              else
+                masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+              end
             end
+          else
+            masktime{1}=masktime_tmp;
           end
-        else
-          masktime{1}=masktime_tmp;
-        end
-        for dd=1:length(masktime)
+          for dd=1:length(masktime)
+            
+            cfg.parameter='plvavgabs';
+            cfg.layout='elec1010.lay';
+            cfg.maskalpha=0.5;
+            %     cfg.zlim='maxabs';
+            cfg.highlight='on';
+            cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
+            cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+            cfg.baseline=baseline2;
+            cfg.zlim=[-.15 .15];
+            cfg.comment='no';
+            cfg.comment='auto';
+            figure(100*ll+5);
+            ft_topoplotTFR(cfg,tmpuA);
+            print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            figure(100*ll+6);
+            ft_topoplotTFR(cfg,tmpsA);
+            print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            cfg.zlim=[-.1 .1];
+            figure(100*ll+7);
+            ft_topoplotTFR(cfg,tmpA);
+            print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          end
           
-          cfg.parameter='plvavgabs';
-          cfg.layout='elec1010.lay';
-          cfg.maskalpha=0.5;
-          %     cfg.zlim='maxabs';
-          cfg.highlight='on';
-          cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          cfg.baseline=baseline2;
-          cfg.zlim=[-.15 .15];
-          cfg.comment='no';
-          cfg.comment='auto';
-          figure(100*ll+5);
+          
+          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+            chansel=cfg.highlightchannel;
+            zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+            figinds=[100*ll+40+1;  100*ll+50+1];
+            figstrings{1}=[fdir 'plvabslo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            figstrings{2}=[fdir 'plvanglo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+          end
+          
+          cfg.parameter='plvavgangwrap';
+          if sleep==0 && ll==6
+            cfg.xlim=[.34 .34];
+          elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+            cfg.xlim=[0 0];
+          elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
+            cfg.xlim=[-.06 -.06];
+          elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
+            cfg.xlim=[.21 .21];
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.xlim=[.2 .2];
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.xlim=[.2 .2];
+          elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.xlim=[.17 .17];
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.xlim=[.11 .11];
+          else
+            disp('get xlim right per ll alpha plv')
+            tmp.time(find(mean(mean(tmp.mask,2),3)))
+            keyboard
+          end
+          cfg.zlim=[-4 4];
+          figure(100*ll+5+10);
           ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-          figure(100*ll+6);
+          print(100*ll+5+10,[fdir 'plvanglo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+6+10);
           ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-          cfg.zlim=[-.1 .1];
-          figure(100*ll+7);
+          print(100*ll+6+10,[fdir 'plvanglo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+7+10);
           ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-        end
-        
-        
-        if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=cfg.highlightchannel;
-          zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-          zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-          figinds=[100*ll+40+1;  100*ll+50+1];
-          figstrings{1}=[fdir 'plvabslo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-        end
-        
-        cfg.parameter='plvavgangwrap';
-        if sleep==0 && ll==6
-          cfg.xlim=[.34 .34];
-        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
-          cfg.xlim=[0 0];
-        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
-          cfg.xlim=[-.06 -.06];
-        elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
-          cfg.xlim=[.21 .21];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.xlim=[.2 .2];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.xlim=[.2 .2];
-        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.xlim=[.17 .17];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.xlim=[.11 .11];
-        else
-          disp('get xlim right per ll alpha plv')
-          tmp.time(find(mean(mean(tmp.mask,2),3)))
-          keyboard
-        end
-        cfg.zlim=[-4 4];
-        figure(100*ll+5+10);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+5+10,[fdir 'plvanglo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+6+10);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+6+10,[fdir 'plvanglo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+7+10);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+7+10,[fdir 'plvanglo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          print(100*ll+7+10,[fdir 'plvanglo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
         end % skipplot
-      end 
+      end
       
       % beta topo
       skipplot=0;
@@ -6849,49 +6901,49 @@ for ll=soalist
           figure(100*ll+7);
           ft_topoplotTFR(cfg,tmpA);
           print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        
-        if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=cfg.highlightchannel;
-          zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-          zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-          figinds=[100*ll+40+1;  100*ll+50+1];
-          figstrings{1}=[fdir 'plvabslo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-        end
-        
-        cfg.parameter='plvavgangwrap';
-        if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
-          cfg.xlim=[.32 .32];
-        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
-          cfg.xlim=[0 0];
-        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
-          cfg.xlim=[-.06 -.06];
-        elseif sleep==1 && ll==1 && adda==2 && pre30plot==1
-          cfg.xlim=[0.05 0.61];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.xlim=[.12 .12]; 
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
-        else
-          disp('get xlim right per ll beta plv')
-          tmp.time(find(mean(mean(tmp.mask,2),3)))
-          keyboard
-        end
-        cfg.zlim=[-4 4];
-        figure(100*ll+5+10);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+5+10,[fdir 'plvanglo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+6+10);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+6+10,[fdir 'plvanglo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+7+10);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+7+10,[fdir 'plvanglo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          
+          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+            chansel=cfg.highlightchannel;
+            zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+            figinds=[100*ll+40+1;  100*ll+50+1];
+            figstrings{1}=[fdir 'plvabslo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            figstrings{2}=[fdir 'plvanglo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+          end
+          
+          cfg.parameter='plvavgangwrap';
+          if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
+            cfg.xlim=[.32 .32];
+          elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+            cfg.xlim=[0 0];
+          elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
+            cfg.xlim=[-.06 -.06];
+          elseif sleep==1 && ll==1 && adda==2 && pre30plot==1
+            cfg.xlim=[0.05 0.61];
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.xlim=[.12 .12];
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
+          else
+            disp('get xlim right per ll beta plv')
+            tmp.time(find(mean(mean(tmp.mask,2),3)))
+            keyboard
+          end
+          cfg.zlim=[-4 4];
+          figure(100*ll+5+10);
+          ft_topoplotTFR(cfg,tmpuA);
+          print(100*ll+5+10,[fdir 'plvanglo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+6+10);
+          ft_topoplotTFR(cfg,tmpsA);
+          print(100*ll+6+10,[fdir 'plvanglo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+7+10);
+          ft_topoplotTFR(cfg,tmpA);
+          print(100*ll+7+10,[fdir 'plvanglo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
         end % skippplot
-      end 
+      end
       
     end % adda
     
