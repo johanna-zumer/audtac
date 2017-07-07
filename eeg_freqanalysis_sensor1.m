@@ -3856,7 +3856,6 @@ for ll=soalist
   
   
   resetusetr=0;
-  keyboard
   if usetr~=2
     iterinduse=1;
   elseif usetr==2 && size(freqloall_tacPaud_comb1,2)==1
@@ -3944,8 +3943,7 @@ for ll=soalist
       freqhiall_tNulAlone_combtmp{ii}=ft_math(cfg,freqhiall_tNulAlone_comb{ii,:});
       freqhiall_tMSAlone_combtmp{ii}=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
       cfg.parameter={'plvspctrm'};
-      cfg.operation='abs(x1./abs(x1) + x2./abs(x2))/2';
-      keyboard
+      cfg.operation='(x1./abs(x1) + x2./abs(x2))/2'; % This is correct for getting plvavgang (later in ft_freqgrandaverage)
       tmp=ft_math(cfg,freqloall_TPA_MSPN_comb1{ii,:});
       freqloall_TPA_MSPN_comb1_usetr2{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqhiall_TPA_MSPN_comb1{ii,:});
@@ -3969,15 +3967,15 @@ for ll=soalist
       tmp=ft_math(cfg,freqhiall_tacMSpN_comb1{ii,:});
       freqhiall_tacMSpN_comb1tmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqhiall_tacMSpN_comb2{ii,:});
-      freqhiall_tacMSpN_comb2tmp{ii}.plvspctrm.plvspctrm=tmp.plvspctrm;
+      freqhiall_tacMSpN_comb2tmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqloall_tTacAlone_comb{ii,:});
       freqloall_tTacAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqloall_tAudAlone_comb{ii,:});
-      freqloall_tAudAlone_combtmp{ii}=tmp.plvspctrm;
+      freqloall_tAudAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqloall_tNulAlone_comb{ii,:});
-      freqloall_tNulAlone_combtmp{ii}.plvspctrm.plvspctrm=tmp.plvspctrm;
+      freqloall_tNulAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqloall_tMSAlone_comb{ii,:});
-      freqloall_tMSAlone_combtmp{ii}=tmp.plvspctrm;
+      freqloall_tMSAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqhiall_tTacAlone_comb{ii,:});
       freqhiall_tTacAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       tmp=ft_math(cfg,freqhiall_tAudAlone_comb{ii,:});
@@ -3987,6 +3985,49 @@ for ll=soalist
       tmp=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
       freqhiall_tMSAlone_combtmp{ii}.plvspctrm=tmp.plvspctrm;
       
+      cfg.parameter={'plvspctrm'};
+      cfg.operation='(abs(x1) + abs(x2))/2'; % This is correct for getting plvavgabs (must alter ft_freqgrandaverage)
+      tmp=ft_math(cfg,freqloall_TPA_MSPN_comb1{ii,:});
+      freqloall_TPA_MSPN_comb1_usetr2{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_TPA_MSPN_comb1{ii,:});
+      freqhiall_TPA_MSPN_comb1_usetr2{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_TPA_MSPN_comb2{ii,:});
+      freqloall_TPA_MSPN_comb2_usetr2{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_TPA_MSPN_comb2{ii,:});
+      freqhiall_TPA_MSPN_comb2_usetr2{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacPaud_comb1{ii,:});
+      freqloall_tacPaud_comb1tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacPaud_comb2{ii,:});
+      freqloall_tacPaud_comb2tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacPaud_comb1{ii,:});
+      freqhiall_tacPaud_comb1tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacPaud_comb2{ii,:});
+      freqhiall_tacPaud_comb2tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacMSpN_comb1{ii,:});
+      freqloall_tacMSpN_comb1tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tacMSpN_comb2{ii,:});
+      freqloall_tacMSpN_comb2tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacMSpN_comb1{ii,:});
+      freqhiall_tacMSpN_comb1tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tacMSpN_comb2{ii,:});
+      freqhiall_tacMSpN_comb2tmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tTacAlone_comb{ii,:});
+      freqloall_tTacAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tAudAlone_comb{ii,:});
+      freqloall_tAudAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tNulAlone_comb{ii,:});
+      freqloall_tNulAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqloall_tMSAlone_comb{ii,:});
+      freqloall_tMSAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tTacAlone_comb{ii,:});
+      freqhiall_tTacAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tAudAlone_comb{ii,:});
+      freqhiall_tAudAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tNulAlone_comb{ii,:});
+      freqhiall_tNulAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+      tmp=ft_math(cfg,freqhiall_tMSAlone_comb{ii,:});
+      freqhiall_tMSAlone_combtmp{ii}.plvavgabs=tmp.plvspctrm;
+
     end
   end % end ii
   if usetr==2
@@ -4035,6 +4076,12 @@ for ll=soalist
   if usetr==2
     gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
     gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
+    gravelo_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;    
+    tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+    gravehi_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;    
+    cfg.parameter={'powspctrm' 'plvspctrm'};
   else
     gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{:});
     gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{:});
@@ -4047,6 +4094,12 @@ for ll=soalist
     if usetr==2
       gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
       gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+      cfg.parameter={'plvavgabs'};
+      tmp=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
+      gravelo_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+      gravehi_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      cfg.parameter={'powspctrm' 'plvspctrm'};
     else
       gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{:});
       gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{:});
@@ -4062,6 +4115,12 @@ for ll=soalist
     if comb2flag
       gravelo_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb2{:});
       gravehi_APT_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb2{:});
+      cfg.parameter={'plvavgabs'};
+      tmp=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb2{:});
+      gravelo_APT_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      tmp=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb2{:});
+      gravehi_APT_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      cfg.parameter={'powspctrm' 'plvspctrm'};
     end
   end
   
@@ -4282,6 +4341,16 @@ for ll=soalist
   grindlo_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
   grindhi_tacPaud_comb1=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
   grindhi_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
+  cfg.parameter={'plvavgabs'};
+  tmp=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{:});
+  grindlo_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
+  grindlo_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
+  grindhi_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
+  grindhi_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
+  cfg.parameter={'powspctrm' 'plvspctrm'};
   if synchasynch && ll<5
     grindlo_tMSsynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb1{:});
     grindlo_tMSasynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb1{:});
@@ -4293,6 +4362,16 @@ for ll=soalist
     grindlo_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
     grindhi_tacPaud_comb2=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
     grindhi_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{:});
+    grindlo_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
+    grindlo_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
+    grindhi_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
+    grindhi_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
+    cfg.parameter={'powspctrm' 'plvspctrm'};
     if synchasynch && ll<5
       grindlo_tMSsynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb2{:});
       grindlo_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb2{:});
@@ -4308,12 +4387,42 @@ for ll=soalist
   grindhi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
   grindlo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
   grindhi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  cfg.parameter={'plvavgabs'};
+  tmp=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
+  grindlo_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
+  grindhi_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
+  grindlo_tTacAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
+  grindhi_tTacAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
+  grindlo_tAudAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
+  grindhi_tAudAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
+  grindlo_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
+  tmp=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  grindhi_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
+  cfg.parameter={'powspctrm' 'plvspctrm'};
   if usetr==2
     grindlo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
     grindhi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
+    grindlo_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
+    grindhi_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
+    cfg.parameter={'powspctrm' 'plvspctrm'};
     if comb2flag
       grindlo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
       grindhi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+      cfg.parameter={'plvavgabs'};
+      tmp=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
+      grindlo_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
+      grindhi_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
+      cfg.parameter={'powspctrm' 'plvspctrm'};
     end
   end
   
@@ -4392,6 +4501,16 @@ for ll=soalist
   gravelo_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
   gravehi_tacPaud_comb1=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
   gravehi_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{:});
+    gravelo_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
+    gravelo_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
+    gravehi_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
+    gravehi_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
+    cfg.parameter={'powspctrm' 'plvspctrm'};
   if synchasynch && ll<5
     gravelo_tMSsynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb1{:});
     gravelo_tMSasynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb1{:});
@@ -4403,6 +4522,16 @@ for ll=soalist
     gravelo_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
     gravehi_tacPaud_comb2=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
     gravehi_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{:});
+    gravelo_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
+    gravelo_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
+    gravehi_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
+    gravehi_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
+    cfg.parameter={'powspctrm' 'plvspctrm'};
     if synchasynch && ll<5
       gravelo_tMSsynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb2{:});
       gravelo_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb2{:});
@@ -4418,6 +4547,24 @@ for ll=soalist
   gravehi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
   gravelo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
   gravehi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+    cfg.parameter={'plvavgabs'};
+    tmp=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
+    gravelo_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
+    gravehi_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
+    gravelo_tTacAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
+    gravehi_tTacAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
+    gravelo_tAudAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
+    gravehi_tAudAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
+    gravelo_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
+    tmp=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+    gravehi_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
+    cfg.parameter={'powspctrm' 'plvspctrm'};
   
   if audtacflag
     gravelo_audPtac_comb1=ft_freqgrandaverage(cfg,freqloall_audPtac_comb1{:});
@@ -6249,8 +6396,8 @@ for ll=soalist
       cfg.maskalpha=0.5;
       if sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
         cfg.ylim=[4 8.5]; % theta here includes 8 hz (nothing in alpha above 8)
-      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[4 10.5]; % theta here includes 8 hz (nothing in alpha above 8)
+%       elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
+%         cfg.ylim=[4 10.5]; % theta here includes 8 hz (nothing in alpha above 8)
       else
         cfg.ylim=[4 6.5];
       end
@@ -6345,8 +6492,10 @@ for ll=soalist
         cfg.ylim=[8 12];
       elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
         skipplot=1; % theta goes up to 10Hz
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[8 12];
+%       elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
+%         cfg.ylim=[8 12];
+%       elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
+%         cfg.ylim=[8 12];
       else
         disp('get ylim right per ll alpha')
         tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -6410,8 +6559,10 @@ for ll=soalist
         cfg.ylim=[14 22];
       elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
         cfg.ylim=[14 22];
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[14 30];
+%       elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
+%         cfg.ylim=[14 30];
+%       elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
+%         cfg.ylim=[14 18];
       else
         disp('get ylim right per ll beta')
         tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -6603,6 +6754,8 @@ for ll=soalist
         pow{3}=tmpA;
       end
       
+      disp('starting PLF plotting')
+      keyboard
       chansel=chanplot{1};
       figinds=[100*ll;  100*ll+10];
       figstrings{1}=[fdir 'plvabslo_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
@@ -6751,8 +6904,8 @@ for ll=soalist
         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
           % only at 8Hz, so will tie in with theta
           skipplot=1;
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
-          cfg.ylim=[8 12];
+%         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
+%           cfg.ylim=[8 12];
         else
           disp('get ylim right per ll alpha plv')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -6872,8 +7025,8 @@ for ll=soalist
           skipplot=1;
         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
           cfg.ylim=[15 25];
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
-          cfg.ylim=[13 19];
+%         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
+%           cfg.ylim=[13 19];
         else
           disp('get ylim right per ll beta plv')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
