@@ -92,10 +92,10 @@ load([edir 'iikeep.mat'])
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
 %%
-usetr=2; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
+usetr=3; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
 ttuse=[3];
 tacaloneproc=0;
-phaset0=0;
+phaset0=1; % compute phase at time 0
 phaset0use=2; % 0 = compute Hilbert; 1 = FFT Cz, 2 = FFT FC, 3 = FFT PCA, 4 = Hilb Cz, 5 = Hilb FC, 6 = Hilb PCA
 synchasynch=0;
 binonly=0;
@@ -5038,7 +5038,7 @@ end % ll
 if savegrindflag
   if ~iterflag
     save([edir 'tlock_grind_sleep' num2str(sleep) '_runagain' num2str(runagain) '.mat'],'grave*T*','grind_*save','plv');
-    break
+%     break
   else
     if sleep
       save([edir 'tlock_grind_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat'],'grave*T*','grind_*save','plv');
