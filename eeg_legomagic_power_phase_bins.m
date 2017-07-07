@@ -32,8 +32,15 @@ switch phaset0use
       load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'],'freq*');
       freqtr=load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'],'tr');
     else
-      load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*');
-      freqtr=load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'tr');
+      try
+        load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*');
+        freqtr=load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'tr');
+      catch
+        if sleep==0 && trialkc==-1
+          load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'],'freq*');
+          freqtr=load(['freqtime0_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'],'tr');
+        end
+      end
     end
   case {4 5 6}
     load(['tlock_unimultsensHilbert_' sub{ii} '_sleep0_tt' num2str(tt) '_tacaud1_iter' num2str(iter) '_trialkc-1.mat']);
