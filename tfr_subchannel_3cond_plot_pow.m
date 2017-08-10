@@ -50,8 +50,8 @@ for pp=1:length(pow)
   axis([cfg.xlim(1) cfg.xlim(2) tmp{1}.freq(1) tmp{1}.freq(end)]);
 end  
 tmpfig=get(figinds(1));
-for ff=2:2:8, set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
-for ff=2:2:8, set(tmpfig.Children(ff).Title,'Visible','off'); end
+for ff=2:2:(2*length(tmp)), set(tmpfig.Children(ff),'FontSize',18);end  % this controls the x,y, and colorbar fontsize
+for ff=2:2:(2*length(tmp)), set(tmpfig.Children(ff).Title,'Visible','off'); end
 % subplot(3,1,3);
 % ft_singleplotTFR(cfg,tmp1);
 % subplot(3,1,1);
