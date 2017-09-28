@@ -304,8 +304,8 @@ return
 % Thus, e.g. tac4mscon1bin{1,tt,ss} (compare to AT500) has the phase computed prior to -500ms as it wil be compared to ms4mscon1bin{1,tt,ss} which has auditory at -500.
 % But tac4mscon1bin{5,tt,ss} (compare to AT0) has the phase computed prior to 0ms.
 
-% *con1* means the phase taken at -250ms prior to onset of first stimulus (in MS case) or equivalent time for unisensory
-% *con2* means the phase taken at -250ms prior to onset of second stimulus
+% *con1* means the phase taken at -250ms (for 2 Hz presumably??) prior to onset of first stimulus (in MS case) or equivalent time for unisensory
+% *con2* means the phase taken at -250ms (for 2 Hz presumably??) prior to onset of second stimulus
 
 % power is taken -500ms prior to either first or second stimulus (con1 or con2)
 
