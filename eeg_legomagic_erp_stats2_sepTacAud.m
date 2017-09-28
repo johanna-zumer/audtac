@@ -92,13 +92,14 @@ load([edir 'iikeep.mat'])
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
 %%
-usetr=3; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
+usetr=1; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
 ttuse=[3];
 tacaloneproc=0;
-phaset0=1; % compute phase at time 0
+phaset0=0; % compute phase at time 0
 phaset0use=2; % 0 = compute Hilbert; 1 = FFT Cz, 2 = FFT FC, 3 = FFT PCA, 4 = Hilb Cz, 5 = Hilb FC, 6 = Hilb PCA
 synchasynch=0;
 binonly=0;
+pcmflag=1;
 
 for sleep=[0]
   if sleep
@@ -112,7 +113,7 @@ for sleep=[0]
   freqsub=nan(1,max(iiuse));
   for ii=iiuse
     cd([edir sub{ii} ])
-    clearvars -except ii sub edir ddir ii*use sleep featurestats* ttuse soades usetr tacaloneproc synchasynch phaset0* binonly
+    clearvars -except ii sub edir ddir ii*use sleep featurestats* ttuse soades usetr tacaloneproc synchasynch phaset0* binonly pcmflag
     [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
     
     %   try
@@ -128,10 +129,10 @@ for sleep=[0]
       iteruse=11;
     elseif sleep==0
       trialkc=-1; % always -1
-      %       iteruse=27; % for main analysis
+            iteruse=27; % for main analysis
       %       iteruse=30; % for tacalone analysis
       % for new 'smart sampling' use 31 and 33
-      iteruse=31; % smart sampling;  set to value of usetr=0 in combination with usetr=2 to get new paired sample (iteruse+1)
+%       iteruse=32; % smart sampling;  set to value of usetr=0 in combination with usetr=2 to get new paired sample (iteruse+1)
     end
     
     % For memory reasons, do TacPlusAud separately from AudPlusTac
@@ -188,6 +189,9 @@ for sleep=[0]
           clear raw*
         else
           ssuse=tr.stageuse+10;
+          if pcmflag
+            ssuse=10;
+          end
         end
         
         
@@ -780,6 +784,23 @@ for sleep=[0]
                   cfg.covariance='yes';
                   cfg.covariancewindow=[-0.6 0.7]; % a full window valid for all ll
                   tlock_tactlock{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                  if pcmflag
+                    if rem(ll,10)==1 || rem(ll,10)==3 || rem(ll,10)==4 || rem(ll,10)==5
+                      starttime=0;     endtime=.5;
+                    elseif rem(ll,10)==6
+                      starttime=0.02;  endtime=.52;
+                    elseif rem(ll,10)==7
+                      starttime=0.07;  endtime=.57;
+                    elseif rem(ll,10)==9
+                      starttime=0.5;   endtime=1;
+                    end
+                    cfg.keeptrials='yes';
+                    cfg.covariance='no';
+                    tmp_tactlock=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
+                    cfg=[];
+                    cfg.latency=[starttime endtime];
+                    pcm_tactlock{ll,tt,ss}=ft_selectdata(cfg,tmp_tactlock);
+                  end
                   if phaset0 && phaset0use
                     %                       if ll<10
                     %                         for at=1:numt_trials(ll,tt,ss)
@@ -1051,6 +1072,23 @@ for sleep=[0]
                   cfg.covariance='yes';
                   cfg.covariancewindow=[-0.6 0.7]; % a full window valid for all ll
                   tlock_audtlock{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                  if pcmflag
+                    if rem(ll,10)==1 || rem(ll,10)==3 || rem(ll,10)==4 || rem(ll,10)==5
+                      starttime=0;     endtime=.5;
+                    elseif rem(ll,10)==6
+                      starttime=0.02;  endtime=.52;
+                    elseif rem(ll,10)==7
+                      starttime=0.07;  endtime=.57;
+                    elseif rem(ll,10)==9
+                      starttime=0.5;   endtime=1;
+                    end
+                    cfg.keeptrials='yes';
+                    cfg.covariance='no';
+                    tmp_audtlock=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
+                    cfg=[];
+                    cfg.latency=[starttime endtime];
+                    pcm_audtlock{ll,tt,ss}=ft_selectdata(cfg,tmp_audtlock);
+                  end
                   if phaset0 && phaset0use
                     for bb=1:4
                       cfg=[];
@@ -1185,6 +1223,23 @@ for sleep=[0]
                 cfg.covariance='yes';
                 cfg.covariancewindow=[-0.6 0.7]; % a full window valid for all ll
                 tlock_nultlock{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                if pcmflag
+                  if rem(ll,10)==1 || rem(ll,10)==3 || rem(ll,10)==4 || rem(ll,10)==5
+                    starttime=0;     endtime=.5;
+                  elseif rem(ll,10)==6
+                    starttime=0.02;  endtime=.52;
+                  elseif rem(ll,10)==7
+                    starttime=0.07;  endtime=.57;
+                  elseif rem(ll,10)==9
+                    starttime=0.5;   endtime=1;
+                  end
+                  cfg.keeptrials='yes';
+                  cfg.covariance='no';
+                  tmp_nultlock=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
+                  cfg=[];
+                  cfg.latency=[starttime endtime];
+                  pcm_nultlock{ll,tt,ss}=ft_selectdata(cfg,tmp_nultlock);
+                end
                 if phaset0 && phaset0use
                   for bb=1:4
                     cfg=[];
@@ -1234,6 +1289,7 @@ for sleep=[0]
             end
             tlock_nul{ll,tt,ss}=[];
           end
+          clear tmp_*
           
           if phaset0 && phaset0use==0
             save(['tlock_unimultsensHilbert_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'hilb*','tr')
@@ -1475,6 +1531,33 @@ for sleep=[0]
             %           else
             %             tlock_audMSpN{ll,tt,ss}=[];
             %           end
+            
+            
+            if pcmflag
+              disp('pcmflag')
+              mintrl=min([size(pcm_tactlock{ll,tt,ss}.trial,1) size(pcm_nultlock{ll+50,tt,ss}.trial,1) size(pcm_tactlock{ll+20,tt,ss}.trial,1) size(pcm_audtlock{ll+40,tt,ss}.trial,1)]);
+              cfg=[];
+              cfg.trials=1:mintrl;
+              pcm_tactlock{ll,tt,ss}=ft_selectdata(cfg,pcm_tactlock{ll,tt,ss});
+              pcm_tactlock{ll+20,tt,ss}=ft_selectdata(cfg,pcm_tactlock{ll+20,tt,ss});
+              pcm_nultlock{ll+50,tt,ss}=ft_selectdata(cfg,pcm_nultlock{ll+50,tt,ss});
+              pcm_audtlock{ll+40,tt,ss}=ft_selectdata(cfg,pcm_audtlock{ll+40,tt,ss});
+              cfg=[];
+              cfg.parameter='trial';
+              cfg.operation='add';
+              pcm_tacMSpN=ft_math(cfg,pcm_tactlock{ll,tt,ss},   pcm_nultlock{ll+50,tt,ss}); % AT + N
+              pcm_tacPaud=ft_math(cfg,pcm_tactlock{ll+20,tt,ss},pcm_audtlock{ll+40,tt,ss}); % T + A
+              cfg.operation='subtract';
+              pcm_TPAmMSPN{ll,tt,ss}=ft_math(cfg,pcm_tacPaud,pcm_tacMSpN);
+%               pcm_TPAmMSPN{ll,tt,ss}.dimord='rpt_chan_time';
+%               pcm_TPAmMSPN{ll,tt,ss}.label=pcm_tacPaud.label;
+%               for jj=1:25 % every 20 ms
+%                 pcm_TPAmMSPN{ll,tt,ss}.trial(:,:,jj)=mean(TPAmMSPN.trial(:,:,jj*20-19:jj*20+1),3);
+%                 pcm_TPAmMSPN{ll,tt,ss}.time(jj)=TPAmMSPN.time(jj*20-10);
+%               end
+              clear TPAmMSPN pcm_tacMSpN pcm_tacPaud
+            end
+            
           end % end ll
           
           if synchasynch
@@ -1547,14 +1630,15 @@ for sleep=[0]
           
         end  % end ss
         
-        if binonly
-          continue
-        end
+%         if binonly
+%           continue
+%         end
+        
         
         %clear tlock_tac tlock_aud tlock_nul tr tlock*tlock
         clear tlock_tac tlock_aud tlock_nul
         clear tlock_tacMSshift1 tlock_tacMSshift2 tlock_tacMSshift3 tlock_tacMSshift4
-        if ~tacaloneproc && ~phaset0
+        if ~tacaloneproc && ~phaset0 && ~pcmflag
           if isempty(tr.stageuse)
             save(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'tr')
           else
@@ -1562,6 +1646,8 @@ for sleep=[0]
           end
         elseif phaset0 && phaset0use>0
           save(['tlock_ERPphasebin_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'tlock_*con*phasebin','tlock_*con*absbin','tr','phaset0use','freqs*');
+        elseif pcmflag
+          save(['tlock_pcm_' sub{ii} '_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'pcm_TPAmMSPN','tr');
         end
       end % end iter
     end % end tt
@@ -3744,7 +3830,7 @@ savegrindflag=1;
 iterflag=1; % multiple iterations of random trial assignment
 audtacflag=0;
 runagainflag=0; % 2nd run of erp results (resampling of trials into ERP)
-usetr=0;
+usetr=3;
 trialkcflag=1; % 0 for ignore trialkc (old results; all trials), or 1 for use trialkc value
 tophalfflag=0; % only relevant for sleep=1; tophalf of participants only (see sortTacN2.mat)
 synchasynch=0;
@@ -3772,7 +3858,7 @@ chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
 % allcond_sameN=1; % means using ii>=8, but we doing that anyway with iiuse
 % for tacaud=[1 0]
 % for sleep=[1]
-sleep=1;
+sleep=0;
 if sleep
   chanuse=chanuse_sleep1;
   iteruse=11;
@@ -3785,7 +3871,7 @@ else
   chanuse=chanuse_sleep0;
   %   warning('change me back to 27!!')
   %   iteruse=27;
-  iteruse=31;
+  iteruse=32;
   trialkc=-1;
 end
 iter=iteruse;
@@ -5619,6 +5705,291 @@ cfg=[];
 % *   0.0006    10/10                       median 0.0005
 % *   0.0030    10/10                       median 0.0025
 
+%% Pattern Component Modelling (Diedrichsen) see eeg_pcm.m
+
+%% Computing RSA (Cecere 2017 modified) and RDM (Nili 2014 MRC-CAM RSA toolbox)
+
+clearvars -except sub *dir
+iterflag=1;
+sleep=0;
+tt=3;
+statwinorig=0;  % =1 means the latency range of .1 to .45 (first way);  =0 means 0 to .5 (final /better way)
+ftver=0;
+mcseed=13;
+usetr=0;
+plotallmask=1; % =0 means each subplot will use significane mask relevant for those sensors & time plotted only
+               % =1 means each subplot will use mask relevant for all sensors even those not plotted.
+
+if sleep
+  iter=11;
+  ss=12;
+  trialkc=0;
+else
+  iter=27;  % previous result; final way (easier!)
+%   iter=31;  % smart sampling
+  ss=10;
+  trialkc=-1;
+end
+
+if iterflag
+  if sleep
+    try
+%       load([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '.mat']);
+      load([edir 'tlock_grind_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '.mat']);
+    catch
+      load([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat']);
+      load([edir 'tlock_grind_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat']);
+    end
+  else
+    try
+%       load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat']);
+      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat']);
+    catch
+      try
+%         load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
+        load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
+      catch
+%         load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
+        load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
+      end
+    end
+  end
+else
+%   load([edir 'tlock_statmc_sleep' num2str(sleep) '.mat']);
+  load([edir 'tlock_grind_sleep' num2str(sleep) '.mat']);
+end
+
+soalist=[1 3 4 5 6 7 9];
+timwinstatflag=1; % =1 for using only stat.time, =0 for using [-0.5 1.0];
+timwin=[-0.5 1];
+stattime=[0 0.5];
+soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
+
+timestart=[0 nan 0 0 0 0.2 .07 nan .5];
+timeend=timestart+.5;
+startind=[500 nan 500 500 500 520 570 nan 1000];
+endind=startind+500;
+
+llcnt=0;lllcnt=0;
+rsa_scorr=zeros(7,7,25,22);
+rsa_edist=zeros(7,7,25,22);
+% rsa_cov=zeros(7,7,25,22);
+for ll=soalist
+  llcnt=llcnt+1;
+  lllcnt=0;
+  for lll=soalist
+    lllcnt=lllcnt+1;
+    for ii=1:22 % number of participants
+      val1=squeeze(grind_TPA_MSPN{ll,tt,10}.individual(ii,:,startind(ll):endind(ll)));
+      val2=squeeze(grind_TPA_MSPN{lll,tt,10}.individual(ii,:,startind(lll):endind(lll)));
+      for jj=1:25 % every 20 ms
+        valslide1=mean(val1(:,jj*20-19:jj*20+1),2);
+        valslide2=mean(val2(:,jj*20-19:jj*20+1),2);
+        rsa_scorr(llcnt,lllcnt,jj,ii)=1-corr(valslide1,valslide2,'type','Spearman'); % 1-r for dissimilarity matrix
+        rsa_edist(llcnt,lllcnt,jj,ii)=norm(valslide1-valslide2);
+%         tmpcov=cov(valslide1,valslide2);
+%         rsa_cov(llcnt,lllcnt,jj,ii)=tmpcov(1,2); % how to make this dissimilar?   1./ or 1-?  or - ?
+      end
+    end
+  end
+end
+
+figure;for jj=1:25,subplot(5,5,jj);imagesc(mean(rsa_scorr(:,:,jj,:),4));caxis([0 1]);title(num2str(jj*20-10));end;
+figure;for jj=1:25,subplot(5,5,jj);imagesc(mean(rsa_edist(:,:,jj,:),4));caxis([0 32]);title(num2str(jj*20-10));end;
+figure;for jj=1:25,subplot(5,5,jj);imagesc(mean(rsa_cov(:,:,jj,:),4));caxis([-10 10]);title(num2str(jj*20-10));end;
+
+
+% Models:
+
+% 1) TIW, fall off as Gaussian with SOA
+rsmodel_1a=zeros(7,7);
+rsmodel_1a(3:5,3:5)=1;
+
+rsmodel_1b=zeros(7,7);
+rsmodel_1b(2:6,2:6)=1;
+
+rsmodel_1c=zeros(7,7);
+rsmodel_1c(2:5,2:5)=1;
+
+rsmodel_1d=zeros(7,7);
+rsmodel_1d(3:6,3:6)=1;
+
+rsmodel_1e=zeros(7,7);
+rsmodel_1e(2:4,2:4)=1;
+
+rsmodel_1f=zeros(7,7);
+rsmodel_1f(4:6,4:6)=1;
+
+% this one is linear combo of above two, thus not needed.
+% rsmodel_1c=zeros(7,7);
+% rsmodel_1c(2,2:6)=1;
+% rsmodel_1c(3:5,2)=1;
+% rsmodel_1c(3:5,6)=1;
+% rsmodel_1c(6,2:6)=1;
+
+figure;imagesc(rsmodel_1a);caxis([-1 1]);
+figure;imagesc(rsmodel_1b);caxis([-1 1]);
+figure;imagesc(rsmodel_1c);caxis([-1 1]);
+figure;imagesc(rsmodel_1d);caxis([-1 1]);
+figure;imagesc(rsmodel_1e);caxis([-1 1]);
+figure;imagesc(rsmodel_1f);caxis([-1 1]);
+
+
+% 2) asymmetry: AT will be similar to each other but different from TA (vice versa)
+rsmodel_2a=zeros(7,7);
+rsmodel_2a(1:4,1:4)=1;
+rsmodel_2a(4:7,4:7)=1;
+figure;imagesc(rsmodel_2a);caxis([-1 1]);
+% rdmodel_2a=-rsmodel_2a;
+% figure;imagesc(rdmodel_2a);
+
+% rsamod2b=eye(7,7);
+% rsamod2b(1:3,1:3)=1;
+% rsamod2b(5:7,5:7)=1;
+% rdmcand2b=-rsamod2b;
+% figure;imagesc(rsamod2b);
+% figure;imagesc(rdmcand2b);
+% rsamod2c=zeros(7,7);
+% rsamod2c(1:3,1:3)=1;
+% rsamod2c(5:7,5:7)=1;
+% figure;imagesc(rsamod2c);
+
+% 3) symmetric: TA70 will be more like itself and AT70 than others
+
+% rsamod3=eye(7,7);
+% rsamod3(3,5)=1;
+% rsamod3(2,6)=1;
+% rsamod3(1,7)=1;
+% rsamod3(5,3)=1;
+% rsamod3(6,2)=1;
+% rsamod3(7,1)=1;
+% figure;imagesc(rsamod3);
+% rsamod3b=zeros(7,7);
+% rsamod3b(3,5)=1;
+% rsamod3b(2,6)=1;
+% rsamod3b(1,7)=1;
+% rsamod3b(5,3)=1;
+% rsamod3b(6,2)=1;
+% rsamod3b(7,1)=1;
+% figure;imagesc(rsamod3b);
+% rsamod3c=zeros(7,7);
+% rsamod3c(2,6)=1;
+% rsamod3c(6,2)=1;
+% figure;imagesc(rsamod3c);
+rsmodel_3a=zeros(7,7);
+rsmodel_3a(1,7)=1;
+rsmodel_3a(2,6)=1;
+rsmodel_3a(3,5)=1;
+rsmodel_3a(4,4)=1;
+rsmodel_3a(5,3)=1;
+rsmodel_3a(6,2)=1;
+rsmodel_3a(7,1)=1;
+figure;imagesc(rsmodel_3a);caxis([-1 1]);
+% rdmcand3b=ones(7,7);
+% rdmcand3b(1,7)=0;
+% rdmcand3b(7,1)=0;
+% figure;imagesc(rdmcand3b);
+% rdmcand3c=ones(7,7);
+% rdmcand3c(2,6)=0;
+% rdmcand3c(6,2)=0;
+% figure;imagesc(rdmcand3c);
+% rdmcand3d=ones(7,7);
+% rdmcand3d(3,5)=0;
+% rdmcand3d(5,3)=0;
+% figure;imagesc(rdmcand3d);
+
+% 4) Behavioural RT
+load([ddir 'rt_allsubj.mat'],'rt*');
+rt_allsubjuse=squeeze(rt_msMminshiftuni(soalist,3,:));
+rt_avgsubj=nanmean(rt_allsubjuse,2);
+for ii=1:size(rt_allsubjuse,2)
+  rt_cov_ind(:,:,ii)=rt_allsubjuse(:,ii)*rt_allsubjuse(:,ii)';
+end
+rt_cov_all=rt_avgsubj*rt_avgsubj';
+
+rsmodel_4a=rt_cov_all/max(abs(rt_cov_all(:)));
+figure;imagesc(rsmodel_4a);caxis([-1 1])
+
+% timevec=-.5:.01:.5;
+% rtvec=nan(101,1);
+% timeind=[dsearchn(timevec',-.5) dsearchn(timevec',-.07) dsearchn(timevec',-.02) dsearchn(timevec',0) dsearchn(timevec',.02) dsearchn(timevec',.07) dsearchn(timevec',.5)]
+% rtvec(1)=rtvals(1);
+% rtvec(dsearchn(timevec',-.07))=rtvals(2);
+% rtvec(dsearchn(timevec',-.02))=rtvals(3);
+% rtvec(dsearchn(timevec',0))=rtvals(4);
+% rtvec(dsearchn(timevec',.02))=rtvals(5);
+% rtvec(dsearchn(timevec',.07))=rtvals(6);
+% rtvec(dsearchn(timevec',.5))=rtvals(7);
+% w=gausswin(101,5); % adjust 2nd param for width
+% figure;plot(timevec,0.037*w);hold on;
+% plot(timevec,rtvec,'o');
+% rsamod1=sqrt(w(timeind)*w(timeind)');  % take sqrt since we want diagonal to be originall gaussian values
+% rdmcand1a=1-rsamod1;
+% figure;imagesc(rsamod1);
+% figure;imagesc(rdmcand1a);
+% uptriind=find(triu(rsamod1));
+
+
+
+% % % 4) simple similarity to self.  (don't use: don't fit diagonal anyway)
+% % rsamod4=eye(7,7);
+% % figure;imagesc(rsamod4);
+
+% Interaction terms:
+interact_1a2a=rsmodel_1a.*rsmodel_2a;
+interact_1b2a=rsmodel_1b.*rsmodel_2a;
+interact_1a3a=rsmodel_1a.*rsmodel_3a;
+interact_1b3a=rsmodel_1b.*rsmodel_3a;
+% interact_2a3a=rsmodel_2a.*rsmodel_3a;  % this gives only the centre point 4,4
+interact_1a4a=rsmodel_1a.*rsmodel_4a;
+interact_1b4a=rsmodel_1b.*rsmodel_4a;
+interact_2a4a=rsmodel_2a.*rsmodel_4a;
+interact_3a4a=rsmodel_3a.*rsmodel_4a;
+figure;imagesc(interact_1a2a);caxis([-1 1]);
+figure;imagesc(interact_1b2a);caxis([-1 1]);
+figure;imagesc(interact_1a3a);caxis([-1 1]);
+figure;imagesc(interact_1b3a);caxis([-1 1]); % scale RT
+% figure;imagesc(interact_2a3a);caxis([-1 1]);
+figure;imagesc(interact_1a4a);caxis([-1 1]);
+figure;imagesc(interact_1b4a);caxis([-1 1]);
+figure;imagesc(interact_2a4a);caxis([-1 1]);
+figure;imagesc(interact_3a4a);caxis([-1 1]);
+
+% rdmcand4_1a2a=rdmcand1a.*rdmcand2a;
+% rdmcand4_1a2b=rdmcand1a.*rdmcand2b;
+% rdmcand4_1b2a=rdmcand1b.*rdmcand2a;
+% rdmcand4_1b2b=rdmcand1b.*rdmcand2b;
+% figure;imagesc(rdmcand4_1a2a)
+% 
+% rdmcand5_1a3a=rdmcand1a.*rdmcand3a;
+% rdmcand5_1b3a=rdmcand1b.*rdmcand3a;
+% figure;imagesc(rdmcand5_1a3a);
+
+% rdmcand6_2a3a=rdmcand2a.*rdmcand3a;
+% rdmcand6_2a3b=rdmcand2a.*rdmcand3b;
+% rdmcand6_2b3a=rdmcand2b.*rdmcand3a;
+% rdmcand6_2b3b=rdmcand2b.*rdmcand3b;
+
+% % Define Models as inclusion/exclusion of regressors (candidates)
+% Model 1: RT alone
+
+% Model 2: RT + asymmetry
+
+% Model 3: RT + sym-pairs 
+
+% Model 4: RT + asymmetry + sym-pairs
+
+% Model 5: RT + asymmetry + RT_X_asymmetry
+
+% Model 6: RT + sym-pairs + RT_X_sym-pairs
+
+% Model 7: RT + asymmetry + sym-pairs + RT_X_asymmetry
+
+% Model 8: RT + asymmetry + sym-pairs + RT_X_sym-pairs
+
+% Model 9: RT + asymmetry + sym-pairs + RT_X_asymmetry + RT_X_sym-pairs
+
+
 %% Plotting above ERP sensor results
 
 
@@ -5642,15 +6013,17 @@ tt=3;
 statwinorig=0;  % =1 means the latency range of .1 to .45 (first way);  =0 means 0 to .5 (final /better way)
 ftver=0;
 mcseed=13;
-usetr=2;
+usetr=0;
+plotallmask=1; % =0 means each subplot will use significane mask relevant for those sensors & time plotted only
+               % =1 means each subplot will use mask relevant for all sensors even those not plotted.
 
 if sleep
   iter=11;
   ss=12;
   trialkc=0;
 else
-%   iter=27;  % previous result
-  iter=31;  % smart sampling
+  iter=27;  % previous result; final way (easier!)
+%   iter=31;  % smart sampling
   ss=10;
   trialkc=-1;
 end
@@ -5772,6 +6145,12 @@ for ll=soalist
     tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
   end
   
+  if plotallmask
+    tmpu1.mask=repmat(ceil(mean(tmpu1.mask,1)),[size(tmpu1.mask,1) 1]);
+    tmpm10.mask=repmat(ceil(mean(tmpm10.mask,1)),[size(tmpm10.mask,1) 1]);
+    tmpd5.mask=repmat(ceil(mean(tmpd5.mask,1)),[size(tmpd5.mask,1) 1]);
+  end
+  
   %   cfg=[];
   %   if timwinstatflag==1
   %     cfg.latency=[statt_mc{ll,tt,ss}.time(1) statt_mc{ll,tt,ss}.time(end)];
@@ -5854,6 +6233,7 @@ for ll=soalist
     plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
     plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
     axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
+    pbaspect([2 1 1]);
     if cg==3
       legend('Null','Tactile','Auditory','Multisensory')
     end
@@ -6036,11 +6416,86 @@ for ll=soalist
   set(f,'AlphaData',statt_mc{ll,3,10}.mask(sortind,:))
   hold off
   fighand=get(ll,'Children');
-  set(fighand(1),'FontSize',20)
+%   set(fighand(1),'FontSize',22)
+  set(gca,'FontSize',20)
+  set(gca,'YTick',[10 30 50])
+  set(gca,'YTickLabel',{'Frontal' 'Central' 'Posterior'})
+  set(gca,'YTickLabelRotation',90)
   print(ll,[fdir 'erp_maskedTstat_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc')
+  print(ll,[fdir 'erp_maskedTstat_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
 end
 
 
+% correlation following Cecere et al. 2017 of topo RSA (tRSA)
+% first average over all time for one overall map
+llcnt=0;lllcnt=0;trsa=zeros(7,7);tcov=zeros(7,7);
+for ll=soalist
+  llcnt=llcnt+1;
+  lllcnt=0;
+  for lll=soalist
+  lllcnt=lllcnt+1;
+   trsa(llcnt,lllcnt)=corr(statt_mc{ll,3,10}.stat(:),statt_mc{lll,3,10}.stat(:));
+   tmpcov=cov(statt_mc{ll,3,10}.stat(:),statt_mc{lll,3,10}.stat(:));
+   tcov(llcnt,lllcnt)=tmpcov(1,2);
+  end
+end
+figure;imagesc(trsa);caxis([-1 1]);colorbar;
+figure;imagesc(tcov);caxis([-max(abs(tcov(:))) max(abs(tcov(:)))]);colorbar;
+% % then get spatial correlation for sliding time window averages
+% llcnt=0;lllcnt=0;trsat=zeros(7,7,50);
+% for ll=soalist
+%   llcnt=llcnt+1;
+%   lllcnt=0;
+%   for lll=soalist
+%     lllcnt=lllcnt+1;
+%     for tt=1:50 % every 10 ms
+%       stat1=mean(statt_mc{ll,3,10}.stat(:,tt*10-9:tt*10+1,:),2);
+%       stat2=mean(statt_mc{lll,3,10}.stat(:,tt*10-9:tt*10+1,:),2);
+%       trsat(llcnt,lllcnt,tt)=corr(stat1,stat2);
+%     end
+%   end
+% end
+% figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);imagesc(squeeze(trsat(aa,bb,:))');caxis([-1 1]);end;end
+% every 20 ms
+llcnt=0;lllcnt=0;trsat=zeros(7,7,25);covt=zeros(7,7,25);
+for ll=soalist
+  llcnt=llcnt+1;
+  lllcnt=0;
+  for lll=soalist
+    lllcnt=lllcnt+1;
+    for tt=1:25 % every 20 ms
+      stat1=mean(statt_mc{ll,3,10}.stat(:,tt*20-19:tt*20+1,:),2);
+      stat2=mean(statt_mc{lll,3,10}.stat(:,tt*20-19:tt*20+1,:),2);
+      trsat(llcnt,lllcnt,tt)=corr(stat1,stat2,'type','Spearman');
+      tmpcov=cov(stat1,stat2);
+      covt(llcnt,lllcnt,tt)=tmpcov(1,2);
+      ed(llcnt,lllcnt,tt)=norm(stat1-stat2); % Euclidean distance
+    end
+  end
+end
+figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);imagesc(squeeze(trsat(aa,bb,:))');caxis([-1 1]);end;end
+figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);imagesc(squeeze(covt(aa,bb,:))');caxis([-max(abs(covt(:)))/2 max(abs(covt(:)))/2]);end;end
+figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);plot(10:20:490,squeeze(trsat(aa,bb,:))');ylim([-1 1]);end;end
+figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);plot(10:20:490,squeeze(covt(aa,bb,:))');ylim([-max(abs(covt(:)))/2 max(abs(covt(:)))/2]);end;end
+
+figure;for tt=1:25,subplot(5,5,tt);imagesc(squeeze(trsat(:,:,tt)));caxis([-1 1]);title(num2str(tt*20-10));end;
+figure;for tt=1:25,subplot(5,5,tt);imagesc(squeeze(ed(:,:,tt)));caxis([0 15]);title(num2str(tt*20-10));end;
+
+% % every 50 ms
+% llcnt=0;lllcnt=0;trsat=zeros(7,7,10);
+% for ll=soalist
+%   llcnt=llcnt+1;
+%   lllcnt=0;
+%   for lll=soalist
+%     lllcnt=lllcnt+1;
+%     for tt=1:10 % every 50 ms
+%       stat1=mean(statt_mc{ll,3,10}.stat(:,tt*50-49:tt*50+1,:),2);
+%       stat2=mean(statt_mc{lll,3,10}.stat(:,tt*50-49:tt*50+1,:),2);
+%       trsat(llcnt,lllcnt,tt)=corr(stat1,stat2);
+%     end
+%   end
+% end
+% figure;for aa=1:7,for bb=1:7,subplot(7,7,(aa-1)*7+bb);imagesc(squeeze(trsat(aa,bb,:))');caxis([-1 1]);end;end
 
 
 
@@ -7889,7 +8344,7 @@ chanlabel{2}='Occipital-parietal electrodes';
 iterflag=1;
 tt=3;
 
-sleep=1;
+sleep=0;
 sleepshortstatflag=0;
 if sleep
   iter=11;
@@ -8199,7 +8654,8 @@ for pb=1:2
         else
           cfg.channel=chanplot{cg};
         end
-        cfg.graphcolor=[bluered(1,:); bluered(10,:); coloruse(2*(bb-1)+pb,:)];
+%         cfg.graphcolor=[bluered(1,:); bluered(10,:); coloruse(2*(bb-1)+pb,:)]; % color for different phase bins
+        cfg.graphcolor=[bluered(1,:); bluered(10,:); coloruse(pb,:)];
         cfg.interactive='no';
         cfg.maskparameter='mask';
         cfg.maskstyle='box'; % default
@@ -8281,25 +8737,42 @@ for ll=soalist
   cfg=[];
   cfg.parameter='individual';
   cfg.operation='subtract';
-  grind_TPAmMSPN_4m2_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,4},grind_TPAmMSPN1_pb{ll,2});
-  grave_TPAmMSPN_4m2_pb{ll}=grind_TPAmMSPN_4m2_pb{ll};
-  grave_TPAmMSPN_4m2_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m2_pb{ll}.individual,1));
-  grave_TPAmMSPN_4m2_pb{ll}=rmfield(grave_TPAmMSPN_4m2_pb{ll},'individual');
-  grave_TPAmMSPN_4m2_pb{ll}.dimord='chan_time';
+%   grind_TPAmMSPN_4m2_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,4},grind_TPAmMSPN1_pb{ll,2});
+%   grave_TPAmMSPN_4m2_pb{ll}=grind_TPAmMSPN_4m2_pb{ll};
+%   grave_TPAmMSPN_4m2_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m2_pb{ll}.individual,1));
+%   grave_TPAmMSPN_4m2_pb{ll}=rmfield(grave_TPAmMSPN_4m2_pb{ll},'individual');
+%   grave_TPAmMSPN_4m2_pb{ll}.dimord='chan_time';
+%   
+%   grind_TPAmMSPN_3m1_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,3},grind_TPAmMSPN1_pb{ll,1});
+%   grave_TPAmMSPN_3m1_pb{ll}=grind_TPAmMSPN_3m1_pb{ll};
+%   grave_TPAmMSPN_3m1_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_3m1_pb{ll}.individual,1));
+%   grave_TPAmMSPN_3m1_pb{ll}=rmfield(grave_TPAmMSPN_3m1_pb{ll},'individual');
+%   grave_TPAmMSPN_3m1_pb{ll}.dimord='chan_time';
   
-  grind_TPAmMSPN_3m1_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,3},grind_TPAmMSPN1_pb{ll,1});
-  grave_TPAmMSPN_3m1_pb{ll}=grind_TPAmMSPN_3m1_pb{ll};
-  grave_TPAmMSPN_3m1_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_3m1_pb{ll}.individual,1));
-  grave_TPAmMSPN_3m1_pb{ll}=rmfield(grave_TPAmMSPN_3m1_pb{ll},'individual');
-  grave_TPAmMSPN_3m1_pb{ll}.dimord='chan_time';
+  grind_TPAmMSPN_2m4_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,2},grind_TPAmMSPN1_pb{ll,4});
+  grave_TPAmMSPN_2m4_pb{ll}=grind_TPAmMSPN_2m4_pb{ll};
+  grave_TPAmMSPN_2m4_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_2m4_pb{ll}.individual,1));
+  grave_TPAmMSPN_2m4_pb{ll}=rmfield(grave_TPAmMSPN_2m4_pb{ll},'individual');
+  grave_TPAmMSPN_2m4_pb{ll}.dimord='chan_time';
   
-  grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,1});
-  grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
-  grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
-  grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
-  grave_TPAmMSPN_4m1_ab{ll}.dimord='chan_time';
+  grind_TPAmMSPN_1m3_pb{ll}=ft_math(cfg,grind_TPAmMSPN1_pb{ll,1},grind_TPAmMSPN1_pb{ll,3});
+  grave_TPAmMSPN_1m3_pb{ll}=grind_TPAmMSPN_1m3_pb{ll};
+  grave_TPAmMSPN_1m3_pb{ll}.avg=squeeze(mean(grave_TPAmMSPN_1m3_pb{ll}.individual,1));
+  grave_TPAmMSPN_1m3_pb{ll}=rmfield(grave_TPAmMSPN_1m3_pb{ll},'individual');
+  grave_TPAmMSPN_1m3_pb{ll}.dimord='chan_time';
+
+  if exist('grind_TPAmMSPN1_ab','var')
+    grind_TPAmMSPN_4m1_ab{ll}=ft_math(cfg,grind_TPAmMSPN1_ab{ll,4},grind_TPAmMSPN1_ab{ll,1});
+    grave_TPAmMSPN_4m1_ab{ll}=grind_TPAmMSPN_4m1_ab{ll};
+    grave_TPAmMSPN_4m1_ab{ll}.avg=squeeze(mean(grave_TPAmMSPN_4m1_ab{ll}.individual,1));
+    grave_TPAmMSPN_4m1_ab{ll}=rmfield(grave_TPAmMSPN_4m1_ab{ll},'individual');
+    grave_TPAmMSPN_4m1_ab{ll}.dimord='chan_time';
+    kkmax=3;
+  else
+    kkmax=2;
+  end
   
-  for kk=1:3
+  for kk=1:kkmax
     cfg=[];
     if timwinstatflag==1
       cfg.latency=[stat_TPAmMSPN1_peak_pb{ll}.time(1) stat_TPAmMSPN1_peak_pb{ll}.time(end)];
@@ -8321,7 +8794,7 @@ for ll=soalist
         tmpm10.avg=squeeze(mean(tmpm10.individual,1));
         tmpm10=rmfield(tmpm10,'individual');
         
-        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_4m2_pb{ll});
+        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_2m4_pb{ll});
         tmpd5.dimord='chan_time';
         tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
         tmpd5=rmfield(tmpd5,'individual');
@@ -8336,7 +8809,7 @@ for ll=soalist
         tmpm10.avg=squeeze(mean(tmpm10.individual,1));
         tmpm10=rmfield(tmpm10,'individual');
         
-        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
+        tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_1m3_pb{ll});
         tmpd5.dimord='chan_time';
         tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
         tmpd5=rmfield(tmpd5,'individual');
@@ -8406,7 +8879,7 @@ for ll=soalist
       cfg.interactive='no';
       cfg.maskparameter='mask';
       cfg.maskstyle='box'; % default
-      figure(100*bb+ll+10*(cg+1))
+      figure(500+ll+10*(cg+1))
       ft_singleplotER(cfg,tmpu1,tmpm10,tmpd5);
       hold on;plot(tmpu1.time,0,'k');
       set(gca,'XTick',[-.5:.1:1])
@@ -8425,14 +8898,14 @@ for ll=soalist
     %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     switch kk
       case 1
-        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff42.png'],'-dpng')
-        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff42.png'],'-dpng')
+        print(500+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff24.png'],'-dpng')
+        print(500+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff24.png'],'-dpng')
       case 2
-        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff31.png'],'-dpng')
-        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff31.png'],'-dpng')
+        print(500+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff13.png'],'-dpng')
+        print(500+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff13.png'],'-dpng')
       case 3
-        print(100*bb+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
-        print(100*bb+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
+        print(500+ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
+        print(500+ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_ab_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) '_shortstat' num2str(sleepshortstatflag)  '_bindiff41.png'],'-dpng')
     end
     
     if any(tmpmask(:))
@@ -8452,31 +8925,31 @@ for ll=soalist
       ft_topoplotER(cfg,tmpu1);
       switch kk
         case 1
-          print(1000*bb+ll,[fdir 'erp_topoU_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+ll,[fdir 'erp_topoU_pb_2m4_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 2
-          print(1000*bb+ll,[fdir 'erp_topoU_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+ll,[fdir 'erp_topoU_pb_1m3_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 3
-          print(1000*bb+ll,[fdir 'erp_topoU_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+ll,[fdir 'erp_topoU_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
       end
       figure(1000*bb+10+ll);
       ft_topoplotER(cfg,tmpm10);
       switch kk
         case 1
-          print(1000*bb+10+ll,[fdir 'erp_topoM_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+10+ll,[fdir 'erp_topoM_pb_2m4_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 2
-          print(1000*bb+10+ll,[fdir 'erp_topoM_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+10+ll,[fdir 'erp_topoM_pb_1m3_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 3
-          print(1000*bb+10+ll,[fdir 'erp_topoM_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+10+ll,[fdir 'erp_topoM_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
       end
       figure(1000*bb+20+ll);
       ft_topoplotER(cfg,tmpd5);
       switch kk
         case 1
-          print(1000*bb+20+ll,[fdir 'erp_topoDiff_pb_4m2_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+20+ll,[fdir 'erp_topoDiff_pb_2m4_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 2
-          print(1000*bb+20+ll,[fdir 'erp_topoDiff_pb_3m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+20+ll,[fdir 'erp_topoDiff_pb_1m3_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
         case 3
-          print(1000*bb+20+ll,[fdir 'erp_topoDiff_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
+          print(5000+20+ll,[fdir 'erp_topoDiff_ab_4m1_' num2str(ll) num2str(tt) num2str(ss) '_bin' num2str(bb) '_shortstat' num2str(sleepshortstatflag)  '.png'],'-dpng')
       end
     end
     
@@ -8484,8 +8957,8 @@ for ll=soalist
 end % ll
 
 
-
-for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
+if sleep==0
+  pb=1; ll=5; % 1vs3 and 2vs4 (ll=5 only significant finding in phase binning)
   cfg=[];
   if timwinstatflag==1
     cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
@@ -8495,8 +8968,7 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
   end
   cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
   
-  % FINISH ME HERE!
-  
+
   tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
   tmpu1.dimord='chan_time';
   tmpu1.avg=squeeze(mean(tmpu1.individual,1));
@@ -8507,7 +8979,7 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
   tmpm10.avg=squeeze(mean(tmpm10.individual,1));
   tmpm10=rmfield(tmpm10,'individual');
   
-  tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
+  tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_1m3_pb{ll});
   tmpd5.dimord='chan_time';
   tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
   tmpd5=rmfield(tmpd5,'individual');
@@ -8539,7 +9011,8 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
     else
       cfg.channel=chanplot{cg};
     end
-    cfg.graphcolor=coloruse([5 5 2],:);
+    cfg.graphcolor=coloruse([1 1 4],:);
+    cfg.linestyle={'-', '--', '-'};
     cfg.interactive='no';
     cfg.maskparameter='mask';
     cfg.maskstyle='box'; % default
@@ -8553,15 +9026,16 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
     plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
     plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
     plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
+    plot([soades(ll) soades(ll)],cfg.ylim,'Color',bluered(9,:),'LineWidth',6)
     axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
     if cg==3
       legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
     end
   end
-  %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_FC_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_OP_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+  %   print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_FC_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+  %   print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_OP_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+  print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_FC_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) 'bindiff13_posthoctime.png'],'-dpng')
+  print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_OP_pb_' num2str(ll) num2str(tt) num2str(ss) '_trialkc' num2str(trialkc) 'bindiff13_posthoctime.png'],'-dpng')
   
   if any(tmpmask(:))
     masktime=find(any(tmpd5.mask,1));
@@ -8578,16 +9052,15 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
     cfg.highlightchannel=sigchannels;
     figure(100+ll);
     ft_topoplotER(cfg,tmpu1);
-    print(100+ll,[fdir 'erp_topoU_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100+ll,[fdir 'erp_topoTPAmMSpN_bin1_' num2str(ll) num2str(tt) num2str(ss) '_posthoctime.png'],'-dpng')
     figure(100+10+ll);
     ft_topoplotER(cfg,tmpm10);
-    print(100+10+ll,[fdir 'erp_topoM_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100+10+ll,[fdir 'erp_topoTPAmMSpN_bin3_' num2str(ll) num2str(tt) num2str(ss) '_posthoctime.png'],'-dpng')
     figure(100+20+ll);
     ft_topoplotER(cfg,tmpd5);
-    print(100+20+ll,[fdir 'erp_topoDiff_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100+20+ll,[fdir 'erp_topoTPAmMSpN_bindiff13_' num2str(ll) num2str(tt) num2str(ss) '_posthoctime.png'],'-dpng')
   end
-  
-end
+end % sleep
 
 %% Plotting phase-dependent results (Uni vs Nul)
 
@@ -8773,7 +9246,9 @@ for ll=[soalist 11 12]
     cfg.maskparameter='mask';
     cfg.maskstyle='box'; % default
     figure(ll*100+10*(cg+1))
-    ft_singleplotER(cfg,tmpu1,tmpd7,tmpm10,tmpd4);
+    ft_singleplotER(cfg,tmpu1,tmpd7,tmpm10,tmpd4); % index 1, 4, 3, 2, corresponding to
+    % see bin_my_angle for what each of 4 bins means
+    % 1: peak, 2: peak to trough, 3: trough, 4: trough to peak
     hold on;plot(tmpu1.time,0,'k');
     set(gca,'XTick',[-.5:.1:1])
     set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
@@ -8797,92 +9272,9 @@ for ll=[soalist 11 12]
   print(ll*100+20,[fdir 'erp_' condname{ll} 'vsNul_diff_PeakVsTrgh_FC_sleep' num2str(sleep) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(ll*100+30,[fdir 'erp_' condname{ll} 'vsNul_diff_PeakVsTrgh_OP_sleep' num2str(sleep) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   
-  
-end
-
-
-
-
-for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
-  cfg=[];
-  if timwinstatflag==1
-    cfg.latency=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-  elseif timwinstatflag==0
-    cfg.latency=timwin;
-    stattimwin=[stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(1) stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.time(end)];
-  end
-  cfg.channel=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.label;
-  
-  % FINISH ME HERE!
-  
-  tmpu1=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,1});
-  tmpu1.dimord='chan_time';
-  tmpu1.avg=squeeze(mean(tmpu1.individual,1));
-  tmpu1=rmfield(tmpu1,'individual');
-  
-  tmpm10=ft_selectdata(cfg,grind_TPAmMSPN1_pb{ll,3});
-  tmpm10.dimord='chan_time';
-  tmpm10.avg=squeeze(mean(tmpm10.individual,1));
-  tmpm10=rmfield(tmpm10,'individual');
-  
-  tmpd5=ft_selectdata(cfg,grind_TPAmMSPN_3m1_pb{ll});
-  tmpd5.dimord='chan_time';
-  tmpd5.avg=scalediff*squeeze(mean(tmpd5.individual,1));
-  tmpd5=rmfield(tmpd5,'individual');
-  
-  
-  tmpmask=stat_TPAmMSPN_peakMtrgh_pb_posthoctime{ll}.mask;
-  if timwinstatflag==0
-    tmpu1.mask=zeros(size(tmpu1.avg,1),length(tmpu1.time));
-    tmpu1.mask(:,dsearchn(tmpu1.time',stattimwin(1)):dsearchn(tmpu1.time',stattimwin(end)))=tmpmask;
-    tmpm10.mask=zeros(size(tmpm10.avg,1),length(tmpm10.time));
-    tmpm10.mask(:,dsearchn(tmpm10.time',stattimwin(1)):dsearchn(tmpm10.time',stattimwin(end)))=tmpmask;
-    tmpd5.mask=zeros(size(tmpd5.avg,1),length(tmpd5.time));
-    tmpd5.mask(:,dsearchn(tmpd5.time',stattimwin(1)):dsearchn(tmpd5.time',stattimwin(end)))=tmpmask;
-  else
-    tmpu1{bb}.mask=tmpmask
-    tmpm10{bb}.mask=tmpmask;
-    tmpd5{bb}.mask=tmpmask;
-  end
-  
-  for cg=1:length(chanplot)
-    cfg=[];
-    cfg.parameter='avg';
-    cfg.layout='elec1010.lay';
-    cfg.ylim=[-5 8];
-    cfg.linewidth=3;
-    cfg.xlim=timwin;
-    if cg>length(chanplot)
-      cfg.channel=tmpd5.label(any(tmpd5.mask,2));
-    else
-      cfg.channel=chanplot{cg};
-    end
-    cfg.graphcolor=coloruse([5 5 2],:);
-    cfg.interactive='no';
-    cfg.maskparameter='mask';
-    cfg.maskstyle='box'; % default
-    figure(ll+10*(cg+1))
-    ft_singleplotER(cfg,tmpu1,tmpm10,tmpd5);
-    hold on;plot(tmpu1.time,0,'k');
-    set(gca,'XTick',[-.5:.1:1])
-    set(gca,'XTickLabel',{'-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'})
-    set(gca,'FontSize',30)
-    title([])
-    plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
-    plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
-    plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
-    axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
-    if cg==3
-      legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
-    end
-  end
-  %   print(30+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(ll+20,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_FC_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(ll+30,[fdir 'erp_tacPaud_MSpN_diff_PeakVsTrgh_OP_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  
-  if any(tmpmask(:))
-    masktime=find(any(tmpd5.mask,1));
+  % topos of significant chunks only
+  if ~isempty(find(mean(tmpmask,1))) %in other words, if there is some significant time point(s)
+    masktime=find(any(tmpmask,1));
     cfg=[];
     cfg.parameter='avg';
     cfg.layout='elec1010.lay';
@@ -8890,20 +9282,23 @@ for ll=5 % 1vs3 and 2vs4 (ll=5 only significant finding)
     cfg.zlim=[-5 5];
     cfg.highlight='on';
     cfg.highlightsize=12;
-    cfg.xlim=[tmpd5.time(masktime(1)) tmpd5.time(masktime(end))];
+    cfg.xlim=[tmpu1.time(masktime(1)) tmpu1.time(masktime(end))];
     cfg.comment='no';
-    sigchannels=tmpd5.label(find(ceil(mean(tmpd5.mask(:,dsearchn(tmpd5.time',cfg.xlim(1)):dsearchn(tmpd5.time',cfg.xlim(2))),2))));
+    sigchannels=tmpu1.label(find(ceil(mean(tmpu1.mask(:,dsearchn(tmpu1.time',cfg.xlim(1)):dsearchn(tmpu1.time',cfg.xlim(2))),2))));
     cfg.highlightchannel=sigchannels;
     figure(100+ll);
     ft_topoplotER(cfg,tmpu1);
-    print(100+ll,[fdir 'erp_topoU_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(100+ll,[fdir 'erp_topo_Peak_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     figure(100+10+ll);
-    ft_topoplotER(cfg,tmpm10);
-    print(100+10+ll,[fdir 'erp_topoM_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    ft_topoplotER(cfg,tmpd7);
+    print(100+10+ll,[fdir 'erp_topo_Trgh2Peak_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     figure(100+20+ll);
-    ft_topoplotER(cfg,tmpd5);
-    print(100+20+ll,[fdir 'erp_topoDiff_PeakVsTrgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    ft_topoplotER(cfg,tmpm10);
+    print(100+20+ll,[fdir 'erp_topo_Trgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    figure(100+30+ll);
+    ft_topoplotER(cfg,tmpd4);
+    print(100+30+ll,[fdir 'erp_topo_Peak2Trgh_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   end
-  
 end
+
 
