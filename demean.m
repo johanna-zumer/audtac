@@ -1,4 +1,5 @@
 function xout=demean(xin,dim)
+% function xout=demean(xin,dim)
 
 if dim==1
   xout=xin-repmat(mean(xin,dim),[size(xin,1) 1]);
