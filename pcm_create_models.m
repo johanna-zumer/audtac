@@ -2,12 +2,14 @@
 % Johanna Zumer, 2017
 plotflag=0;
 
+pcm_RDM_G
+
 % Model 1: Null model for baseline: here we use a model which has all
 % Patterns be independent
 M{1}.type       = 'component';
 M{1}.numGparams = 1;
 M{1}.Gc         = eye(7);
-M{1}.name       = 'null'; 
+M{1}.name       = 'null_eye'; 
 
 % Model 2: Free model as Noise ceiling
 M{2}.type       = 'freechol'; 
@@ -23,104 +25,6 @@ H=eye(7)-ones(7)/7;
 
 
 % components
-
-% 1) TIW, varying width and centre
-% rsmodel_1a=zeros(7,7);
-% rsmodel_1a(3:5,3:5)=1;
-% G_1a=rsa2G(rsmodel_1a,plotflag,'model 1a');
-rdmodel_1a=1-eye(7);
-rdmodel_1a(3:5,3:5)=0;
-G_1a=nearestSPD(rdm2G(rdmodel_1a,plotflag,'model 1a'));
-
-% rsmodel_1b=zeros(7,7);
-% rsmodel_1b(2:6,2:6)=1;
-% G_1b=rsa2G(rsmodel_1b,plotflag,'model 1b');
-rdmodel_1b=1-eye(7);
-rdmodel_1b(2:6,2:6)=0;
-G_1b=nearestSPD(rdm2G(rdmodel_1b,plotflag,'model 1b'));
-
-% rsmodel_1c=zeros(7,7);
-% rsmodel_1c(2:5,2:5)=1;
-% G_1c=rsa2G(rsmodel_1c,plotflag,'model 1c');
-rdmodel_1c=1-eye(7);
-rdmodel_1c(2:5,2:5)=0;
-G_1c=nearestSPD(rdm2G(rdmodel_1c,plotflag,'model 1c'));
-
-% rsmodel_1d=zeros(7,7);
-% rsmodel_1d(3:6,3:6)=1;
-% G_1d=rsa2G(rsmodel_1d,plotflag,'model 1d');
-rdmodel_1d=1-eye(7);
-rdmodel_1d(3:6,3:6)=0;
-G_1d=nearestSPD(rdm2G(rdmodel_1d,plotflag,'model 1d'));
-
-% rsmodel_1e=zeros(7,7);
-% rsmodel_1e(2:4,2:4)=1;
-% G_1e=rsa2G(rsmodel_1e,plotflag,'model 1e');
-rdmodel_1e=1-eye(7);
-rdmodel_1e(2:4,2:4)=0;
-G_1e=nearestSPD(rdm2G(rdmodel_1e,plotflag,'model 1e'));
-
-% rsmodel_1f=zeros(7,7);
-% rsmodel_1f(4:6,4:6)=1;
-% G_1f=rsa2G(rsmodel_1f,plotflag,'model 1f');
-rdmodel_1f=1-eye(7);
-rdmodel_1f(4:6,4:6)=0;
-G_1f=nearestSPD(rdm2G(rdmodel_1f,plotflag,'model 1f'));
-
-% 2) asymmetry: AT will be similar to each other but different from TA (vice versa)
-% rsmodel_2a=zeros(7,7);
-% rsmodel_2a(1:4,1:4)=1;
-% rsmodel_2a(4:7,4:7)=1;
-% G_2a=rsa2G(rsmodel_2a,plotflag,'model 2');
-rdmodel_2a=1-eye(7);
-rdmodel_2a(1:4,1:4)=0;
-rdmodel_2a(4:7,4:7)=0;
-G_2a=nearestSPD(rdm2G(rdmodel_2a,plotflag,'model 2'));
-
-% 3) symmetric pair: TA70 will be more like itself and AT70 than others
-% rsmodel_3a=zeros(7,7);
-% rsmodel_3a(1,7)=1;
-% rsmodel_3a(2,6)=1;
-% rsmodel_3a(3,5)=1;
-% rsmodel_3a(4,4)=1;
-% rsmodel_3a(5,3)=1;
-% rsmodel_3a(6,2)=1;
-% rsmodel_3a(7,1)=1;
-% G_3a=rsa2G(rsmodel_3a,plotflag,'model 3');
-rdmodel_3a=1-eye(7);
-rdmodel_3a(1,7)=0;
-rdmodel_3a(2,6)=0;
-rdmodel_3a(3,5)=0;
-rdmodel_3a(4,4)=0;
-rdmodel_3a(5,3)=0;
-rdmodel_3a(6,2)=0;
-rdmodel_3a(7,1)=0;
-G_3a=nearestSPD(rdm2G(rdmodel_3a,plotflag,'model 3'));
-
-% Interaction terms:
-% interact_1a2a=rsmodel_1a.*rsmodel_2a;
-% interact_1b2a=rsmodel_1b.*rsmodel_2a;
-% interact_1a3a=rsmodel_1a.*rsmodel_3a;
-% interact_1b3a=rsmodel_1b.*rsmodel_3a;
-% G_1a2a=rsa2G(interact_1a2a,plotflag,'model 3');
-% G_1b2a=rsa2G(interact_1b2a,plotflag,'model 3');
-% G_1a3a=rsa2G(interact_1a3a,plotflag,'model 3');
-% G_1b3a=rsa2G(interact_1b3a,plotflag,'model 3');
-interact_1a2a=rdmodel_1a.*rdmodel_2a;
-interact_1b2a=rdmodel_1b.*rdmodel_2a;
-interact_1a3a=rdmodel_1a.*rdmodel_3a;
-interact_1b3a=rdmodel_1b.*rdmodel_3a;
-interact_2a3a=rdmodel_2a.*rdmodel_3a;
-G_1a2a=nearestSPD(rdm2G(interact_1a2a,plotflag,'model 1a X 2'));
-G_1b2a=nearestSPD(rdm2G(interact_1b2a,plotflag,'model 1b X 2'));
-G_1a3a=nearestSPD(rdm2G(interact_1a3a,plotflag,'model 1a X 3'));
-G_1b3a=nearestSPD(rdm2G(interact_1b3a,plotflag,'model 1b X 3'));
-G_2a3a=nearestSPD(rdm2G(interact_2a3a,plotflag,'model 2 X 3'));
-
-% Gi_1a2a=G_1a.*G_2a;
-% Gi_1b2a=G_1b.*G_2a;
-% Gi_1a3a=G_1a.*G_3a;
-% Gi_1b3a=G_1b.*G_3a;
 
 % % Model 3: TIW a
 % M{3}.type       = 'component';
@@ -244,6 +148,12 @@ M{16}.Gc(:,:,3)  = G_2a;
 M{16}.Gc(:,:,4)  = G_3a;
 M{16}.Gc(:,:,5)  = eye(7);
 M{16}.name       = 'TIW1a1b_Asym2_SymPair3_eye'; 
+
+M{17}.type       = 'component';
+M{17}.numGparams = 1;
+M{17}.Gc         = nearestSPD(zeros(7));
+M{17}.name       = 'null_zero'; 
+
 
 % % % 3 (reduced) models with interaction terms
 % % Model 10: TIW a and b;  Asymmetry; Interaction_TIW_Asym
@@ -381,7 +291,8 @@ M{16}.name       = 'TIW1a1b_Asym2_SymPair3_eye';
 % 
 
 for mm=1:numel(M)
-  M{mm}.fitAlgorithm='NR'; % NR or minimize
+%   M{mm}.fitAlgorithm='NR'; % NR or minimize
+  M{mm}.fitAlgorithm='minimize'; % NR or minimize
 end
 
 save([edir 'pcm_models.mat'],'M');
