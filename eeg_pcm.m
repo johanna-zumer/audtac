@@ -10,6 +10,7 @@ if ispc
   fdir='D:\audtac\figs\';
   mdir='D:\audtac\structural_MRI\';
   pdir='D:\audtac\polhemus\';
+  idir='D:\audtac\sim_results\';
 else
   [~,hostname]=system('hostname');
   if ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % either COLLES-151401 or LES-LINUX_FS3
@@ -21,6 +22,7 @@ else
     fdir='/home/zumerj/audtac/figs/';
     mdir='/home/zumerj/audtac/structural_MRI/';
     pdir='/home/zumerj/audtac/polhemus/';
+    idir='/home/zumerj/audtac/sim_results/';
   else % assume on VM linux of psychl-132432
     edir='/mnt/hgfs/D/audtac/eeg_data/';
     esdir='/mnt/hgfs/D/audtac/source_data/';
@@ -30,6 +32,7 @@ else
     fdir='/mnt/hgfs/D/audtac/figs/';
     mdir='/mnt/hgfs/D/audtac/structural_MRI/';
     pdir='/mnt/hgfs/D/audtac/polhemus/';
+    idir='/mnt/hgfs/D/audtac/sim_results/';
   end
 end
 cd(edir)
@@ -155,6 +158,7 @@ for ii=subuseall
   % Extract each difference across time windows of ERP, normalise.
   llcnt=0;
   trlcnt=0;
+  numPart=5; % number of partitions for crossval
   for ll=soalist
     llcnt=llcnt+1;
     %     startind1=dsearchn(tlock_tacPaud{ll,tt,10}.time',timestart(ll));
@@ -170,8 +174,9 @@ for ii=subuseall
     data_condmean_squeeze{llcnt}=mean(tlockdiff_slide{llcnt},1);
     data_condmean{llcnt}=repmat(mean(tlockdiff_slide{llcnt},1),[size(tlockdiff_slide{llcnt},1) 1 1]);
   end
-  datacat{subcnt}=cat(1,tlockdiff_slide{:});
-  partVec{subcnt}=ones(size(datacat{subcnt},1),1);
+  datacat{subcnt}=cat(1,tlockdiff_slide{:}); % non-equal number of trials per condition; okay?
+  partVec{subcnt}=[rem(1:size(datacat{subcnt},1),numPart)+1]';  % this is nonequal number of trials per partition & condition; okay?
+%   partVec{subcnt}=ones(size(datacat{subcnt},1),1);
   datameancat=cat(1,data_condmean{:});
   datacat_meansubt{subcnt}=datacat{subcnt}-datameancat;
   datameansqueezecat=cat(1,data_condmean_squeeze{:});
@@ -181,16 +186,16 @@ for ii=subuseall
   
   % Mahalanobis distance (from Mate)
   sigma = compCovEEG(datacat{subcnt},designX{subcnt});
-  pdistvec =  NaN(7*(7-1)/2,numtimesteps);
-  for iTimePoint = 1:numtimesteps
-%     actTimePointFeats = squeeze(feat_avg(:,iTimePoint,:))';
-%     actTimePointFeats = squeeze(datameancat(:,:,iTimePoint));
-    actTimePointFeats = squeeze(datameansqueezecat(:,:,iTimePoint));
-    pdistvec(:,iTimePoint) = pdist(actTimePointFeats,'mahalanobis',sigma(:,:,iTimePoint));
-  end
-  if plotflag
-    for jj=1:25,subplot(5,5,jj);imagesc(squareform(pdistvec(:,jj)));caxis([0 1.5]);end
-  end
+%   pdistvec =  NaN(7*(7-1)/2,numtimesteps);
+%   for iTimePoint = 1:numtimesteps
+% %     actTimePointFeats = squeeze(feat_avg(:,iTimePoint,:))';
+% %     actTimePointFeats = squeeze(datameancat(:,:,iTimePoint));
+%     actTimePointFeats = squeeze(datameansqueezecat(:,:,iTimePoint));
+%     pdistvec(:,iTimePoint) = pdist(actTimePointFeats,'mahalanobis',sigma(:,:,iTimePoint));
+%   end
+%   if plotflag
+%     for jj=1:25,subplot(5,5,jj);imagesc(squareform(pdistvec(:,jj)));caxis([0 1.5]);end
+%   end
   
   % Multivariate noise normalisation
   for jj=1:numtimesteps
@@ -209,32 +214,46 @@ pcm_create_models;
 
 load([edir 'pcm_datacat.mat']);
 load([edir 'pcm_models.mat']);
-
-% new partVec for proper cross-val
-for subcnt=1:length(datacat)
-  partVec{subcnt}=repmat([1 2],[1 floor(size(datacat{subcnt},1)/2)])';
-  datacat{subcnt}=datacat{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
-  datacat_meansubt{subcnt}=datacat_meansubt{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
-  datacat_meansubt_noisenorm{subcnt}=datacat_meansubt_noisenorm{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
-  designX{subcnt}=designX{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:);
-  numobs(subcnt)=size(designX{subcnt},1);
-end
-numobsall=sum(numobs);
-
 numtimesteps=size(datacat{1},3);
-for jj=1:numtimesteps
-  % Y=datacat;
-  % Y=datacat_meansubt;
-  for ii=1:length(datacat_meansubt_noisenorm)
-    Y{ii}=datacat_meansubt_noisenorm{ii}(:,:,jj);
+
+% % new partVec for proper cross-val
+% for subcnt=1:length(datacat)
+%   partVec{subcnt}=repmat([1 2],[1 floor(size(datacat{subcnt},1)/2)])';
+%   datacat{subcnt}=datacat{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
+%   datacat_meansubt{subcnt}=datacat_meansubt{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
+%   datacat_meansubt_noisenorm{subcnt}=datacat_meansubt_noisenorm{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:,:);
+%   designX{subcnt}=designX{subcnt}(1:2*floor(size(datacat{subcnt},1)/2),:);
+%   numobs(subcnt)=size(designX{subcnt},1);
+% end
+% numobsall=sum(numobs);
+
+if 0
+  for jj=1:numtimesteps
+    % Y=datacat;
+    % Y=datacat_meansubt;
+    for ii=1:length(datacat_meansubt_noisenorm)
+      Y{ii}=datacat_meansubt_noisenorm{ii}(:,:,jj);
+    end
+    [pcmfit{jj}.Tgroup,pcmfit{jj}.theta,pcmfit{jj}.Gpred] = pcm_fitModelGroup(Y,M,partVec,designX,'runEffect','fixed','fitScale',1);
+    [pcmfit{jj}.Tcross,pcmfit{jj}.thetaCr,pcmfit{jj}.G_predcv] = pcm_fitModelGroupCrossval(Y,M,partVec,designX,'runEffect','fixed','groupFit',pcmfit{jj}.theta,'fitScale',1);
+    save([edir 'pcm_datafit.mat'],'pcmfit');
   end
-  [pcmfit{jj}.Tgroup,pcmfit{jj}.theta,pcmfit{jj}.Gpred] = pcm_fitModelGroup(Y,M,partVec,designX,'runEffect','fixed','fitScale',1);
-  [pcmfit{jj}.Tcross,pcmfit{jj}.thetaCr,pcmfit{jj}.G_predcv] = pcm_fitModelGroupCrossval(Y,M,partVec,designX,'runEffect','fixed','groupFit',pcmfit{jj}.theta,'fitScale',1);
-  save([edir 'pcm_datafit.mat'],'pcmfit');
+else % bluebear
+  % audtac_pcm_run
+  for jj=1:numtimesteps
+    load([edir 'pcm_datafit_jj' num2str(jj) '.mat']); % using real partVec
+    pcmfit{jj}=A;
+  end
 end
 
+
+close all;figure
 for jj=1:numtimesteps
-  pcmfit{jj}.T = pcm_plotModelLikelihood(pcmfit{jj}.Tcross,M,'upperceil',pcmfit{jj}.Tgroup.likelihood(:,2),'normalize',1);
+  subplot(5,5,jj);
+  pcmfit{jj}.T = pcm_plotModelLikelihood(pcmfit{jj}.Tcross,M,'upperceil',pcmfit{jj}.Tgroup.likelihood(:,2),'normalize',0,'Nnull',17,'Nceil',2);
+end
+for jj=1:numtimesteps
+  subplot(5,5,jj);plot(mean(pcmfit{jj}.T.likelihood_norm,1),'o');ylim([-.2 1]);title([num2str(jj*20) ' ms'])
 end
 
 for jj=1:numtimesteps

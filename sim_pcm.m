@@ -102,7 +102,7 @@ for ss=1:22  % pretend 22 subjects
     for sm=1:size(Scale_noise,1)
       theta_s(sm,ss)   = abs(Scale_noise(sm,1)+randn*.1);
       theta_sig(sm,ss) = abs(Scale_noise(sm,2)+randn*.1);
-
+      
       V = Z*G_sum(:,:,tr)*theta_s(sm,ss)*Z';
       V = V + eye(size(V))*theta_sig(sm,ss);
       
@@ -143,74 +143,114 @@ return
 load([edir 'pcm_models.mat']);  % from pcm_create_models.m
 load([edir 'sim_Ydata.mat']);
 
-% Fit the models on the group level
-% partVec=ones(350,1);
-% Still playing around with how best to partition for cross-validation
-% partVec=repmat([1 2],[1 175])';
-partVec=repmat([1 2 3 4 5],[1 70])';
-
-% delete(gcp('nocreate'))
-% mypool=parpool;
-% addAttachedFiles(mypool, [edir 'sim_pcm_output_cv.mat'])
-
-% values{2}=partVec;
-% values{3}=M;
-% snames{1}='ms_mr';
-% snames{2}='partVec';
-% snames{3}='M';
-
-for sm=1:size(Y_ms_n,2)
-  for tr=1:size(Y_ms_n,1)
-    % multisensory, mean-removed
-    [ms_mr{tr,sm}.Tgroup,ms_mr{tr,sm}.theta,ms_mr{tr,sm}.G_pred,ms_mr{tr,sm}.G_hat] = pcm_fitModelGroup(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
-    [ms_mr{tr,sm}.Tcross,ms_mr{tr,sm}.thetaCr,ms_mr{tr,sm}.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',ms_mr{tr,sm}.theta,'fitScale',1);
-    %     save([edir 'sim_pcm_output.mat'],'ms_mr'); % using partVec=ones
-    %     updateAttachedFiles(mypool)
-    %   save([edir 'sim_pcm_output_cv.mat'],'ms_mr','partVec'); % using real partVec
-%     values{1}=ms_mr;
-%     parfor_save([edir 'sim_pcm_output_cv2_rownorm.mat'],values,snames)
-    save([edir 'sim_pcm_output_cv2_rownorm_newY.mat'],'ms_mr','partVec','M'); % using real partVec
+if 0
+  
+  % Fit the models on the group level
+  % partVec=ones(350,1);
+  % Still playing around with how best to partition for cross-validation
+  % partVec=repmat([1 2],[1 175])';
+  partVec=repmat([1 2 3 4 5],[1 70])';
+  
+  % delete(gcp('nocreate'))
+  % mypool=parpool;
+  % addAttachedFiles(mypool, [edir 'sim_pcm_output_cv.mat'])
+  
+  % values{2}=partVec;
+  % values{3}=M;
+  % snames{1}='ms_mr';
+  % snames{2}='partVec';
+  % snames{3}='M';
+  
+  for sm=1:size(Y_ms_n,2)
+    for tr=1:size(Y_ms_n,1)
+      % multisensory, mean-removed
+      [ms_mr{tr,sm}.Tgroup,ms_mr{tr,sm}.theta,ms_mr{tr,sm}.G_pred,ms_mr{tr,sm}.G_hat] = pcm_fitModelGroup(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
+      [ms_mr{tr,sm}.Tcross,ms_mr{tr,sm}.thetaCr,ms_mr{tr,sm}.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',ms_mr{tr,sm}.theta,'fitScale',1);
+      %     save([edir 'sim_pcm_output.mat'],'ms_mr'); % using partVec=ones
+      %     updateAttachedFiles(mypool)
+      %   save([edir 'sim_pcm_output_cv.mat'],'ms_mr','partVec'); % using real partVec
+      %     values{1}=ms_mr;
+      %     parfor_save([edir 'sim_pcm_output_cv2_rownorm.mat'],values,snames)
+      save([edir 'sim_pcm_output_cv2_rownorm_newY.mat'],'ms_mr','partVec','M'); % using real partVec
+    end
   end
+  
+  for sm=1:size(Y_ms_n,2)
+    for tr=1:size(Y_ms_n,1)
+      % multisensory, mean condition included
+      [ms_mc{tr,sm}.Tgroup,ms_mc{tr,sm}.theta,ms_mc{tr,sm}.G_pred] = pcm_fitModelGroup(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
+      [ms_mc{tr,sm}.Tcross,ms_mc{tr,sm}.thetaCr,ms_mc{tr,sm}.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',ms_mc{tr,sm}.theta,'fitScale',1);
+      save([edir 'sim_pcm_output_cv.mat'],'ms_mr','ms_mc','partVec');
+    end
+  end
+  
+  load([edir 'sim_pcm_output_cv.mat'],'ms_mr');
+  
+  % % Cecere subtraction, mean-removed
+  % [cs_mr.Tgroup,cs_mr.theta,cs_mr.G_pred] = pcm_fitModelGroup(Y_cc_n,M,partVec,Z,'runEffect','fixed','fitScale',1);
+  % [cs_mr.Tcross,cs_mr.thetaCr,cs_mr.G_predcv] = pcm_fitModelGroupCrossval(Y_cc_n,M,partVec,Z,'runEffect','fixed','groupFit',cs_mr.theta,'fitScale',1);
+  % % Cecere subtraction, mean condition included
+  % [cs_mc.Tgroup,cs_mc.theta,cs_mc.G_pred] = pcm_fitModelGroup(Y_cc_n_mc,M,partVec,Z,'runEffect','fixed','fitScale',1);
+  % [cs_mc.Tcross,cs_mc.thetaCr,cs_mc.G_predcv] = pcm_fitModelGroupCrossval(Y_cc_n_mc,M,partVec,Z,'runEffect','fixed','groupFit',cs_mc.theta,'fitScale',1);
+  
+  % save([edir 'sim_pcm_output.mat'],'ms_mr','ms_mc','cs_mr','cs_mc');
+  %
+  % ms_mr.T = pcm_plotModelLikelihood(ms_mr.Tcross,M,'upperceil',ms_mr.Tgroup.likelihood(:,2));
+  % ms_mr.T = pcm_plotModelLikelihood(ms_mr.Tcross,M,'upperceil',ms_mr.Tgroup.likelihood(:,2),'normalize',1);
+  % mean(ms_mr.T.likelihood_norm,1)
+  
+else
+  % OR, see results from running on BlueBear cluster
+  for sm=1:size(Y_ms_n,2)
+    for tr=1:size(Y_ms_n,1)
+      load([idir 'sim_pcm_output_tr' num2str(tr) '_sm' num2str(sm) '.mat']); % using real partVec
+      ms_mr{tr,sm}=A;
+    end
+  end
+  
 end
 
-for sm=1:size(Y_ms_n,2)
-  for tr=1:size(Y_ms_n,1)
-    % multisensory, mean condition included
-    [ms_mc{tr,sm}.Tgroup,ms_mc{tr,sm}.theta,ms_mc{tr,sm}.G_pred] = pcm_fitModelGroup(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
-    [ms_mc{tr,sm}.Tcross,ms_mc{tr,sm}.thetaCr,ms_mc{tr,sm}.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',ms_mc{tr,sm}.theta,'fitScale',1);
-    save([edir 'sim_pcm_output_cv.mat'],'ms_mr','ms_mc','partVec');
+
+
+set_pcmsim_colors
+for tr=1:size(Y_ms_n,1)
+  if numel(M)==17
+    Nnull=17;
+    Nceil=2;
+    colors{tr}(Nnull)=[];
+    colors{tr}(Nceil)=[];
+    for sm=1:size(Y_ms_n,2)
+      figure(tr)
+      try
+        subplot(4,2,2*(sm-1)+1);
+        ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tcross,M,'upperceil',ms_mr{tr,sm}.Tcross.likelihood(:,2),'normalize',1,'Nnull',Nnull,'Nceil',Nceil,'colors',colors{tr});
+        if sm==1,title('CV');end
+%         ylim([-2 2]);
+      end
+      try
+        subplot(4,2,2*(sm-1)+2);
+        ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tgroup,M,'upperceil',ms_mr{tr,sm}.Tgroup.likelihood(:,2),'normalize',1,'Nnull',Nnull,'Nceil',Nceil,'colors',colors{tr});
+        if sm==1,title('non-CV');end
+%         ylim([-2 2]);
+      end
+    end
+    print(tr,[fdir 'simpcm_results_tr' num2str(tr) '.png'],'-dpng');
+  elseif numel(M)==16
+    Nnull=1;
+    Nceil=2;
+    colors{tr}(Nnull)=[];
+    colors{tr}(Nceill)=[];
+    for sm=1:size(Y_ms_n,2)
+      figure(tr)
+      subplot(3,2,2*(sm-1)+1);
+      ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tcross,M,'upperceil',ms_mr{tr,sm}.Tcross.likelihood(:,2),'normalize',1,'Nnull',Nnull,'Nceil',Nceil,'colors',colors{tr});
+      ylim([-2 2]);
+      subplot(3,2,2*(sm-1)+2);
+      ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tgroup,M,'upperceil',ms_mr{tr,sm}.Tgroup.likelihood(:,2),'normalize',1,'Nnull',Nnull,'Nceil',Nceil,'colors',colors{tr});
+      ylim([-2 2]);
+    end
   end
 end
-
-load([edir 'sim_pcm_output_cv.mat'],'ms_mr');
-for sm=1:size(Y_ms_n,2)
-  for tr=1:size(Y_ms_n,1)
-    figure(tr)
-    subplot(3,2,2*(sm-1)+1);
-    ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tcross,M,'upperceil',ms_mr{tr,sm}.Tgroup.likelihood(:,2),'normalize',1);
-    ylim([-2 2]);
-    subplot(3,2,2*(sm-1)+2);
-    ms_mr{tr,sm}.T = pcm_plotModelLikelihood(ms_mr{tr,sm}.Tgroup,M,'upperceil',ms_mr{tr,sm}.Tgroup.likelihood(:,2),'normalize',1);
-    ylim([-2 2]);
-  end
-end
-
-% % Cecere subtraction, mean-removed
-% [cs_mr.Tgroup,cs_mr.theta,cs_mr.G_pred] = pcm_fitModelGroup(Y_cc_n,M,partVec,Z,'runEffect','fixed','fitScale',1);
-% [cs_mr.Tcross,cs_mr.thetaCr,cs_mr.G_predcv] = pcm_fitModelGroupCrossval(Y_cc_n,M,partVec,Z,'runEffect','fixed','groupFit',cs_mr.theta,'fitScale',1);
-% % Cecere subtraction, mean condition included
-% [cs_mc.Tgroup,cs_mc.theta,cs_mc.G_pred] = pcm_fitModelGroup(Y_cc_n_mc,M,partVec,Z,'runEffect','fixed','fitScale',1);
-% [cs_mc.Tcross,cs_mc.thetaCr,cs_mc.G_predcv] = pcm_fitModelGroupCrossval(Y_cc_n_mc,M,partVec,Z,'runEffect','fixed','groupFit',cs_mc.theta,'fitScale',1);
-
-% save([edir 'sim_pcm_output.mat'],'ms_mr','ms_mc','cs_mr','cs_mc');
-%
-% ms_mr.T = pcm_plotModelLikelihood(ms_mr.Tcross,M,'upperceil',ms_mr.Tgroup.likelihood(:,2));
-% ms_mr.T = pcm_plotModelLikelihood(ms_mr.Tcross,M,'upperceil',ms_mr.Tgroup.likelihood(:,2),'normalize',1);
-% mean(ms_mr.T.likelihood_norm,1)
-
-
-
-
 
 
 
