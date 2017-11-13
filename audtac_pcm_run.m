@@ -20,7 +20,8 @@ load([edir 'pcm_datacat.mat']);
 disp(['Iteration running: timestep ' num2str(jj) ])
 
 for ii=1:length(datacat_meansubt_noisenorm)
-  Y{ii}=datacat_meansubt_noisenorm{ii}(:,:,jj);
+%  Y{ii}=datacat_meansubt_noisenorm{ii}(:,:,jj);
+  Y{ii}=datacat_noisenorm{ii}(:,:,jj);
 end
 [A.Tgroup,A.theta,A.Gpred] = pcm_fitModelGroup(Y,M,partVec,designX,'runEffect','fixed','fitScale',1);
 save([edir 'pcm_datafit_jj' num2str(jj) '.mat'],'A','partVec','M'); % using real partVec

@@ -4,7 +4,7 @@
 #SBATCH --job-name sim_pcm
 #SBATCH --mem 2G # 4GB
 #SBATcH --mem-per-cpu 2G
-#SBATCH --time 28:00:00
+#SBATCH --time 48:00:00
 #SBATCH --mail-type=NONE  #ALL
 #SBATCH --get-user-env
 #SBATCH --export=NONE
@@ -16,7 +16,7 @@
 unset SLURM_EXPORT_ENV
 set -e
 module purge; module load bluebear
-module load apps/matlab/r2016a
+module load apps/matlab/r2017a
 
-matlab -nodisplay -r "sim_pcm_run($tr,$sm)"
+matlab -nodisplay -r "sim2_pcm_run($tr,$sm)"
 

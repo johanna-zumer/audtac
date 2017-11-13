@@ -12,7 +12,8 @@
 # 	SUBID = the subject id number
 
 # Loop through subjects and submit each one to the scheduler:
-trind=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25) 
+# trind=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25) 
+trind=(1 2 3 4 5 6 7 8 9 10 11 12 13 14) 
 # smind=(1 2 3 4) 
 for t in ${trind[@]}; do
 	#for s in ${smind[@]}; do

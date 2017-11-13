@@ -21,7 +21,7 @@ Z(201:250,5)=1;
 Z(251:300,6)=1;
 Z(301:350,7)=1;
 
-pcm_RDM_G
+sim1_RDM_G
 
 % Activation U different for every subject, but same pattern.
 % Take in to account modelling noise, whether AT vs A+T is difference than AT+N vs A+T
