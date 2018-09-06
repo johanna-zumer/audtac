@@ -107,6 +107,12 @@ for ii=iiuse
   for tt=2:3
     for ll=fliplr(soalist)
       rt{ll,tt,ii}=rrts(find(rsoareal(tt-1,:)==condcode(ll)));
+      % added 12 July, 2018
+%       rt{ll,tt,ii}(1)=nan; % remove first trial of block, not of stim cond
+      rt{ll,tt,ii}(find(rt{ll,tt,ii}<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
+      rt{ll,tt,ii}(find(rt{ll,tt,ii}>1))=nan; % asleep?   % Throwing out trials greater than 1s
+      % end add
+
       % save out some per-subject metrics of effect
       % 1) actual RT
       rt_med(ll,tt,bbind)=nanmedian(rt{ll,tt,ii});
@@ -213,16 +219,22 @@ for ii=iiuse
   clear rtime_touch
 end % ii
 save([ddir 'rt_allsubj.mat'],'rt*','fg*','G*');
+return
 
+
+%% 
+load([ddir 'rt_allsubj.mat'],'rt_med')
 tt=3;
-numsubj=bbind-1;
+numsubj=size(rt_med,3);
 subuse=3:numsubj;
 numuse=length(subuse);
+
 figure(1);
 errorbar([-.5 .5 ],nanmean(squeeze(rt_med([11 12],tt,subuse)),2),nanstd(squeeze(rt_med([11 12],tt,subuse)),[],2)/sqrt(numuse-1),'bo')
 hold on;
 errorbar([-.5 -.07 -.02 0 .02 .07 .5 ],nanmean(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),2),nanstd(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),[],2)/sqrt(numuse-1),'ro-')
 axis([-.8 .8 .22 .32])
+
 figure(2);
 h1=errorbar([-.7 .7 ],nanmean(squeeze(rt_med([11 12],tt,subuse)),2),nanstd(squeeze(rt_med([11 12],tt,subuse)),[],2)/sqrt(numuse-1),'bo');
 hold on;
@@ -238,8 +250,78 @@ set(gca,'XTickLabel',{'A' '-500' '-70' '70' '500' 'T'})
 print(1,[fdir 'rt_med.png'],'-dpng')
 print(2,[fdir 'rt_med_bar.png'],'-dpng')
 
+colorblindD  =[204 101 0]/256;
+colorblindApT=[5 165 255]/256;
+colorblindMpN=[0 59 179]/256;
+colorblindT  =[255 51 166]/256;
+colorblindA  =[0 158 115]/256;
+colorblindM  =[0 0 0]/256;
+colorblindN  =[128 128 128]/256;
+% % 
+figure(3);
+h1=errorbar([-.8 ],nanmean(squeeze(rt_med([11],tt,subuse)),1),nanstd(squeeze(rt_med([11],tt,subuse)),[],1)/sqrt(numuse-1),'o','Color',colorblindA);
+hold on;
+h1=errorbar([.8 ],nanmean(squeeze(rt_med([12],tt,subuse)),1),nanstd(squeeze(rt_med([12],tt,subuse)),[],1)/sqrt(numuse-1),'o','Color',colorblindT);
+hold on;
+h2=bar([-.8 ],nanmean(squeeze(rt_med([11],tt,subuse)),1),.15,'FaceColor',colorblindA);
+hold on;
+h2=bar([.8 ],nanmean(squeeze(rt_med([12],tt,subuse)),1),.15,'FaceColor',colorblindT);
+hold on;
+% h3=errorbar([-.6 -.35 -.1 0 .1 .35 .6],nanmean(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),2),nanstd(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),[],2)/sqrt(numuse-1),'mo:');
+h3=errorbar([-.6 -.35],nanmean(squeeze(rt_med([1 3],tt,subuse)),2),nanstd(squeeze(rt_med([1 3 ],tt,subuse)),[],2)/sqrt(numuse-1),'o:','Color',colorblindM);
+h4=errorbar([-.35 -.1 0 .1 .35],nanmean(squeeze(rt_med([ 3 4 5 6 7 ],tt,subuse)),2),nanstd(squeeze(rt_med([3 4 5 6 7],tt,subuse)),[],2)/sqrt(numuse-1),'o-','Color',colorblindM);
+h5=errorbar([.35 .6],nanmean(squeeze(rt_med([7 9],tt,subuse)),2),nanstd(squeeze(rt_med([7 9],tt,subuse)),[],2)/sqrt(numuse-1),'o:','Color',colorblindM);
+axis([-1 1 .22 .32])
+set(h3,'linewidth',3)
+set(h4,'linewidth',3)
+set(h5,'linewidth',3)
+set(gca,'FontSize',15)
+set(gca,'Xtick',[-.8 -.6 -.35 -.1 0 .1 .35 .6 .8])
+set(gca,'XTickLabel',{'A' '-500' '-70' '-20' '0' '20' '70' '500' 'T'})
+xlabel('Unisensory|--  Multisensory Asynchrony (ms)  --|Unisensory')
+ylabel('Reaction time (s)')
+print(3,[fdir 'rt_med_bar_colXlog.png'],'-dpng')
+print(3,[fdir 'rt_med_bar_colXlog.eps'],'-painters','-depsc')
+
+
+% % 
+figure(4);
+h3=errorbar([-.6 -.35 -.1 0 .1 .35 .6],nanmean(squeeze(-rt_msMminshiftuni([1 3 4 5 6 7 9],tt,subuse)),2),nanstd(squeeze(rt_msMminshiftuni([1 3 4 5 6 7 9],tt,subuse)),[],2)/sqrt(numuse-1),'mo-');
+axis([-.8 .8 -.05 .03])
+set(h3,'linewidth',3)
+set(gca,'FontSize',15)
+set(gca,'Xtick',[ -.6 -.35 -.1 0 .1 .35 .6 ])
+set(gca,'XTickLabel',{'-500' '-70' '-20' '0' '20' '70' '500'})
+xlabel('Multisensory Asynchrony (ms)')
+ylabel('Redundant Target Effect (s)')
+
+print(4,[fdir 'rt_med_Xlog_RTE.png'],'-dpng')
+
+
+
 %% Analyse RT
-load([ddir 'rt_allsubj.mat'],'rt');
+load([ddir 'rt_allsubj.mat'],'rt_ms*');
+rtuse=squeeze(rt_msMminshiftuni(:,3,:));
+anova_rm(rtuse([3 4 5 6 7],:)')
+
+p=nan(7,7);
+[h,p(3,4)]=ttest(rtuse(3,:),rtuse(4,:))
+[h,p(3,5)]=ttest(rtuse(3,:),rtuse(5,:))
+[h,p(3,6)]=ttest(rtuse(3,:),rtuse(6,:))
+[h,p(3,7)]=ttest(rtuse(3,:),rtuse(7,:))
+
+[h,p(4,5)]=ttest(rtuse(4,:),rtuse(5,:))
+[h,p(4,6)]=ttest(rtuse(4,:),rtuse(6,:))
+[h,p(4,7)]=ttest(rtuse(4,:),rtuse(7,:))
+
+[h,p(5,6)]=ttest(rtuse(5,:),rtuse(6,:))
+[h,p(5,7)]=ttest(rtuse(5,:),rtuse(7,:))
+
+[h,p(6,7)]=ttest(rtuse(6,:),rtuse(7,:))
+
+
+% old
+load([ddir 'rt_allsubj.mat'],'rt_med');
 tt=3;
 
 anova_rm(squeeze(rt_med([1 3 4 5 6 7 9],tt,:))')
@@ -291,6 +373,51 @@ p=nan(12)
 
 anova_rm(squeeze(rt_med([3 4 5 6 7],tt,:))')
 
+
+%% 
+
+% nsub=length(subuse);
+% Y=reshape(squeeze(rt_med([1 3 4 6 7 9],3,subuse))',[nsub*6 1]);
+% S=repmat([1:nsub]',[6 1]);
+% F1=[ones(nsub,1); ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+% F2=[1*ones(nsub,1); 2*ones(nsub,1); 3*ones(nsub,1); 3*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 500, 70, 20
+% NAMES={'Sense leading', 'Asyncrhony'};
+% stats = rm_anova2(Y,S,F1,F2,NAMES)
+% % Yes, interaction significant (p=0.005) as well as Asychnrony (p<0.0001), not sense-leading (p>0.1)
+% % This permits to look at asynchrony with rm-1-way-anova for sense-leading, 
+% % AND
+% % sense-leading with rm-1-way-anova for asychrony
+% 
+% % Sense-leading plays a role for 500 only
+% p=anova_rm(squeeze(rt_med([1 9],3,subuse))','off'); % p=0.12
+% p=anova_rm(squeeze(rt_med([3 7],3,subuse))','off'); % p=0.0052
+% p=anova_rm(squeeze(rt_med([4 6],3,subuse))','off'); % p=0.0099
+% 
+% % Asynchrony affects RT, for each sense-leading separately
+% p=anova_rm(squeeze(rt_med([1 3 4],3,subuse))','off'); % p<0.0001
+% p=anova_rm(squeeze(rt_med([6 7 9],3,subuse))','off'); % p<0.0001
+
+
+nsub=length(subuse);
+Y=reshape(squeeze(-rt_msMminshiftuni([1 3 4 6 7 9],3,subuse))',[nsub*6 1]);
+S=repmat([1:nsub]',[6 1]);
+F1=[ones(nsub,1); ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+F2=[1*ones(nsub,1); 2*ones(nsub,1); 3*ones(nsub,1); 3*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 500, 70, 20
+NAMES={'Sense leading', 'Asynchrony'};
+stats = rm_anova2(Y,S,F1,F2,NAMES)
+% Yes, interaction significant (p=0.0006) as well as Asychnrony (p<0.0001), not sense-leading (p>0.1)
+% This permits to look at asynchrony with rm-1-way-anova for sense-leading, 
+% AND
+% sense-leading with rm-1-way-anova for asychrony
+
+% Sense-leading plays a role for 500 only
+p=anova_rm(squeeze(-rt_msMminshiftuni([1 9],3,subuse))','off') % p=0.005
+p=anova_rm(squeeze(-rt_msMminshiftuni([3 7],3,subuse))','off') % p=0.24
+p=anova_rm(squeeze(-rt_msMminshiftuni([4 6],3,subuse))','off') % p=0.31
+
+% Asynchrony affects RT, for each sense-leading separately
+p=anova_rm(squeeze(-rt_msMminshiftuni([1 3 4],3,subuse))','off') % p<0.0001
+p=anova_rm(squeeze(-rt_msMminshiftuni([6 7 9],3,subuse))','off') % p<0.0001
 
 
 
