@@ -65,6 +65,8 @@ cd([ddir ])
 sfiles=dir([ddir sub{ii} '_*s.mat']);
 bfiles=dir([ddir sub{ii} '_*b.mat']);
 rfiles=dir([ddir sub{ii} '_*r.mat']);
+dosfiles=0;
+dobfiles=0;
 
 stime_touch=[];
 btime_touch=[];
@@ -100,6 +102,7 @@ rrts=[]; % RTs for response-condition only
 
 figind=1;
 
+if dosfiles
 for ll=1:length(sfiles)
   sstim{ll}=load(sfiles(ll).name);
   
@@ -282,9 +285,10 @@ for ll=1:length(sfiles)
     figure(figind-2);subplot(2,1,2);plot(time_touch1);axis([-inf inf .17 .25])
   end
 end
+end
 
 %% Sleep data
-
+if dobfiles
 for ll=1:length(bfiles)
   bstim{ll}=load(bfiles(ll).name);
   
@@ -470,6 +474,7 @@ for ll=1:length(bfiles)
   catch
     disp(cfg.dataset) % this sometimes happened when I restarted the stim but left the EEG acqu running
   end
+end
 end
 
 %% Sitting responding no-EEG data
@@ -673,10 +678,11 @@ for ll=1:length(rfiles)
   resptime=rstim{ll}.info.prsout(1:nt)-rstim{ll}.info.start_time;
   firststimtime=min(rstim{ll}.info.audio_time(1:nt)+auddelay-rstim{ll}.info.start_time, rstim{ll}.info.valve_time(1:nt)+time_touch0-rstim{ll}.info.start_time);
   rts=resptime-firststimtime;  
+  keyboard
   rrts = [rrts rts];
   
 end
-
+keyboard
 
 %%
 audDelay=sstim{1}.fin.audDelay;
