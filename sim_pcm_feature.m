@@ -86,6 +86,7 @@ for ss=1:22  % pretend 22 subjects
   theta_real(9,:) = [0 2 0 -inf];
   theta_real(10,:) = [0 0 0 0];
   
+
   % X*B is condition mean
   X=Z;
   B=[1; 1.2; 1.4; 1.6; 1.4; 1.2; 1];
@@ -99,20 +100,27 @@ for ss=1:22  % pretend 22 subjects
   
   for tr=1:size(theta_real,1)
 %     G_sum(:,:,tr) = exp(theta_real(tr,1))*G_eye + exp(theta_real(tr,2))*G_1a + exp(theta_real(2))*G_1b + exp(theta_real(tr,3))*G_2a + exp(theta_real(tr,4))*G_3a;
-    G_sum(:,:,tr) = exp(theta_real(tr,1))*G_eye + exp(theta_real(tr,2))*G_1 + exp(theta_real(tr,3))*G_2 + exp(theta_real(tr,4))*G_3;
+%     G_sum(:,:,tr) = exp(theta_real(tr,1))*G_eye + exp(theta_real(tr,2))*G_1 + exp(theta_real(tr,3))*G_2 + exp(theta_real(tr,4))*G_3;
+    G_feat(:,:,tr) = pcm_calculateG(Mg{2},theta_feat(tr,:));
+    
     
     for sm=1:size(Scale_noise,1)
       theta_s(sm,ss)   = abs(Scale_noise(sm,1)+randn*.1);
       theta_sig(sm,ss) = abs(Scale_noise(sm,2)+randn*.1);
       
-      V = Z*G_sum(:,:,tr)*theta_s(sm,ss)*Z';
+%       V = Z*G_sum(:,:,tr)*theta_s(sm,ss)*Z';
+      V = Z*G_feat(:,:,tr)*theta_s(sm,ss)*Z';
       V = V + eye(size(V))*theta_sig(sm,ss);
       
       Y_ms_n{tr,sm}{ss}   =mvnrnd(zeros(1,350),V,64)';
       Y_ms_n_mc{tr,sm}{ss}=mvnrnd(X*B,         V,64)';
       %       MScon{tr}=mvnrnd(zeros(1,7),G_sum(:,:,tr),64)';
+      % Multivariate noise normalisation
+      sigma = compCovEEG(Y_ms_n_mc{tr,sm}{ss},Z);
+      Y_ms_n_mc_mvnn{tr,sm}{ss}=Y_ms_n_mc{tr,sm}{ss}*(sigma^-0.5);
     end
   end
+  
   
   %   end
   
@@ -196,6 +204,40 @@ else
   end
   
 end
+
+%%  Plotting results
+
+for tr=1:size(Y_ms_n,1)
+  for sm=1:size(Y_ms_n,2)
+    for iireal=1:length(Y_ms_n_mc{tr,sm})
+      Gs_emp{tr,sm}(:,:,iireal)=cov([Z'*Y_ms_n_mc_mvnn{tr,sm}{iireal}]',1);
+      Gs_empCV{tr,sm}(:,:,iireal)=pcm_estGCrossval(Y_ms_n_mc_mvnn{tr,sm}{iireal},partVec,Z);
+    end
+  end
+end
+
+nfig=2;
+set(0,'DefaultFigurePosition',[15 450 1300 300+100*(nfig-3)])
+for sm=1:size(Y_ms_n,2)
+  for tr=1:size(Y_ms_n,1)
+    
+%     [mx,mxind(tr)]=max(mean(ms_mc{tr,sm}.Tcross.likelihood-repmat(ms_mc{tr,sm}.Tcross.likelihood(:,2),[1 17])));
+  figure(sm*100);
+  subplot(nfig,10,tr);imagesc(mean(Gs_emp{tr,sm},3));title([num2str(tr) ' model'])
+  if tr==1,ylabel(['Gemp']);end
+  subplot(nfig,10,10+tr);imagesc(mean(Gs_empCV{tr,sm},3));
+  if tr==1,ylabel(['GempCV']);end
+%   subplot(nfig,10,20+tr);imagesc(mean(ms_mc{tr,sm}.G_predcv{mxind(tr)},3));
+%   if tr==1,ylabel(['GfitCV ML']);end
+%   subplot(nfig,10,30+tr);imagesc(mean(ms_mc{tr,sm}.G_predcv{1},3));
+%   if tr==1,ylabel(['GfitCV Free']);end
+%   subplot(nfig,10,40+tr);imagesc(mean(ms_mc{tr,sm}.G_predcv{17},3));
+%   if tr==1,ylabel(['GfitCV All']);end
+
+  end
+end
+
+
 
 Nnull=2;
 Nceil=1;

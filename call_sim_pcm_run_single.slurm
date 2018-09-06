@@ -4,7 +4,7 @@
 #SBATCH --job-name sim_pcm
 #SBATCH --mem 2G # 4GB
 #SBATcH --mem-per-cpu 2G
-#SBATCH --time 48:00:00
+#SBATCH --time 180:00:00
 #SBATCH --mail-type=NONE  #ALL
 #SBATCH --get-user-env
 #SBATCH --export=NONE

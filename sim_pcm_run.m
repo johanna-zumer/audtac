@@ -19,10 +19,16 @@ partVec=repmat([1 2 3 4 5],[1 70])';
 
 disp(['Iteration running: TR ' num2str(tr) ' SM ' num2str(sm)])
 
-[A.Tgroup,A.theta,A.G_pred,A.G_hat] = pcm_fitModelGroup(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
-save([sdir 'sim_pcm_output_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
-[A.Tcross,A.thetaCr,A.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',A.theta,'fitScale',1);
-save([sdir 'sim_pcm_output_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
+[A.Tgroup,A.theta,A.G_pred,A.G_hat] = pcm_fitModelGroup(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','fitScale',1);
+save([sdir 'sim_pcm_output_grpMC_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
+[A.Tcross,A.thetaCr,A.G_predcv] = pcm_fitModelGroupCrossval(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed','groupFit',A.theta,'fitScale',1);
+save([sdir 'sim_pcm_output_grpMC_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
+
+[A.Tgroup,A.theta_hat,A.G_pred]=pcm_fitModelIndivid(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed');
+save([sdir 'sim_pcm_output_indMC_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
+[A.D,A.Tcross,A.thetaCV]=pcm_fitModelIndividCrossval(Y_ms_n_mc{tr,sm},M,partVec,Z,'runEffect','fixed');
+save([sdir 'sim_pcm_output_indMC_tr' num2str(tr) '_sm' num2str(sm) '.mat'],'A','partVec','M'); % using real partVec
+
 
 end
 
