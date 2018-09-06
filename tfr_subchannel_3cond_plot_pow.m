@@ -39,10 +39,11 @@ cfg.parameter='powspctrm';
 cfg.layout='elec1010.lay';
 cfg.maskparameter='mask';
 cfg.maskalpha=0.5;
+cfg.maskstyle='outline';
 cfg.zlim=zlim;
-cfg.xlim=[-.6 1.6];
-cfg.baseline=baseline;
-cfg.baselinetype='absolute';
+cfg.xlim=[-.6 1.8];
+% cfg.baseline=baseline;
+% cfg.baselinetype='absolute';
 for pp=1:length(pow)
   subplot(length(pow),1,pp);
 %   subplot(1,length(pow),pp);
