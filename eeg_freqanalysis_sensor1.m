@@ -100,23 +100,24 @@ toibeg=min(soades,0)-.7;
 toiend=max(soades,0)+1.3;
 
 dofftadd=0;
-usetr=3; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
+usetr=1; % see inside eeg_legomagic_trialSelection2_wakeSleep_sepTacAud for what this does/means
 synchasynch=0;
 use23=0;
 phaset0=0;
 
 % for sleep=0
-sleep=0;
+sleep=1;
 if sleep
   iiuse=iiBuse;
   %     iiuse=[32];
   iteruse=11;
-  trialkc=-1;  % vary this from -1, 0, and 1
+  trialkc=0;  % vary this from -1, 0, and 1
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:30);
   iteruse=31;  % iteruse=31 with usetr3 for final iter31; iteruse=31 with usetr2 for final iter32
   % 1 june 2016, re-run iter 31/32 with updated cfg.toi
+  iteruse=27; % final use; keep it simple
   trialkc=-1;
 end
 for ii=iiuse;
@@ -1064,7 +1065,7 @@ for ii=iiuse;
           freqlo_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
           freqlo_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
           
-          disp('study getplv'), keyboard
+          %           disp('study getplv'), keyboard
           freqlo_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
           freqlo_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
           freqlo_tTacAlone_comb{ll,tt,ss}=rmfield(freqlo_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
@@ -1188,7 +1189,7 @@ for ii=iiuse;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
             
-            disp('study getplv'), keyboard
+            %             disp('study getplv'), keyboard
             
             freqlo_tacPaud_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
             freqlo_tacPaud_tmp{cc}.powspctrm=squeeze(mean(abs(freqlo_tacPaud_tmp{cc}.fourierspctrm).^2,1));
@@ -1333,7 +1334,7 @@ for ii=iiuse;
             cfg.t_ftimwin=4./cfg.foi;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier'; % this forces keeptrials to be 'yes'
-            disp('study getplv'), keyboard
+            %             disp('study getplv'), keyboard
             
             freqlo_tacMSpN_tmp{cc}=ft_freqanalysis(cfg,tlock_fake);
             freqlo_tacMSpN_tmp{cc}.powspctrm=squeeze(mean(abs(freqlo_tacMSpN_tmp{cc}.fourierspctrm).^2,1));
@@ -3092,343 +3093,445 @@ ylimlo=[4 7; 8 12; 14 30];
 ylimhi=[30 45; 55 80];
 
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
-plotflag=1;
-printflag=1;
-statspowflag=1;
-statsplvflag=1;
+plotflag=0;
+printflag=0;
 audtacflag=0;
 fftaddflag=0;
 synchasynch=0;
+statspowflag=1;
+statsplvflag=1;
+itcdepsampflag=1;
+savegrindflag=0;
 
 soalist=[1 3 4 5 6 7 9];
-% soalist=[3 4 5 6 7 9];
 
 chanuse_sleep0={'all' '-F4'};
 chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
-for sleep=[1]
-  for tt=3
-    
-    clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax
-    if sleep
-      chanuse=chanuse_sleep1;
-      subuseall=iiBuse;
-      iteruse=11;
-      trialkc=0;
-      %       ssuse=12;
-      sleepcond='Sleep N2';
-    else
-      chanuse=chanuse_sleep0;
-      subuseall=setdiff(iiSuse,[]);
-      iteruse=27;
-      trialkc=-1;
-      %       ssuse=10; % awake
-      sleepcond='Awake W';
-    end
-    %     ss=ssuse;
-    
-    submin=subuseall(1)-1;
-    subuseind=0;
-    usetr=1;
-    iteruse
-    
-    for ii=subuseall
-      cd([edir sub{ii} ])
-      %       load(['freq_diffs_averef_' sub{ii} '.mat']);
-      %       try
-      %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-      %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '_tt' num2str(tt) '.mat'])
-      %       catch
-      %         if tt==2
-      %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat'])
-      %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '.mat'])
-      %         end
-      %       end
+tt=3;
+
+sleep=0;
+
+clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax
+if sleep
+  chanuse=chanuse_sleep1;
+  subuseall=iiBuse;
+  iteruse=11;
+  trialkc=-1;   % CHANGE ME
+  ssuse=10:12; % all stages
+  sleepcond='Sleep N2';
+  usetr=1;
+  medsplitflag=1;
+else
+  chanuse=chanuse_sleep0;
+  subuseall=setdiff(iiSuse,[]);
+  iteruse=31;
+  trialkc=-1;
+  ssuse=10; % awake
+  sleepcond='Awake W';
+  usetr=3;
+  medsplitflag=0;
+end
+%     ss=ssuse;
+
+submin=subuseall(1)-1;
+subuseind=0;
+iteruse
+
+for ii=subuseall
+  cd([edir sub{ii} ])
+  %       load(['freq_diffs_averef_' sub{ii} '.mat']);
+  %       try
+  %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+  %         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '_tt' num2str(tt) '.mat'])
+  %       catch
+  %         if tt==2
+  %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat'])
+  %           load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(0) '.mat'])
+  %         end
+  %       end
+  
+  % NOTE: this below is with trialkc=0 implicit!!
+  %         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+  %       try
+  try
+    load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_trialkc' num2str(trialkc) '.mat'])
+  catch
+    load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
+  end
+  %       catch
+  %         if trialkc==0
+  %           load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
+  %         end
+  %       end
+  
+  
+  %       try
+  %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+  %       catch
+  %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat']);
+  %       end
+  %         for ss=ssuse
+  %       subuse=subuseall; % reset to all for each sleep stage
+  subuseind=subuseind+1;
+  
+  for ss=ssuse
+    for ll=soalist
       
-      % NOTE: this below is with trialkc=0 implicit!!
-      %         load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-      try
-        load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
-      catch
-        if trialkc==0
-          load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-        end
+      numtrt(ll,tt,ss,subuseind)=numt_trials(ll,tt,ss);
+      if numtrt(ll,tt,ss,subuseind)<20
+        subuse(ll,ss,subuseind)=nan;
+      else
+        subuse(ll,ss,subuseind)=1;
       end
       
-      
-      %       try
-      %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
-      %       catch
-      %         tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '.mat']);
-      %       end
-      %         for ss=ssuse
-      %       subuse=subuseall; % reset to all for each sleep stage
-      subuseind=subuseind+1;
-      
-      for ss=10:12
-        for ll=soalist
-          
-          numtrt(ll,tt,ss,subuseind)=numt_trials(ll,tt,ss);
-          if numtrt(ll,tt,ss,subuseind)<20
-            subuse(ll,ss,subuseind)=nan;
-          else
-            subuse(ll,ss,subuseind)=1;
-          end
-          
-          if ~isnan(subuse(ll,ss,subuseind))
-            freqhiall_tNulAlone_comb{ll,ss}{subuseind}=freqhi_tNulAlone_comb{ll,tt,ss};
-            freqloall_tNulAlone_comb{ll,ss}{subuseind}=freqlo_tNulAlone_comb{ll,tt,ss};
-            freqhiall_tTacAlone_comb{ll,ss}{subuseind}=freqhi_tTacAlone_comb{ll,tt,ss};
-            freqloall_tTacAlone_comb{ll,ss}{subuseind}=freqlo_tTacAlone_comb{ll,tt,ss};
-            freqhiall_tAudAlone_comb{ll,ss}{subuseind}=freqhi_tAudAlone_comb{ll,tt,ss};
-            freqloall_tAudAlone_comb{ll,ss}{subuseind}=freqlo_tAudAlone_comb{ll,tt,ss};
-            freqhiall_tMSAlone_comb{ll,ss}{subuseind} =freqhi_tMSAlone_comb{ll,tt,ss};
-            freqloall_tMSAlone_comb{ll,ss}{subuseind} =freqlo_tMSAlone_comb{ll,tt,ss};
-            freqloall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqloall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqloall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqloall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqhiall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqhiall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqhiall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-            freqhiall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
-          end
-        end %ll
+      if ~isnan(subuse(ll,ss,subuseind))
+        freqhiall_tNulAlone_comb{ll,ss}{subuseind}=freqhi_tNulAlone_comb{ll,tt,ss};
+        freqloall_tNulAlone_comb{ll,ss}{subuseind}=freqlo_tNulAlone_comb{ll,tt,ss};
+        freqhiall_tTacAlone_comb{ll,ss}{subuseind}=freqhi_tTacAlone_comb{ll,tt,ss};
+        freqloall_tTacAlone_comb{ll,ss}{subuseind}=freqlo_tTacAlone_comb{ll,tt,ss};
+        freqhiall_tAudAlone_comb{ll,ss}{subuseind}=freqhi_tAudAlone_comb{ll,tt,ss};
+        freqloall_tAudAlone_comb{ll,ss}{subuseind}=freqlo_tAudAlone_comb{ll,tt,ss};
+        freqhiall_tMSAlone_comb{ll,ss}{subuseind} =freqhi_tMSAlone_comb{ll,tt,ss};
+        freqloall_tMSAlone_comb{ll,ss}{subuseind} =freqlo_tMSAlone_comb{ll,tt,ss};
+        freqloall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqloall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqloall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqloall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqhiall_tNulAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqhiall_tTacAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqhiall_tAudAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqhiall_tMSAlone_comb{ll,ss}{subuseind}.dimord='chan_freq_time';
+        freqhiall_tNulAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqhi_tNulAlone_comb{ll,tt,ss}.plvspctrm);
+        freqloall_tNulAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqlo_tNulAlone_comb{ll,tt,ss}.plvspctrm);
+        freqhiall_tTacAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqhi_tTacAlone_comb{ll,tt,ss}.plvspctrm);
+        freqloall_tTacAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqlo_tTacAlone_comb{ll,tt,ss}.plvspctrm);
+        freqhiall_tAudAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqhi_tAudAlone_comb{ll,tt,ss}.plvspctrm);
+        freqloall_tAudAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqlo_tAudAlone_comb{ll,tt,ss}.plvspctrm);
+        freqhiall_tMSAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqhi_tMSAlone_comb{ll,tt,ss}.plvspctrm);
+        freqloall_tMSAlone_comb{ll,ss}{subuseind}.plvabs=abs(freqlo_tMSAlone_comb{ll,tt,ss}.plvspctrm);
       end
-    end %ii
-    subuseindfinal=subuseind;
+    end %ll
+  end % ss
+end %ii
+subuseindfinal=subuseind;
+
+
+for ss=ssuse
+  
+  cfg=[];
+  cfg.keepindividual='yes';
+  cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
+  
+  for ll=soalist
+    usesub=~isnan(subuse(ll,ss,:));
+    grindlo_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{ll,ss}{usesub});
+    grindhi_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{ll,ss}{usesub});
+    grindlo_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{ll,ss}{usesub});
+    grindhi_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{ll,ss}{usesub});
+    grindlo_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{ll,ss}{usesub});
+    grindhi_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{ll,ss}{usesub});
+    grindlo_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{ll,ss}{usesub});
+    grindhi_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{ll,ss}{usesub});
+  end % ll
+  
+  if savegrindflag
+    save(['grindTFR_UniMsNul_sleep' num2str(sleep) '_iter' num2str(iteruse) '_trialkc' num2str(trialkc) '.mat'],'grind*');
+  end
+  
+  cfg=[];
+  cfg.neighbours=neighbours;
+  cfg.method='montecarlo';
+  cfg.numrandomization=2000;
+  cfg.correctm='cluster';
+  cfg.clusteralpha = 0.05;
+  cfg.clusterstatistic = 'maxsum';
+  cfg.minnbchan = 2;
+  cfg.ivar=1;
+  
+  if statspowflag
+    cfg.statistic='depsamplesT';
+    cfg.uvar=2;
+    cfg.parameter='powspctrm';
+    for ll=soalist
+      nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
+      cfg.design=zeros(2,2*nsub);
+      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+      cfg.design(2,:)=[1:nsub 1:nsub];
+      cfg.latency=[-.15-audbasemax(5); .35-audbasemax(5)];
+      stattl_mc_TacVsNul_short{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      cfg.latency=[-.15-audbasemax(5); 1.05-audbasemax(5)];
+      stattl_mc_TacVsNul_long{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      if ll>=5
+        cfg.latency=[-.15-audbasemax(ll); .35-audbasemax(ll)];
+      else
+        cfg.latency=[.15+tacbasemax(ll); .65+tacbasemax(ll)];
+      end
+      stattl_mc_AudVsNul_short{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      if ll>=5
+        cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+      else
+        cfg.latency=[.15+tacbasemax(ll); 1.35+tacbasemax(ll)];
+      end
+      stattl_mc_AudVsNul_long{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      cfg.latency=[-.15-audbasemax(ll); .35-audbasemax(ll)];
+      stattl_mc_MSVsNul_short{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+      stattl_mc_MSVsNul_long{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+    end  % ll
     
-    
-    for ss=10:12
-      
-      cfg=[];
-      cfg.keepindividual='yes';
-      cfg.parameter={'powspctrm' 'plvspctrm'};
-      for ll=soalist
-        usesub=~isnan(subuse(ll,ss,:));
-        grindlo_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{ll,ss}{usesub});
-        grindhi_tNulAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{ll,ss}{usesub});
-        grindlo_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{ll,ss}{usesub});
-        grindhi_tTacAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{ll,ss}{usesub});
-        grindlo_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{ll,ss}{usesub});
-        grindhi_tAudAlone{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{ll,ss}{usesub});
-        grindlo_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{ll,ss}{usesub});
-        grindhi_tMSAlone{ll,ss} =ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{ll,ss}{usesub});
-      end % ll
-      
-      cfg=[];
-      cfg.neighbours=neighbours;
-      cfg.method='montecarlo';
-      cfg.numrandomization=2000;
-      cfg.correctm='cluster';
-      cfg.clusteralpha = 0.05;
-      cfg.clusterstatistic = 'maxsum';
-      cfg.minnbchan = 2;
-      cfg.ivar=1;
+  end
+  
+  if statsplvflag
+    if itcdepsampflag
+      cfg.statistic='depsamplesT';
       cfg.uvar=2;
-      
-      if statspowflag
-        cfg.statistic='depsamplesT';
-        cfg.parameter='powspctrm';
-        for ll=soalist
-          nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
-          cfg.design=zeros(2,2*nsub);
-          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-          cfg.design(2,:)=[1:nsub 1:nsub];
-          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-          stattl_mc_TacVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
-          if ll>=5
-            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-          else
-            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
-          end
-          stattl_mc_AudVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
-          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-          stattl_mc_MSVsNul{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      cfg.parameter='plvabs';
+    else
+      cfg.statistic='diff_itc';
+      cfg.uvar=[];
+      cfg.parameter='plvspctrm';
+      cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+      cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+    end
+    for ll=soalist
+      nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
+      cfg.design=zeros(2,2*nsub);
+      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+      cfg.design(2,:)=[1:nsub 1:nsub];
+      if itcdepsampflag
+        cfg.latency=[-.15-audbasemax(5); .35-audbasemax(5)];
+        stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        cfg.latency=[-.15-audbasemax(5); 1.05-audbasemax(5)];
+        stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        if ll>=5
+          cfg.latency=[-.15-audbasemax(ll); .35-audbasemax(ll)];
+        else
+          cfg.latency=[.15+tacbasemax(ll); .65+tacbasemax(ll)];
         end
-        
+        stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        if ll>=5
+          cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+        else
+          cfg.latency=[.15+tacbasemax(ll); 1.35+tacbasemax(ll)];
+        end
+        stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        cfg.latency=[-.15-audbasemax(ll); .35-audbasemax(ll)];
+        stattl_mcplv_MSVsNul_short_itcdepT{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+        stattl_mcplv_MSVsNul_long_itcdepT{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+      else
+        error('helpitc')
+        %         stattl_mcplv_TacVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        %         if ll>=5
+        %           cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+        %         else
+        %           cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+        %         end
+        %         stattl_mcplv_AudVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
+        %         cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+        %         stattl_mcplv_MSVsNul{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
       end
       
-      if statsplvflag
-        cfg.statistic='diff_itc';
-        cfg.parameter='plvspctrm';
-        cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
-        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-        for ll=soalist
-          nsub=size(grindlo_tNulAlone{ll,ss}.powspctrm,1);
-          cfg.design=zeros(2,2*nsub);
-          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-          cfg.design(2,:)=[1:nsub 1:nsub];
-          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-          stattl_mcplv_TacVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
-          if ll>=5
-            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-          else
-            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
-          end
-          stattl_mcplv_AudVsNul{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
-          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-          stattl_mcplv_MSVsNul{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone{ll,ss}, grindlo_tNulAlone{ll,ss});
-        end
-      end
-      
-      
-      % NOTE: without trialkc label, it refers to trialkc=0;
-      %     if ~exist([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'file')
-      %       %     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
-      %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*');
-      %     else
-      %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
-      %     end
+    end %ll
+  end
+  
+  
+  % NOTE: without trialkc label, it refers to trialkc=0;
+  %     if ~exist([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'file')
+  %       %     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
+  %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+  %     else
+  %       save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+  %     end
+  if statspowflag || statsplvflag
+    if itcdepsampflag
+      save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','subuse');
+    else
       if ~exist([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'file')
         %     save([edir 'statsgrave_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
         save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','subuse');
       else
         save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','subuse','-append');
       end
+    end
+  end
+  
+  if ~medsplitflag
+    continue
+  else
+    
+    load([edir 'sortTacWP200.mat'],'iiuse_*halfWwideP2N1');
+    
+    for ll=soalist
+      subind_top=dsearchn(iiBuse',iiuse_tophalfWwideP2N1');
+      subind_bot=dsearchn(iiBuse',iiuse_bothalfWwideP2N1');
+      usesub=find(squeeze(~isnan(subuse(ll,ss,:))));
       
-      load([edir 'sortTacWP200.mat'],'iiuse_*halfWwideP2N1');
-      
+      grindlo_tTacAlone_top{ll,ss}=grindlo_tTacAlone{ll,ss};
+      grindlo_tTacAlone_top{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tTacAlone_top{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tTacAlone_top{ll,ss}.plvabs=grindlo_tTacAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tTacAlone_bot{ll,ss}=grindlo_tTacAlone{ll,ss};
+      grindlo_tTacAlone_bot{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tTacAlone_bot{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tTacAlone_bot{ll,ss}.plvabs=grindlo_tTacAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tNulAlone_top{ll,ss}=grindlo_tNulAlone{ll,ss};
+      grindlo_tNulAlone_top{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tNulAlone_top{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tNulAlone_top{ll,ss}.plvabs=grindlo_tNulAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tNulAlone_bot{ll,ss}=grindlo_tNulAlone{ll,ss};
+      grindlo_tNulAlone_bot{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tNulAlone_bot{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tNulAlone_bot{ll,ss}.plvabs=grindlo_tNulAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tAudAlone_top{ll,ss}=grindlo_tAudAlone{ll,ss};
+      grindlo_tAudAlone_top{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tAudAlone_top{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tAudAlone_top{ll,ss}.plvabs=grindlo_tAudAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tAudAlone_bot{ll,ss}=grindlo_tAudAlone{ll,ss};
+      grindlo_tAudAlone_bot{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tAudAlone_bot{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tAudAlone_bot{ll,ss}.plvabs=grindlo_tAudAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tMSAlone_top{ll,ss}=grindlo_tMSAlone{ll,ss};
+      grindlo_tMSAlone_top{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tMSAlone_top{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tMSAlone_top{ll,ss}.plvabs=grindlo_tMSAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
+      grindlo_tMSAlone_bot{ll,ss}=grindlo_tMSAlone{ll,ss};
+      grindlo_tMSAlone_bot{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tMSAlone_bot{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+      grindlo_tMSAlone_bot{ll,ss}.plvabs=grindlo_tMSAlone{ll,ss}.plvabs(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
+    end
+    
+    cfg=[];
+    cfg.neighbours=neighbours;
+    cfg.method='montecarlo';
+    cfg.numrandomization=2000;
+    % cfg.correctm='holm';
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.minnbchan = 2;
+    cfg.ivar=1;
+    
+    
+    if statspowflag
+      cfg.parameter='powspctrm';
       for ll=soalist
-        subind_top=dsearchn(iiBuse',iiuse_tophalfWwideP2N1');
-        subind_bot=dsearchn(iiBuse',iiuse_bothalfWwideP2N1');
-        usesub=find(squeeze(~isnan(subuse(ll,ss,:))));
+        % top
+        cfg.statistic='depsamplesT';
+        cfg.uvar=2;
+        nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+        if nsub>1
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
+          error('changed nonmedsplit to _short_ and _long_')
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          stattl_mc_TacVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          if ll>=5
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          else
+            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+          end
+          stattl_mc_AudVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          stattl_mc_MSVsNul_top{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+        else
+          stattl_mc_TacVsNul_top{ll,ss}=[];
+          stattl_mc_AudVsNul_top{ll,ss}=[];
+          stattl_mc_MSVsNul_top{ll,ss} =[];
+        end
         
-        grindlo_tTacAlone_top{ll,ss}=grindlo_tTacAlone{ll,ss};
-        grindlo_tTacAlone_top{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tTacAlone_top{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tTacAlone_bot{ll,ss}=grindlo_tTacAlone{ll,ss};
-        grindlo_tTacAlone_bot{ll,ss}.powspctrm=grindlo_tTacAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tTacAlone_bot{ll,ss}.plvspctrm=grindlo_tTacAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tNulAlone_top{ll,ss}=grindlo_tNulAlone{ll,ss};
-        grindlo_tNulAlone_top{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tNulAlone_top{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tNulAlone_bot{ll,ss}=grindlo_tNulAlone{ll,ss};
-        grindlo_tNulAlone_bot{ll,ss}.powspctrm=grindlo_tNulAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tNulAlone_bot{ll,ss}.plvspctrm=grindlo_tNulAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tAudAlone_top{ll,ss}=grindlo_tAudAlone{ll,ss};
-        grindlo_tAudAlone_top{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tAudAlone_top{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tAudAlone_bot{ll,ss}=grindlo_tAudAlone{ll,ss};
-        grindlo_tAudAlone_bot{ll,ss}.powspctrm=grindlo_tAudAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tAudAlone_bot{ll,ss}.plvspctrm=grindlo_tAudAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tMSAlone_top{ll,ss}=grindlo_tMSAlone{ll,ss};
-        grindlo_tMSAlone_top{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tMSAlone_top{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_top)),:,:,:);
-        grindlo_tMSAlone_bot{ll,ss}=grindlo_tMSAlone{ll,ss};
-        grindlo_tMSAlone_bot{ll,ss}.powspctrm=grindlo_tMSAlone{ll,ss}.powspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-        grindlo_tMSAlone_bot{ll,ss}.plvspctrm=grindlo_tMSAlone{ll,ss}.plvspctrm(dsearchn(usesub,intersect(usesub,subind_bot)),:,:,:);
-      end
-      
-      cfg=[];
-      cfg.neighbours=neighbours;
-      cfg.method='montecarlo';
-      cfg.numrandomization=2000;
-      % cfg.correctm='holm';
-      cfg.correctm='cluster';
-      cfg.clusteralpha = 0.05;
-      cfg.clusterstatistic = 'maxsum';
-      cfg.minnbchan = 2;
-      cfg.ivar=1;
-      cfg.uvar=2;
-      
-      
-      if statspowflag
-        cfg.parameter='powspctrm';
-        for ll=soalist
-          % top
-          cfg.statistic='depsamplesT';
-          cfg.uvar=2;
-          nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
-          if nsub>1
-            cfg.design=zeros(2,2*nsub);
-            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-            cfg.design(2,:)=[1:nsub 1:nsub];
-            
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-            stattl_mc_TacVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
-            if ll>=5
-              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            else
-              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
-            end
-            stattl_mc_AudVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
-            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            stattl_mc_MSVsNul_top{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
-          else
-            stattl_mc_TacVsNul_top{ll,ss}=[];
-            stattl_mc_AudVsNul_top{ll,ss}=[];
-            stattl_mc_MSVsNul_top{ll,ss} =[];
-          end
+        
+        % bottom
+        cfg.statistic='depsamplesT';
+        cfg.uvar=2;
+        nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+        if nsub>1
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
           
-          
-          % bottom
-          cfg.statistic='depsamplesT';
-          cfg.uvar=2;
-          nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
-          if nsub>1
-            cfg.design=zeros(2,2*nsub);
-            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-            cfg.design(2,:)=[1:nsub 1:nsub];
-            
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-            stattl_mc_TacVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
-            if ll>=5
-              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            else
-              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
-            end
-            stattl_mc_AudVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          stattl_mc_TacVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          if ll>=5
             cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            stattl_mc_MSVsNul_bot{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
           else
-            stattl_mc_TacVsNul_bot{ll,ss}=[];
-            stattl_mc_AudVsNul_bot{ll,ss}=[];
-            stattl_mc_MSVsNul_bot{ll,ss} =[];
+            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
           end
-          
-          % top vs bottom
-          cfg.statistic='indepsamplesT';
-          cfg.uvar=[];
-          nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
-          nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
-          if nsubb>1 && nsubt>1
-            cfg.design=zeros(2,nsubb + nsubt);
-            cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
-            cfg.design(2,:)=[1:nsubt 1:nsubb];
-            
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
-            stattl_mc_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
-            if ll>=5
-              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            else
-              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
-            end
-            stattl_mc_AudTVsAudB{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
-            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
-            stattl_mc_MSTVsMSB{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
-          else
-            stattl_mc_TacTVsTacB{ll,ss}=[];
-            stattl_mc_AudTVsAudB{ll,ss}=[];
-            stattl_mc_MSTVsMSB{ll,ss}=[];
-          end
-        end %ll
-      end
-      
-      if statsplvflag
-        cfg.statistic='diff_itc';
+          stattl_mc_AudVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          stattl_mc_MSVsNul_bot{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+        else
+          stattl_mc_TacVsNul_bot{ll,ss}=[];
+          stattl_mc_AudVsNul_bot{ll,ss}=[];
+          stattl_mc_MSVsNul_bot{ll,ss} =[];
+        end
+        
+        % top vs bottom
+        cfg.statistic='indepsamplesT';
         cfg.uvar=[];
-        cfg.parameter='plvspctrm';
-        cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
-        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-        for ll=soalist
+        nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+        nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+        if nsubb>1 && nsubt>1
+          %             cfg.design=zeros(2,nsubb + nsubt);
+          %             cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+          %             cfg.design(2,:)=[1:nsubt 1:nsubb];
+          cfg.design=zeros(1,nsubb + nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
           
-          % top
-          nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
-          if nsub>1
-            cfg.design=zeros(2,2*nsub);
-            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-            cfg.design(2,:)=[1:nsub 1:nsub];
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          stattl_mc_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
+          if ll>=5
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          else
+            cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+          end
+          stattl_mc_AudTVsAudB{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
+          cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+          stattl_mc_MSTVsMSB{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
+        else
+          stattl_mc_TacTVsTacB{ll,ss}=[];
+          stattl_mc_AudTVsAudB{ll,ss}=[];
+          stattl_mc_MSTVsMSB{ll,ss}=[];
+        end
+      end %ll
+    end
+    
+    if statsplvflag
+      for ll=soalist
+        if itcdepsampflag
+          cfg.statistic='depsamplesT';
+          cfg.parameter='plvabs';
+          cfg.uvar=2;
+        else
+          
+          cfg.statistic='diff_itc';  % use this for all PLV, whether dep or indep
+          cfg.uvar=[];
+          cfg.parameter='plvspctrm';
+          cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+          cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        end
+        
+        
+        
+        % top
+        nsub=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+        if nsub>1
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          if itcdepsampflag
+            stattl_mcplv_TacVsNul_top_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudVsNul_top_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSVsNul_top_itcdepT{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          else
             stattl_mcplv_TacVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
             if ll>=5
               cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
@@ -3438,19 +3541,37 @@ for sleep=[1]
             stattl_mcplv_AudVsNul_top{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
             cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
             stattl_mcplv_MSVsNul_top{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tNulAlone_top{ll,ss});
+          end
+        else
+          if itcdepsampflag
+            stattl_mcplv_TacVsNul_top_itcdepT{ll,ss}=[];
+            stattl_mcplv_AudVsNul_top_itcdepT{ll,ss}=[];
+            stattl_mcplv_MSVsNul_top_itcdepT{ll,ss} =[];
           else
             stattl_mcplv_TacVsNul_top{ll,ss}=[];
             stattl_mcplv_AudVsNul_top{ll,ss}=[];
             stattl_mcplv_MSVsNul_top{ll,ss} =[];
           end
-          
-          % bottom
-          nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
-          if nsub>1
-            cfg.design=zeros(2,2*nsub);
-            cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-            cfg.design(2,:)=[1:nsub 1:nsub];
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+        end
+        
+        % bottom
+        nsub=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+        if nsub>1
+          cfg.design=zeros(2,2*nsub);
+          cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+          cfg.design(2,:)=[1:nsub 1:nsub];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          if itcdepsampflag
+            stattl_mcplv_TacVsNul_bot_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudVsNul_bot_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSVsNul_bot_itcdepT{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          else
             stattl_mcplv_TacVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
             if ll>=5
               cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
@@ -3460,20 +3581,51 @@ for sleep=[1]
             stattl_mcplv_AudVsNul_bot{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
             cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
             stattl_mcplv_MSVsNul_bot{ll,ss} =ft_freqstatistics(cfg, grindlo_tMSAlone_bot{ll,ss}, grindlo_tNulAlone_bot{ll,ss});
+          end
+        else
+          if itcdepsampflag
+            stattl_mcplv_TacVsNul_bot_itcdepT{ll,ss}=[];
+            stattl_mcplv_AudVsNul_bot_itcdepT{ll,ss}=[];
+            stattl_mcplv_MSVsNul_bot_itcdepT{ll,ss} =[];
           else
             stattl_mcplv_TacVsNul_bot{ll,ss}=[];
             stattl_mcplv_AudVsNul_bot{ll,ss}=[];
             stattl_mcplv_MSVsNul_bot{ll,ss} =[];
           end
-          
-          % top vs bottom
-          nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
-          nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
-          if nsubt>1 && nsubb>1
-            cfg.design=zeros(2,nsubb + nsubt);
-            cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
-            cfg.design(2,:)=[1:nsubt 1:nsubb];
-            cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+        end
+        
+        if itcdepsampflag
+          cfg.statistic='indepsamplesT';
+          cfg.parameter='plvabs';
+          cfg.uvar=[];
+        else
+          cfg.statistic='diff_itc';  % use this for all PLV, whether dep or indep
+          cfg.uvar=[];
+          cfg.parameter='plvspctrm';
+          cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+          cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        end          % top vs bottom
+        nsubt=size(grindlo_tNulAlone_top{ll,ss}.powspctrm,1);
+        nsubb=size(grindlo_tNulAlone_bot{ll,ss}.powspctrm,1);
+        if nsubt>1 && nsubb>1
+          %             cfg.design=zeros(2,nsubb + nsubt);
+          %             cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+          %             cfg.design(2,:)=[1:nsubt 1:nsubb];
+          cfg.design=zeros(1,nsubb + nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+          cfg.latency=[-.15-audbasemax(5); .55-audbasemax(5)];
+          if itcdepsampflag
+            
+            stattl_mcplv_TacTVsTacB_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
+            if ll>=5
+              cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            else
+              cfg.latency=[.15+tacbasemax(ll); .85+tacbasemax(ll)];
+            end
+            stattl_mcplv_AudTVsAudB_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
+            cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
+            stattl_mcplv_MSTVsMSB_itcdepT{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
+          else
             stattl_mcplv_TacTVsTacB{ll,ss}=ft_freqstatistics(cfg, grindlo_tTacAlone_top{ll,ss}, grindlo_tTacAlone_bot{ll,ss});
             if ll>=5
               cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
@@ -3483,23 +3635,569 @@ for sleep=[1]
             stattl_mcplv_AudTVsAudB{ll,ss}=ft_freqstatistics(cfg, grindlo_tAudAlone_top{ll,ss}, grindlo_tAudAlone_bot{ll,ss});
             cfg.latency=[-.15-audbasemax(ll); .55-audbasemax(ll)];
             stattl_mcplv_MSTVsMSB{ll,ss}=ft_freqstatistics(cfg, grindlo_tMSAlone_top{ll,ss}, grindlo_tMSAlone_bot{ll,ss});
-          else
           end
-        end %ll
-        
+        else
+        end
+      end %ll
+      
+    end
+    
+    % NOTE: without trialkc label, it refers to trialkc=0;
+    %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*');
+    %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+    if statspowflag || statsplvflag
+      if itcdepsampflag
+        save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','-append');
+      else
+        save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+      end
+    end
+  end % medsplitflag
+end % ss
+
+%   end % tt
+% end % sleep
+
+
+%%
+% figures for paper:
+trialkc=-1;
+load(['stats_TFR_UniMSNul_sleep1_trialkc' num2str(trialkc) '.mat'])
+
+% Auditory vs Null
+figure(1);imagesc(squeeze(sum(stattl_mc_AudVsNul{5,12}.mask,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('# channels significant: Aud. vs Null')
+colorbar;   caxis([0 63])
+print(1,[fdir 'TFP_AudVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(1,[fdir 'TFP_AudVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+figure(2);imagesc(squeeze(mean(stattl_mc_AudVsNul{5,12}.stat,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('T-value contrast: Aud. vs Null')
+colorbar;  caxis([-4 4])
+print(2,[fdir 'TFP_AudVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(2,[fdir 'TFP_AudVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+figure(3);imagesc(squeeze(sum(stattl_mc_TacVsNul{5,12}.mask,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('# channels significant: Aud. vs Null')
+colorbar;   caxis([0 63])
+print(3,[fdir 'TFP_TacVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(3,[fdir 'TFP_TacVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+
+figure(4);imagesc(squeeze(mean(stattl_mc_TacVsNul{5,12}.stat,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('T-value contrast: Tac. vs Null')
+colorbar;   caxis([-4 4])
+print(4,[fdir 'TFP_TacVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(4,[fdir 'TFP_TacVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+% Auditory vs Null
+figure(5);imagesc(squeeze(sum(stattl_mcplv_AudVsNul{5,12}.mask,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('# channels significant: Aud. vs Null')
+colorbar;  caxis([0 63])
+print(5,[fdir 'PLF_AudVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(5,[fdir 'PLF_AudVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+figure(6);imagesc(squeeze(mean(stattl_mcplv_AudVsNul{5,12}.stat,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('T-value contrast: Aud. vs Null')
+colorbar;  caxis([-0.4 0.4])
+print(6,[fdir 'PLF_AudVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(6,[fdir 'PLF_AudVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+% Tactile vs Null
+figure(7);imagesc(squeeze(sum(stattl_mcplv_TacVsNul{5,12}.mask,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('# channels significant: Tac. vs Null')
+colorbar;  caxis([0 63])
+print(7,[fdir 'PLF_TacVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(7,[fdir 'PLF_TacVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+figure(8);imagesc(squeeze(mean(stattl_mcplv_TacVsNul{5,12}.stat,1)));axis xy
+ax=gca;
+ax.XTick=ax.XTick+1;
+ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
+ax.YTick=[4 8 12];
+ax.YTickLabel={'10' '18' '26'}
+title('T-value contrast: Tac. vs Null')
+colorbar;  caxis([-0.4 0.4])
+print(8,[fdir 'PLF_TacVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
+print(8,[fdir 'PLF_TacVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+
+%% MultSens contrast with Median-split
+
+load elec1010_neighb.mat
+
+soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
+tacbasemax=min(-.15,soades-.15);
+audbasemax=min(-.15,fliplr(soades)-.15);
+
+ylimlo=[4 7; 8 12; 14 30];
+ylimhi=[30 45; 55 80];
+
+soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
+comb2flag=1;
+mcseed=13;  % montecarlo cfg.randomseed
+usetr=1; % 1 with 27, or 2 or 3 with 31 or 32
+resetusetr=0;
+soalist=[1 3 4 5 6 7 9];
+chanuse_sleep0={'all' '-F4'};
+chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
+
+statspowflag=1;
+statsplvflag=1;
+itcdepsampflag=1;
+
+
+tt=3;
+sleep=1;
+% for sleep=[1]
+if sleep
+  chanuse=chanuse_sleep1;
+else
+  chanuse=chanuse_sleep0;
+end
+clearvars -except ll tt sub *dir ii*use sleep *flag figind soades* soalist chanuse* ylim* neigh* *basemax mcseed usetr
+if sleep
+  chanuse=chanuse_sleep1;
+  subuseall=iiBuse;
+  iteruse=11;
+  trialkc=0;
+  %       ssuse=12;
+  sleepcond='Sleep N2';
+else
+  chanuse=chanuse_sleep0;
+  subuseall=setdiff(iiSuse,[]);
+  iteruse=27;
+  trialkc=-1;
+  %       ssuse=10; % awake
+  sleepcond='Awake W';
+end
+%     ss=ssuse;
+
+submin=subuseall(1)-1;
+subuseind=0;
+usetr=1;
+iteruse
+for ii=subuseall
+  cd([edir sub{ii} ])
+  try
+    load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_trialkc' num2str(trialkc) '.mat'])
+  catch
+    load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
+  end
+  subuseind=subuseind+1;
+  
+  for ss=10:12
+    for ll=soalist
+      
+      numtrt(ll,tt,ss,subuseind)=numt_trials(ll,tt,ss);
+      if numtrt(ll,tt,ss,subuseind)<20
+        subuse(ll,ss,subuseind)=nan;
+      else
+        subuse(ll,ss,subuseind)=1;
       end
       
-      % NOTE: without trialkc label, it refers to trialkc=0;
-      %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*');
-      %     save([edir 'stats_TFR_UniMSNul_' num2str(tt) num2str(ss) num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
-      save([edir 'stats_TFR_UniMSNul_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
-    end % ss
-    
-  end % tt
-end % sleep
+      %       if sleep==0
+      %         ssuse=10; % awake
+      %         sleepcond='Awake W';
+      %       elseif sleep==1
+      %         ssuse=12; % N2
+      %         sleepcond='Sleep N2';
+      %       end
+      try
+        if usetr==2
+          % load usetr=0 here; then later down load usetr=2
+          tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(3) '_trialkc' num2str(trialkc) '.mat']);
+        else
+          tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '.mat']);
+        end
+      catch
+        tkt=load(['trialkeptTFR_tt' num2str(tt) '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_usetr' num2str(usetr) '_trialkc' num2str(trialkc) '.mat']);
+      end
+      
+      
+      %       ss=ssuse;
+      %         for ss=ssuse
+      subuse=subuseall; % reset to all for each sleep stage
+      numtrt(ll,tt,ss,ii-submin)=tkt.numcondtfinal(ll,tt,ss);
+      
+      if min(numtrt(ll,tt,ss,ii-submin),[],1)<20 % what is best number to use here?
+        subuse=setdiff(subuse,ii);
+      else
+        %         subuseind=subuseind+1;
+        freqloall_tacPaud_comb1{ll,ss}{subuseind,1}=freqlo_tacPaud_comb{ll,tt,ss,1};
+        freqloall_tacMSpN_comb1{ll,ss}{subuseind,1}=freqlo_tacMSpN_comb{ll,tt,ss,1};
+        freqhiall_tacPaud_comb1{ll,ss}{subuseind,1}=freqhi_tacPaud_comb{ll,tt,ss,1};
+        freqhiall_tacMSpN_comb1{ll,ss}{subuseind,1}=freqhi_tacMSpN_comb{ll,tt,ss,1};
+        freqloall_tacPaud_comb1{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+        freqloall_tacMSpN_comb1{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+        freqhiall_tacPaud_comb1{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+        freqhiall_tacMSpN_comb1{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+        freqloall_tacPaud_comb1{ll,ss}{subuseind,1}.plvabs=abs(freqlo_tacPaud_comb{ll,tt,ss,1}.plvspctrm);
+        freqloall_tacMSpN_comb1{ll,ss}{subuseind,1}.plvabs=abs(freqlo_tacMSpN_comb{ll,tt,ss,1}.plvspctrm);
+        freqhiall_tacPaud_comb1{ll,ss}{subuseind,1}.plvabs=abs(freqhi_tacPaud_comb{ll,tt,ss,1}.plvspctrm);
+        freqhiall_tacMSpN_comb1{ll,ss}{subuseind,1}.plvabs=abs(freqhi_tacMSpN_comb{ll,tt,ss,1}.plvspctrm);
+        if comb2flag
+          freqloall_tacPaud_comb2{ll,ss}{subuseind,1}=freqlo_tacPaud_comb{ll,tt,ss,2};
+          freqloall_tacMSpN_comb2{ll,ss}{subuseind,1}=freqlo_tacMSpN_comb{ll,tt,ss,2};
+          freqhiall_tacPaud_comb2{ll,ss}{subuseind,1}=freqhi_tacPaud_comb{ll,tt,ss,2};
+          freqhiall_tacMSpN_comb2{ll,ss}{subuseind,1}=freqhi_tacMSpN_comb{ll,tt,ss,2};
+          freqloall_tacPaud_comb2{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+          freqloall_tacMSpN_comb2{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+          freqhiall_tacPaud_comb2{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+          freqhiall_tacMSpN_comb2{ll,ss}{subuseind,1}.dimord='chan_freq_time';
+          freqloall_tacPaud_comb2{ll,ss}{subuseind,1}.plvabs=abs(freqlo_tacPaud_comb{ll,tt,ss,2}.plvspctrm);
+          freqloall_tacMSpN_comb2{ll,ss}{subuseind,1}.plvabs=abs(freqlo_tacMSpN_comb{ll,tt,ss,2}.plvspctrm);
+          freqhiall_tacPaud_comb2{ll,ss}{subuseind,1}.plvabs=abs(freqhi_tacPaud_comb{ll,tt,ss,2}.plvspctrm);
+          freqhiall_tacMSpN_comb2{ll,ss}{subuseind,1}.plvabs=abs(freqhi_tacMSpN_comb{ll,tt,ss,2}.plvspctrm);
+        end
+      end
+      
+    end % ll
+  end % ss
+  clear freqlo_* freqhi_*
+end % ii
+subuseindfinal=subuseind;
 
+for ii=1:subuseind
+  for ss=10:12
+    for ll=soalist
+      cfg=[];
+      cfg.operation='subtract';
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
+      for iterind=1
+        if ii<=size(freqloall_tacPaud_comb1{ll,ss},1) && ~isempty(freqloall_tacPaud_comb1{ll,ss}{ii,iterind})
+          freqloall_TPA_MSPN_comb1{ll,ss}{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb1{ll,ss}{ii,iterind},freqloall_tacMSpN_comb1{ll,ss}{ii,iterind});
+          freqhiall_TPA_MSPN_comb1{ll,ss}{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb1{ll,ss}{ii,iterind},freqhiall_tacMSpN_comb1{ll,ss}{ii,iterind});
+        end
+      end
+      if comb2flag
+        for iterind=1
+          if ii<=size(freqloall_tacPaud_comb2{ll,ss},1) && ~isempty(freqloall_tacPaud_comb2{ll,ss}{ii,iterind})
+            freqloall_TPA_MSPN_comb2{ll,ss}{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb2{ll,ss}{ii,iterind},freqloall_tacMSpN_comb2{ll,ss}{ii,iterind});
+            freqhiall_TPA_MSPN_comb2{ll,ss}{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb2{ll,ss}{ii,iterind},freqhiall_tacMSpN_comb2{ll,ss}{ii,iterind});
+          end
+        end
+      end
+      
+    end % ll
+  end % ss
+  
+end % ii
+
+
+load([edir 'sortTacWP200.mat'],'iiuse_*halfWwideP2N1');
+subind_top=dsearchn(iiBuse',iiuse_tophalfWwideP2N1');
+subind_bot=dsearchn(iiBuse',iiuse_bothalfWwideP2N1');
+sublab=nan(19,1);
+sublab(subind_top)=1;
+sublab(subind_bot)=-1;
+
+cfg=[];
+cfg.keepindividual='yes';
+cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
+
+
+for ss=10:12
+  for ll=soalist
+    clear cellfull
+    for ii=1:length(freqloall_TPA_MSPN_comb1{ll,ss}),cellfull(ii)=~isempty(freqloall_TPA_MSPN_comb1{ll,ss}{ii});end
+    sublabuse{ll,ss}=sublab(cellfull);
+    grindlo_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{ll,ss}{cellfull});
+    grindhi_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{ll,ss}{cellfull});
+    if comb2flag
+      grindlo_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{ll,ss}{cellfull});
+      grindhi_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{ll,ss}{cellfull});
+    end
+    
+    grindlo_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{ll,ss}{cellfull});
+    grindlo_tacMSpN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{ll,ss}{cellfull});
+    grindhi_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{ll,ss}{cellfull});
+    grindhi_tacMSpN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{ll,ss}{cellfull});
+    if comb2flag
+      grindlo_tacPaud_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{ll,ss}{cellfull});
+      grindlo_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{ll,ss}{cellfull});
+      grindhi_tacPaud_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{ll,ss}{cellfull});
+      grindhi_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{ll,ss}{cellfull});
+    end
+    
+    freqloall_TPA_MSPN_comb1{ll,ss}=[];
+    freqloall_TPA_MSPN_comb2{ll,ss}=[];
+    freqhiall_TPA_MSPN_comb1{ll,ss}=[];
+    freqhiall_TPA_MSPN_comb2{ll,ss}=[];
+    freqloall_tacPaud_comb1{ll,ss}=[];
+    freqloall_tacPaud_comb2{ll,ss}=[];
+    freqhiall_tacPaud_comb1{ll,ss}=[];
+    freqhiall_tacPaud_comb2{ll,ss}=[];
+    freqloall_tacMSpN_comb1{ll,ss}=[];
+    freqloall_tacMSpN_comb2{ll,ss}=[];
+    freqhiall_tacMSpN_comb1{ll,ss}=[];
+    freqhiall_tacMSpN_comb2{ll,ss}=[];
+  end % ll
+end % ss
+clear freq*all*comb*
+
+
+for ss=10:12
+  for ll=soalist
+    %     usesub=find(squeeze(~isnan(subuse(ll,ss,:))));
+    
+    grindlo_tacPaud_top{ll,ss,1}=grindlo_tacPaud_comb1{ll,ss};
+    grindlo_tacPaud_top{ll,ss,1}.powspctrm=grindlo_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindlo_tacPaud_top{ll,ss,1}.plvspctrm=grindlo_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindlo_tacPaud_top{ll,ss,1}.plvabs=grindlo_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+    grindlo_tacMSpN_top{ll,ss,1}=grindlo_tacMSpN_comb1{ll,ss};
+    grindlo_tacMSpN_top{ll,ss,1}.powspctrm=grindlo_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindlo_tacMSpN_top{ll,ss,1}.plvspctrm=grindlo_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindlo_tacMSpN_top{ll,ss,1}.plvabs=grindlo_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacPaud_top{ll,ss,1}=grindhi_tacPaud_comb1{ll,ss};
+    grindhi_tacPaud_top{ll,ss,1}.powspctrm=grindhi_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacPaud_top{ll,ss,1}.plvspctrm=grindhi_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacPaud_top{ll,ss,1}.plvabs=grindhi_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacMSpN_top{ll,ss,1}=grindhi_tacMSpN_comb1{ll,ss};
+    grindhi_tacMSpN_top{ll,ss,1}.powspctrm=grindhi_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacMSpN_top{ll,ss,1}.plvspctrm=grindhi_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+    grindhi_tacMSpN_top{ll,ss,1}.plvabs=grindhi_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+    
+    grindlo_tacPaud_bot{ll,ss,1}=grindlo_tacPaud_comb1{ll,ss};
+    grindlo_tacPaud_bot{ll,ss,1}.powspctrm=grindlo_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindlo_tacPaud_bot{ll,ss,1}.plvspctrm=grindlo_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindlo_tacPaud_bot{ll,ss,1}.plvabs=grindlo_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    grindlo_tacMSpN_bot{ll,ss,1}=grindlo_tacMSpN_comb1{ll,ss};
+    grindlo_tacMSpN_bot{ll,ss,1}.powspctrm=grindlo_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindlo_tacMSpN_bot{ll,ss,1}.plvspctrm=grindlo_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindlo_tacMSpN_bot{ll,ss,1}.plvabs=grindlo_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacPaud_bot{ll,ss,1}=grindhi_tacPaud_comb1{ll,ss};
+    grindhi_tacPaud_bot{ll,ss,1}.powspctrm=grindhi_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacPaud_bot{ll,ss,1}.plvspctrm=grindhi_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacPaud_bot{ll,ss,1}.plvabs=grindhi_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacMSpN_bot{ll,ss,1}=grindhi_tacMSpN_comb1{ll,ss};
+    grindhi_tacMSpN_bot{ll,ss,1}.powspctrm=grindhi_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacMSpN_bot{ll,ss,1}.plvspctrm=grindhi_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+    grindhi_tacMSpN_bot{ll,ss,1}.plvabs=grindhi_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    if comb2flag
+      grindlo_tacPaud_top{ll,ss,2}=grindlo_tacPaud_comb2{ll,ss};
+      grindlo_tacPaud_top{ll,ss,2}.powspctrm=grindlo_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindlo_tacPaud_top{ll,ss,2}.plvspctrm=grindlo_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindlo_tacPaud_top{ll,ss,2}.plvabs=grindlo_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+      grindlo_tacMSpN_top{ll,ss,2}=grindlo_tacMSpN_comb2{ll,ss};
+      grindlo_tacMSpN_top{ll,ss,2}.powspctrm=grindlo_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindlo_tacMSpN_top{ll,ss,2}.plvspctrm=grindlo_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindlo_tacMSpN_top{ll,ss,2}.plvabs=grindlo_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacPaud_top{ll,ss,2}=grindhi_tacPaud_comb2{ll,ss};
+      grindhi_tacPaud_top{ll,ss,2}.powspctrm=grindhi_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacPaud_top{ll,ss,2}.plvspctrm=grindhi_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacPaud_top{ll,ss,2}.plvabs=grindhi_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacMSpN_top{ll,ss,2}=grindhi_tacMSpN_comb2{ll,ss};
+      grindhi_tacMSpN_top{ll,ss,2}.powspctrm=grindhi_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacMSpN_top{ll,ss,2}.plvspctrm=grindhi_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
+      grindhi_tacMSpN_top{ll,ss,2}.plvabs=grindhi_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+      
+      grindlo_tacPaud_bot{ll,ss,2}=grindlo_tacPaud_comb2{ll,ss};
+      grindlo_tacPaud_bot{ll,ss,2}.powspctrm=grindlo_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindlo_tacPaud_bot{ll,ss,2}.plvspctrm=grindlo_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindlo_tacPaud_bot{ll,ss,2}.plvabs=grindlo_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+      grindlo_tacMSpN_bot{ll,ss,2}=grindlo_tacMSpN_comb2{ll,ss};
+      grindlo_tacMSpN_bot{ll,ss,2}.powspctrm=grindlo_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindlo_tacMSpN_bot{ll,ss,2}.plvspctrm=grindlo_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindlo_tacMSpN_bot{ll,ss,2}.plvabs=grindlo_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacPaud_bot{ll,ss,2}=grindhi_tacPaud_comb2{ll,ss};
+      grindhi_tacPaud_bot{ll,ss,2}.powspctrm=grindhi_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacPaud_bot{ll,ss,2}.plvspctrm=grindhi_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacPaud_bot{ll,ss,2}.plvabs=grindhi_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacMSpN_bot{ll,ss,2}=grindhi_tacMSpN_comb2{ll,ss};
+      grindhi_tacMSpN_bot{ll,ss,2}.powspctrm=grindhi_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacMSpN_bot{ll,ss,2}.plvspctrm=grindhi_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
+      grindhi_tacMSpN_bot{ll,ss,2}.plvabs=grindhi_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    end
+    
+    % begin stats
+    cfg=[];
+    cfg.neighbours=neighbours;
+    cfg.method='montecarlo';
+    cfg.numrandomization=2000;
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.minnbchan = 2;
+    cfg.ivar=1;
+    cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+    
+    
+    if comb2flag
+      combmax=2;
+    else
+      combmax=1;
+    end
+    
+    for comb=1:combmax
+      nsubt=size(grindlo_tacPaud_top{ll,ss,comb}.powspctrm,1);
+      nsubb=size(grindlo_tacPaud_bot{ll,ss,comb}.powspctrm,1);
+      
+      if statspowflag          % power
+        
+        cfg.parameter='powspctrm';
+        cfg.statistic='depsamplesT';
+        cfg.uvar=2;
+        
+        if nsubt>1
+          cfg.design=zeros(2,2*nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubt)];
+          cfg.design(2,:)=[1:nsubt 1:nsubt];
+          stattl_mc_TpAMSpN_top{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_top{ll,ss,comb}, grindlo_tacMSpN_top{ll,ss,comb});
+          statth_mc_TpAMSpN_top{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_top{ll,ss,comb}, grindhi_tacMSpN_top{ll,ss,comb});
+        else
+          stattl_mc_TpAMSpN_top{ll,ss,comb}=[];
+          statth_mc_TpAMSpN_top{ll,ss,comb}=[];
+        end
+        
+        if nsubb>1
+          cfg.design=zeros(2,2*nsubb);
+          cfg.design(1,:)=[ones(1,nsubb) 2*ones(1,nsubb)];
+          cfg.design(2,:)=[1:nsubb 1:nsubb];
+          stattl_mc_TpAMSpN_bot{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_bot{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+          statth_mc_TpAMSpN_bot{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_bot{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+        else
+          stattl_mc_TpAMSpN_bot{ll,ss,comb}=[];
+          statth_mc_TpAMSpN_bot{ll,ss,comb}=[];
+        end
+        
+        cfg.statistic='indepsamplesT';
+        cfg.uvar=[];
+        if nsubt>1 && nsubb>1
+          cfg.design=zeros(1,nsubb + nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+          stattl_mc_TpAMSpN_TvB{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacMSpN_top{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+          statth_mc_TpAMSpN_TvB{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacMSpN_top{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+        else
+          stattl_mc_TpAMSpN_TvB{ll,ss,comb}=[];
+          statth_mc_TpAMSpN_TvB{ll,ss,comb}=[];
+        end
+      end % statspowflag
+      
+      
+      if statsplvflag  % plf / plv / itc
+        
+        if itcdepsampflag
+          cfg.parameter='plvabs';
+          cfg.statistic='depsamplesT';
+          cfg.uvar=2;
+        else
+          cfg.parameter='plvspctrm';
+          cfg.statistic='diff_itc';
+          cfg.uvar=[];
+          cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+          cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        end
+        
+        
+        if nsubt>1
+          cfg.design=zeros(2,2*nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubt)];
+          cfg.design(2,:)=[1:nsubt 1:nsubt];
+          if itcdepsampflag
+            stattl_mcplv_TpAMSpN_top_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_top{ll,ss,comb}, grindlo_tacMSpN_top{ll,ss,comb});
+            statth_mcplv_TpAMSpN_top_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_top{ll,ss,comb}, grindhi_tacMSpN_top{ll,ss,comb});
+          else
+            stattl_mcplv_TpAMSpN_top{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_top{ll,ss,comb}, grindlo_tacMSpN_top{ll,ss,comb});
+            statth_mcplv_TpAMSpN_top{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_top{ll,ss,comb}, grindhi_tacMSpN_top{ll,ss,comb});
+          end
+        end
+        
+        if nsubb>1
+          cfg.design=zeros(2,2*nsubb);
+          cfg.design(1,:)=[ones(1,nsubb) 2*ones(1,nsubb)];
+          cfg.design(2,:)=[1:nsubb 1:nsubb];
+          if itcdepsampflag
+            stattl_mcplv_TpAMSpN_bot_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_bot{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+            statth_mcplv_TpAMSpN_bot_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_bot{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+          else
+            stattl_mcplv_TpAMSpN_bot{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacPaud_bot{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+            statth_mcplv_TpAMSpN_bot{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacPaud_bot{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+          end
+        end
+        
+        if itcdepsampflag
+          cfg.parameter='plvabs';
+          cfg.statistic='indepsamplesT';
+          cfg.uvar=[];
+        else
+          cfg.parameter='plvspctrm';
+          cfg.statistic='diff_itc';
+          cfg.uvar=[];
+          cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+          cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+        end
+        
+        if nsubt>1 && nsubb>1
+          cfg.design=zeros(1,nsubb + nsubt);
+          cfg.design(1,:)=[ones(1,nsubt) 2*ones(1,nsubb)];
+          if itcdepsampflag
+            stattl_mcplv_TpAMSpN_TvB_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacMSpN_top{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+            statth_mcplv_TpAMSpN_TvB_itcdepT{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacMSpN_top{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+          else
+            stattl_mcplv_TpAMSpN_TvB{ll,ss,comb}=ft_freqstatistics(cfg, grindlo_tacMSpN_top{ll,ss,comb}, grindlo_tacMSpN_bot{ll,ss,comb});
+            statth_mcplv_TpAMSpN_TvB{ll,ss,comb}=ft_freqstatistics(cfg, grindhi_tacMSpN_top{ll,ss,comb}, grindhi_tacMSpN_bot{ll,ss,comb});
+          end
+        end
+      end % statsplvflag
+      
+    end % comb
+    
+  end % ll
+end % ss
+
+
+if itcdepsampflag
+  try
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','-append');
+  catch
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*');
+  end
+else
+  try
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+  catch
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+  end
+end
 
 %%  Main stats
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 load elec1010_neighb.mat
 
@@ -3512,6 +4210,8 @@ ylimlo=[4 7; 8 12; 14 30];
 ylimhi=[30 45; 55 80];
 
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
+statsflag=1;
+itcdepsampflag=1;
 plotflag=0;
 printflag=0;
 audtacflag=0;
@@ -3519,7 +4219,14 @@ comb2flag=1;
 fftaddflag=0;
 synchasynch=0;
 mcseed=13;  % montecarlo cfg.randomseed
-usetr=1; % 1 with 27, or 2 or 3 with 31 or 32
+grindflag=1;
+
+sleep=0;
+if sleep
+  usetr=1;
+else
+  usetr=3; % 1 with 27, or 2 or 3 with 31 or 32
+end
 resetusetr=0;
 
 soalist=[1 3 4 5 6 7 9];
@@ -3529,7 +4236,6 @@ chanuse_sleep0={'all' '-F4'};
 chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
 
 tt=3;
-sleep=0;
 % for sleep=[1]
 if sleep
   chanuse=chanuse_sleep1;
@@ -3541,10 +4247,9 @@ figind=1;
 
 
 for ll=soalist
-  % for ll=[4 5 6 7 9];
+  % for ll=[9];
   clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed *tr
   
-  statsflag=1;
   if resetusetr
     usetr=2;
   end
@@ -3556,8 +4261,8 @@ for ll=soalist
     trialkc=0;
   else
     subuseall=setdiff(iiSuse,[])
-    iter=27;
-    %     iter=31;
+    %     iter=27;
+    iter=31;
     trialkc=-1;
   end
   
@@ -3573,10 +4278,16 @@ for ll=soalist
       if fftaddflag
         load(['freq_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
       else
-        if iter==27
+        if iter==27 && sleep==0
           load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '.mat'])
-        else
+        elseif sleep==0
           load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
+        elseif sleep==1
+          try
+            load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
+          catch
+            load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
+          end
         end
       end
       if audtacflag
@@ -3610,7 +4321,7 @@ for ll=soalist
         ssuse=10; % awake
         sleepcond='Awake W';
       elseif sleep==1
-        ssuse=12; % this is concatenation of N2 and N3
+        ssuse=12; % N2
         sleepcond='Sleep N2';
         %             ssuse=23; % this is concatenation of N2 and N3
         %             sleepcond='Sleep (N2+N3)';
@@ -3857,7 +4568,6 @@ for ll=soalist
   end % ii
   
   
-  
   resetusetr=0;
   if usetr~=2
     iterinduse=1;
@@ -3893,8 +4603,12 @@ for ll=soalist
         end
       end
     end
-    cfg.parameter={'powspctrm' 'plvspctrm'};
+    cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     for iterind=1:iterinduse
+      freqloall_tacPaud_comb1{ii,iterind}.plvabs=abs(freqloall_tacPaud_comb1{ii,iterind}.plvspctrm);
+      freqloall_tacMSpN_comb1{ii,iterind}.plvabs=abs(freqloall_tacMSpN_comb1{ii,iterind}.plvspctrm);
+      freqhiall_tacPaud_comb1{ii,iterind}.plvabs=abs(freqhiall_tacPaud_comb1{ii,iterind}.plvspctrm);
+      freqhiall_tacMSpN_comb1{ii,iterind}.plvabs=abs(freqhiall_tacMSpN_comb1{ii,iterind}.plvspctrm);
       freqloall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb1{ii,iterind},freqloall_tacMSpN_comb1{ii,iterind});
       freqhiall_TPA_MSPN_comb1{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb1{ii,iterind},freqhiall_tacMSpN_comb1{ii,iterind});
     end
@@ -3904,6 +4618,10 @@ for ll=soalist
     end
     if comb2flag
       for iterind=1:iterinduse
+        freqloall_tacPaud_comb2{ii,iterind}.plvabs=abs(freqloall_tacPaud_comb2{ii,iterind}.plvspctrm);
+        freqloall_tacMSpN_comb2{ii,iterind}.plvabs=abs(freqloall_tacMSpN_comb2{ii,iterind}.plvspctrm);
+        freqhiall_tacPaud_comb2{ii,iterind}.plvabs=abs(freqhiall_tacPaud_comb2{ii,iterind}.plvspctrm);
+        freqhiall_tacMSpN_comb2{ii,iterind}.plvabs=abs(freqhiall_tacMSpN_comb2{ii,iterind}.plvspctrm);
         freqloall_TPA_MSPN_comb2{ii,iterind}=ft_math(cfg,freqloall_tacPaud_comb2{ii,iterind},freqloall_tacMSpN_comb2{ii,iterind});
         freqhiall_TPA_MSPN_comb2{ii,iterind}=ft_math(cfg,freqhiall_tacPaud_comb2{ii,iterind},freqhiall_tacMSpN_comb2{ii,iterind});
       end
@@ -4054,28 +4772,28 @@ for ll=soalist
   end
   
   cfg=[];
-  if fftaddflag
-    gravelo_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftadd{:});
-    gravehi_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftadd{:});
-    if 0
-      gravelo_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftaddbn{:});
-      gravehi_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftaddbn{:});
-      gravelo_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1bn{:});
-      gravehi_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1bn{:});
-    end
-    
-    if audtacflag
-      gravelo_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftadd{:});
-      gravehi_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftadd{:});
-      if 0
-        gravelo_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftaddbn{:});
-        gravehi_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftaddbn{:});
-        gravelo_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1bn{:});
-        gravehi_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1bn{:});
-      end
-    end
-  end
-  cfg.parameter={'powspctrm' 'plvspctrm'};
+  %   if fftaddflag
+  %     gravelo_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftadd{:});
+  %     gravehi_TPA_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftadd{:});
+  %     if 0
+  %       gravelo_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_fftaddbn{:});
+  %       gravehi_TPA_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_fftaddbn{:});
+  %       gravelo_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1bn{:});
+  %       gravehi_TPA_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1bn{:});
+  %     end
+  %
+  %     if audtacflag
+  %       gravelo_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftadd{:});
+  %       gravehi_APT_MSPN_fftadd=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftadd{:});
+  %       if 0
+  %         gravelo_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_fftaddbn{:});
+  %         gravehi_APT_MSPN_fftaddbn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_fftaddbn{:});
+  %         gravelo_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqloall_APT_MSPN_comb1bn{:});
+  %         gravehi_APT_MSPN_comb1bn=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb1bn{:});
+  %       end
+  %     end
+  %   end
+  cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   if usetr==2
     gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
     gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
@@ -4084,8 +4802,9 @@ for ll=soalist
     gravelo_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
     tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
     gravehi_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
-    cfg.parameter={'powspctrm' 'plvspctrm'};
+    cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   else
+    cfg.parameter={'powspctrm' 'plvabs' 'plvspctrm'};
     gravelo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{:});
     gravehi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{:});
   end
@@ -4102,7 +4821,7 @@ for ll=soalist
       gravelo_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
       tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
       gravehi_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
-      cfg.parameter={'powspctrm' 'plvspctrm'};
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     else
       gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{:});
       gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{:});
@@ -4123,7 +4842,7 @@ for ll=soalist
       %       gravelo_APT_MSPN_comb2.plvavgabs=tmp.plvavgabs;
       %       tmp=ft_freqgrandaverage(cfg,freqhiall_APT_MSPN_comb2{:});
       %       gravehi_APT_MSPN_comb2.plvavgabs=tmp.plvavgabs;
-      %       cfg.parameter={'powspctrm' 'plvspctrm'};
+      %       cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     end
   end
   
@@ -4339,11 +5058,12 @@ for ll=soalist
     end
   end
   
-  cfg.parameter={'powspctrm' 'plvspctrm'};
+  cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   grindlo_tacPaud_comb1=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{:});
   grindlo_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
   grindhi_tacPaud_comb1=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
   grindhi_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
+  
   %   cfg.parameter={'plvavgabs'};
   %   tmp=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{:});
   %   grindlo_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
@@ -4353,7 +5073,7 @@ for ll=soalist
   %   grindhi_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
   %   tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
   %   grindhi_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
-  %   cfg.parameter={'powspctrm' 'plvspctrm'};
+  %   cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   if synchasynch && ll<5
     grindlo_tMSsynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb1{:});
     grindlo_tMSasynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb1{:});
@@ -4374,7 +5094,7 @@ for ll=soalist
     %     grindhi_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
     %     tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
     %     grindhi_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
-    %     cfg.parameter={'powspctrm' 'plvspctrm'};
+    %     cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     if synchasynch && ll<5
       grindlo_tMSsynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb2{:});
       grindlo_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb2{:});
@@ -4382,14 +5102,16 @@ for ll=soalist
       grindhi_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqhiall_tMSasynch_comb2{:});
     end
   end
-  grindlo_tNulAlone_comb=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
-  grindhi_tNulAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
-  grindlo_tTacAlone_comb=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
-  grindhi_tTacAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
-  grindlo_tAudAlone_comb=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
-  grindhi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
-  grindlo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
-  grindhi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  if 0 % not needed really
+    grindlo_tNulAlone_comb=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
+    grindhi_tNulAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
+    grindlo_tTacAlone_comb=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
+    grindhi_tTacAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
+    grindlo_tAudAlone_comb=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
+    grindhi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
+    grindlo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
+    grindhi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  end
   %   cfg.parameter={'plvavgabs'};
   %   tmp=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
   %   grindlo_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
@@ -4407,7 +5129,7 @@ for ll=soalist
   %   grindlo_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
   %   tmp=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
   %   grindhi_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
-  %   cfg.parameter={'powspctrm' 'plvspctrm'};
+  %   cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   if usetr==2
     grindlo_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1_usetr2{:});
     grindhi_TPA_MSPN_comb1=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
@@ -4416,7 +5138,7 @@ for ll=soalist
     grindlo_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
     tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1_usetr2{:});
     grindhi_TPA_MSPN_comb1.plvavgabs=tmp.plvavgabs;
-    cfg.parameter={'powspctrm' 'plvspctrm'};
+    cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     if comb2flag
       grindlo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2_usetr2{:});
       grindhi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
@@ -4425,7 +5147,7 @@ for ll=soalist
       grindlo_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
       tmp=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2_usetr2{:});
       grindhi_TPA_MSPN_comb2.plvavgabs=tmp.plvavgabs;
-      cfg.parameter={'powspctrm' 'plvspctrm'};
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     end
   end
   
@@ -4449,6 +5171,13 @@ for ll=soalist
     grindlo_aMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_aMSAlone_comb{:});
     grindhi_aMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_aMSAlone_comb{:});
   end
+  
+  if grindflag
+    save([edir 'grindTFR_cond' num2str(ll) '_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat'],'grindlo*');
+    continue
+  end
+  
+  
   
   
   cfg=[];
@@ -4499,7 +5228,7 @@ for ll=soalist
   end
   
   
-  cfg.parameter={'powspctrm' 'plvspctrm'};
+  cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   gravelo_tacPaud_comb1=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{:});
   gravelo_tacMSpN_comb1=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{:});
   gravehi_tacPaud_comb1=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{:});
@@ -4513,7 +5242,7 @@ for ll=soalist
   %     gravehi_tacPaud_comb1.plvavgabs=tmp.plvavgabs;
   %     tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{:});
   %     gravehi_tacMSpN_comb1.plvavgabs=tmp.plvavgabs;
-  %     cfg.parameter={'powspctrm' 'plvspctrm'};
+  %     cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   if synchasynch && ll<5
     gravelo_tMSsynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb1{:});
     gravelo_tMSasynch_comb1=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb1{:});
@@ -4534,7 +5263,7 @@ for ll=soalist
     %     gravehi_tacPaud_comb2.plvavgabs=tmp.plvavgabs;
     %     tmp=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{:});
     %     gravehi_tacMSpN_comb2.plvavgabs=tmp.plvavgabs;
-    %     cfg.parameter={'powspctrm' 'plvspctrm'};
+    %     cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
     if synchasynch && ll<5
       gravelo_tMSsynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSsynch_comb2{:});
       gravelo_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqloall_tMSasynch_comb2{:});
@@ -4542,14 +5271,16 @@ for ll=soalist
       gravehi_tMSasynch_comb2=ft_freqgrandaverage(cfg,freqhiall_tMSasynch_comb2{:});
     end
   end
-  gravelo_tNulAlone_comb=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
-  gravehi_tNulAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
-  gravelo_tTacAlone_comb=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
-  gravehi_tTacAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
-  gravelo_tAudAlone_comb=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
-  gravehi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
-  gravelo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
-  gravehi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  if 0
+    gravelo_tNulAlone_comb=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
+    gravehi_tNulAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tNulAlone_comb{:});
+    gravelo_tTacAlone_comb=ft_freqgrandaverage(cfg,freqloall_tTacAlone_comb{:});
+    gravehi_tTacAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tTacAlone_comb{:});
+    gravelo_tAudAlone_comb=ft_freqgrandaverage(cfg,freqloall_tAudAlone_comb{:});
+    gravehi_tAudAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tAudAlone_comb{:});
+    gravelo_tMSAlone_comb=ft_freqgrandaverage(cfg,freqloall_tMSAlone_comb{:});
+    gravehi_tMSAlone_comb=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
+  end
   %     cfg.parameter={'plvavgabs'};
   %     tmp=ft_freqgrandaverage(cfg,freqloall_tNulAlone_comb{:});
   %     gravelo_tNulAlone_comb.plvavgabs=tmp.plvavgabs;
@@ -4567,7 +5298,7 @@ for ll=soalist
   %     gravelo_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
   %     tmp=ft_freqgrandaverage(cfg,freqhiall_tMSAlone_comb{:});
   %     gravehi_tMSAlone_comb.plvavgabs=tmp.plvavgabs;
-  %     cfg.parameter={'powspctrm' 'plvspctrm'};
+  %     cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
   
   if audtacflag
     gravelo_audPtac_comb1=ft_freqgrandaverage(cfg,freqloall_audPtac_comb1{:});
@@ -4793,7 +5524,7 @@ for ll=soalist
       print(1159,[fdir 'gravehi_tMSAlone_comb_plvavgabs_topoOverTime_ta_cond'  num2str(ll) num2str(tt) num2str(ss) num2str(ylim(1)) num2str(ylim(2)) '.png'],'-dpng')
     end
     close all
-    %         keyboard % single condition alone plvavgang and plvangavg ??
+    %          % single condition alone plvavgang and plvangavg ??
     
     
     % contrast of conditions second
@@ -5174,70 +5905,69 @@ for ll=soalist
     cfg.ivar=1;
     cfg.uvar=2;
     cfg.randomseed=mcseed;
-    if usetr==2
-      grindlo_TPA_MSPN_comb1_zeros=grindlo_TPA_MSPN_comb1;
-      grindlo_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb1.powspctrm));
-      grindlo_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb1.plvspctrm));
-      grindhi_TPA_MSPN_comb1_zeros=grindhi_TPA_MSPN_comb1;
-      grindhi_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb1.powspctrm));
-      grindhi_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb1.plvspctrm));
-      stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
-      statth_mc_comb1=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
-      if comb2flag
-        grindlo_TPA_MSPN_comb2_zeros=grindlo_TPA_MSPN_comb2;
-        grindlo_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb2.powspctrm));
-        grindlo_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb2.plvspctrm));
-        grindhi_TPA_MSPN_comb2_zeros=grindhi_TPA_MSPN_comb2;
-        grindhi_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb2.powspctrm));
-        grindhi_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb2.plvspctrm));
-        stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
-        statth_mc_comb2=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
-      end
-    else
-      if fftaddflag
-        stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
-        statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
-      end
-      stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-      statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-      if comb2flag
-        stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-        statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-      end
-      %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
-      %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
-      %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
-      %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
-      if synchasynch && ll<5
-        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-        stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-        statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-        stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-        statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-      end
-      
-      if audtacflag
-        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
-        statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
-        statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
-        statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-        statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-        if comb2flag
-          statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-          statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-        end
-        %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
-        %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
-        %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
-        %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
-      end
-    end % usetr
+    %     if usetr==2
+    %       grindlo_TPA_MSPN_comb1_zeros=grindlo_TPA_MSPN_comb1;
+    %       grindlo_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb1.powspctrm));
+    %       grindlo_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb1.plvspctrm));
+    %       grindhi_TPA_MSPN_comb1_zeros=grindhi_TPA_MSPN_comb1;
+    %       grindhi_TPA_MSPN_comb1_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb1.powspctrm));
+    %       grindhi_TPA_MSPN_comb1_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb1.plvspctrm));
+    %       stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+    %       statth_mc_comb1=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
+    %       if comb2flag
+    %         grindlo_TPA_MSPN_comb2_zeros=grindlo_TPA_MSPN_comb2;
+    %         grindlo_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindlo_TPA_MSPN_comb2.powspctrm));
+    %         grindlo_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindlo_TPA_MSPN_comb2.plvspctrm));
+    %         grindhi_TPA_MSPN_comb2_zeros=grindhi_TPA_MSPN_comb2;
+    %         grindhi_TPA_MSPN_comb2_zeros.powspctrm=zeros(size(grindhi_TPA_MSPN_comb2.powspctrm));
+    %         grindhi_TPA_MSPN_comb2_zeros.plvspctrm=zeros(size(grindhi_TPA_MSPN_comb2.plvspctrm));
+    %         stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+    %         statth_mc_comb2=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
+    %       end
+    %     else
+    
+    %       if fftaddflag
+    %         stattl_mc_fftadd=ft_freqstatistics(cfg, grindlo_tacPaud_fftadd, grindlo_tacMSpN_fftadd);
+    %         statth_mc_fftadd=ft_freqstatistics(cfg, grindhi_tacPaud_fftadd, grindhi_tacMSpN_fftadd);
+    %       end
+    stattl_mc_comb1=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+    statth_mc_comb1=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+    if comb2flag
+      stattl_mc_comb2=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+      statth_mc_comb2=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+    end
+    %       stattl_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_tacPaud_fftaddbn, grindlo_tacMSpN_fftaddbn);
+    %       statth_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_tacPaud_fftaddbn, grindhi_tacMSpN_fftaddbn);
+    %       stattl_mc_comb1bn=ft_freqstatistics(cfg, grindlo_tacPaud_comb1bn, grindlo_tacMSpN_comb1bn);
+    %       statth_mc_comb1bn=ft_freqstatistics(cfg, grindhi_tacPaud_comb1bn, grindhi_tacMSpN_comb1bn);
+    %       if synchasynch && ll<5
+    %         cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+    %         stattl_synch_comb1=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+    %         statth_synch_comb1=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+    %         stattl_synch_comb2=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+    %         statth_synch_comb2=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+    %       end
+    %
+    %       if audtacflag
+    %         cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)]; % ???
+    %         statal_mc_fftadd=ft_freqstatistics(cfg, grindlo_audPtac_fftadd, grindlo_audMSpN_fftadd);
+    %         statah_mc_fftadd=ft_freqstatistics(cfg, grindhi_audPtac_fftadd, grindhi_audMSpN_fftadd);
+    %         statal_mc_comb1=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+    %         statah_mc_comb1=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    %         if comb2flag
+    %           statal_mc_comb2=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+    %           statah_mc_comb2=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+    %         end
+    %         %       statal_mc_fftaddbn=ft_freqstatistics(cfg, grindlo_audPtac_fftaddbn, grindlo_audMSpN_fftaddbn);
+    %         %       statah_mc_fftaddbn=ft_freqstatistics(cfg, grindhi_audPtac_fftaddbn, grindhi_audMSpN_fftaddbn);
+    %         %       statal_mc_comb1bn=ft_freqstatistics(cfg, grindlo_audPtac_comb1bn, grindlo_audMSpN_comb1bn);
+    %         %       statah_mc_comb1bn=ft_freqstatistics(cfg, grindhi_audPtac_comb1bn, grindhi_audMSpN_comb1bn);
+    %       end
+    %     end % usetr
     
     %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
     cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
-    cfg.statistic='diff_itc';
     cfg.parameter='plvspctrm';
-    cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
     %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
     %       stattl_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
     %       statth_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
@@ -5246,88 +5976,136 @@ for ll=soalist
     %         statth_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
     %       end
     cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-    if usetr==2
-      stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
-      statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
+    %     if usetr==2
+    %       cfg.statistic='diff_itc';
+    %       cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+    %       stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb1, grindlo_TPA_MSPN_comb1_zeros);
+    %       statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb1, grindhi_TPA_MSPN_comb1_zeros);
+    %       if comb2flag
+    %         stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
+    %         statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
+    %       end
+    %     else
+    if itcdepsampflag
+      cfg.statistic='depsamplesT';
+      cfg.design=zeros(2,2*nsub);
+      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+      cfg.design(2,:)=[1:nsub 1:nsub];
+      %         grindlo_tacPaud_comb1_abs=grindlo_tacPaud_comb1;
+      %         grindlo_tacPaud_comb1_abs.plvspctrm=abs(grindlo_tacPaud_comb1_abs.plvspctrm);
+      %         grindlo_tacMSpN_comb1_abs=grindlo_tacMSpN_comb1;
+      %         grindlo_tacMSpN_comb1_abs.plvspctrm=abs(grindlo_tacMSpN_comb1_abs.plvspctrm);
+      %         grindhi_tacPaud_comb1_abs=grindhi_tacPaud_comb1;
+      %         grindhi_tacPaud_comb1_abs.plvspctrm=abs(grindhi_tacPaud_comb1_abs.plvspctrm);
+      %         grindhi_tacMSpN_comb1_abs=grindhi_tacMSpN_comb1;
+      %         grindhi_tacMSpN_comb1_abs.plvspctrm=abs(grindhi_tacMSpN_comb1_abs.plvspctrm);
+      %         stattl_mc_comb1plvDepT=ft_freqstatistics(cfg, grindlo_tacPaud_comb1_abs, grindlo_tacMSpN_comb1_abs);
+      %         statth_mc_comb1plvDepT=ft_freqstatistics(cfg, grindhi_tacPaud_comb1_abs, grindhi_tacMSpN_comb1_abs);
+      
+      cfg.parameter='plvabs';
+      stattl_mc_comb1plvabsDepT=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+      statth_mc_comb1plvabsDepT=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+      
       if comb2flag
-        stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_TPA_MSPN_comb2, grindlo_TPA_MSPN_comb2_zeros);
-        statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_TPA_MSPN_comb2, grindhi_TPA_MSPN_comb2_zeros);
+        %           grindlo_tacPaud_comb2_abs=grindlo_tacPaud_comb2;
+        %           grindlo_tacPaud_comb2_abs.plvspctrm=abs(grindlo_tacPaud_comb2_abs.plvspctrm);
+        %           grindlo_tacMSpN_comb2_abs=grindlo_tacMSpN_comb2;
+        %           grindlo_tacMSpN_comb2_abs.plvspctrm=abs(grindlo_tacMSpN_comb2_abs.plvspctrm);
+        %           grindhi_tacPaud_comb2_abs=grindhi_tacPaud_comb2;
+        %           grindhi_tacPaud_comb2_abs.plvspctrm=abs(grindhi_tacPaud_comb2_abs.plvspctrm);
+        %           grindhi_tacMSpN_comb2_abs=grindhi_tacMSpN_comb2;
+        %           grindhi_tacMSpN_comb2_abs.plvspctrm=abs(grindhi_tacMSpN_comb2_abs.plvspctrm);
+        %           stattl_mc_comb2plvDepT=ft_freqstatistics(cfg, grindlo_tacPaud_comb2_abs, grindlo_tacMSpN_comb2_abs);
+        %           statth_mc_comb2plvDepT=ft_freqstatistics(cfg, grindhi_tacPaud_comb2_abs, grindhi_tacMSpN_comb2_abs);
+        cfg.parameter='plvabs';
+        stattl_mc_comb2plvabsDepT=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+        statth_mc_comb2plvabsDepT=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
       end
     else
+      cfg.statistic='diff_itc';
+      cfg.complex='diffabs'; % default; not sensitive to phase differences between conditions
+      
+      
       stattl_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
       statth_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
       if comb2flag
         stattl_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
         statth_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
       end
-      if synchasynch && ll<5
-        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-        stattl_synch_comb1plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-        statth_synch_comb1plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-        stattl_synch_comb2plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-        statth_synch_comb2plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-      end
-      if audtacflag
-        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
-        %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-        %         statal_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-        %         statah_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-        %         if comb2flag
-        %           statal_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-        %           statah_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-        %         end
-        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-        statal_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-        statah_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-        if comb2flag
-          statal_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-          statah_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-        end
-      end
-      
-      %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
-      cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
-      cfg.complex='absdiff'; % sensitive to phase difference between conditions
-      %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-      %       stattl_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-      %       statth_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-      %       if comb2flag
-      %         stattl_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-      %         statth_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-      %       end
-      cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-      stattl_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
-      statth_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
-      if comb2flag
-        stattl_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
-        statth_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
-      end
-      if synchasynch && ll<5
-        cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
-        stattl_synch_comb1plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
-        statth_synch_comb1plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
-        stattl_synch_comb2plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
-        statth_synch_comb2plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
-      end
-      
-      if audtacflag
-        cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
-        %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
-        %         statal_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-        %         statah_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-        %         if comb2flag
-        %           statal_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-        %           statah_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-        %         end
-        cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
-        statal_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
-        statah_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
-        if comb2flag
-          statal_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
-          statah_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
-        end
-      end
-    end % usetr
+    end
+    %       if synchasynch && ll<5
+    %         cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+    %         stattl_synch_comb1plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+    %         statth_synch_comb1plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+    %         stattl_synch_comb2plvdai=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+    %         statth_synch_comb2plvdai=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+    %       end
+    %       if audtacflag
+    %         cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
+    %         %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+    %         %         statal_mc_comb1plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+    %         %         statah_mc_comb1plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    %         %         if comb2flag
+    %         %           statal_mc_comb2plvdac=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+    %         %           statah_mc_comb2plvdac=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+    %         %         end
+    %         cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+    %         statal_mc_comb1plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+    %         statah_mc_comb1plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    %         if comb2flag
+    %           statal_mc_comb2plvdai=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+    %           statah_mc_comb2plvdai=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+    %         end
+    %       end
+    
+    %       if 0  % absdiff
+    %         %       cfg.latency=[tacbasemax(ll); .55-audbasemax(ll)];
+    %         cfg.latency=[-.15-audbasemax(ll); 1.05-audbasemax(ll)];
+    %         cfg.complex='absdiff'; % sensitive to phase difference between conditions
+    %         %       cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+    %         %       stattl_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+    %         %       statth_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+    %         %       if comb2flag
+    %         %         stattl_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+    %         %         statth_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+    %         %       end
+    %         cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+    %         stattl_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb1, grindlo_tacMSpN_comb1);
+    %         statth_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb1, grindhi_tacMSpN_comb1);
+    %         if comb2flag
+    %           stattl_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_tacPaud_comb2, grindlo_tacMSpN_comb2);
+    %           statth_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_tacPaud_comb2, grindhi_tacMSpN_comb2);
+    %         end
+    %         if synchasynch && ll<5
+    %           cfg.latency=[tacbasemax(9); .55-audbasemax(9)];
+    %           stattl_synch_comb1plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb1, grindlo_tMSasynch_comb1);
+    %           statth_synch_comb1plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb1, grindhi_tMSasynch_comb1);
+    %           stattl_synch_comb2plvadi=ft_freqstatistics(cfg, grindlo_tMSsynch_comb2, grindlo_tMSasynch_comb2);
+    %           statth_synch_comb2plvadi=ft_freqstatistics(cfg, grindhi_tMSsynch_comb2, grindhi_tMSasynch_comb2);
+    %         end
+    %
+    %         if audtacflag
+    %           cfg.latency=[audbasemax(ll); .55-tacbasemax(ll)];
+    %           %         cfg.clusterthreshold = 'nonparametric_common'; % or 'nonparametric_individual' see clusterstat.m
+    %           %         statal_mc_comb1plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+    %           %         statah_mc_comb1plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    %           %         if comb2flag
+    %           %           statal_mc_comb2plvadc=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+    %           %           statah_mc_comb2plvadc=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+    %           %         end
+    %           cfg.clusterthreshold = 'nonparametric_individual'; % or 'nonparametric_individual' see clusterstat.m
+    %           statal_mc_comb1plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb1, grindlo_audMSpN_comb1);
+    %           statah_mc_comb1plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb1, grindhi_audMSpN_comb1);
+    %           if comb2flag
+    %             statal_mc_comb2plvadi=ft_freqstatistics(cfg, grindlo_audPtac_comb2, grindlo_audMSpN_comb2);
+    %             statah_mc_comb2plvadi=ft_freqstatistics(cfg, grindhi_audPtac_comb2, grindhi_audMSpN_comb2);
+    %           end
+    %         end
+    %       end
+    
+    %     end % usetr
+    
+    
   end % statsflag
   
   if plotflag
@@ -5779,7 +6557,12 @@ for ll=soalist
   
   %   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat'],'stat*','grave*');
   %   save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
-  save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+  %  save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+  if itcdepsampflag
+    save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat'],'stat*','grave*');
+  else
+    save([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat'],'stat*','grave*');
+  end
   
   clear stat*mc* gr*
   
@@ -5792,6 +6575,7 @@ end % ll
 %   end % tt
 % end % sleep
 
+%%
 % keeping record of stats
 tt=3;ss=10;sleep=0;usetr=3;mcseed=13;iter=31;
 soalist=[1 3 4 5 6 7 9];
@@ -5949,7 +6733,7 @@ for sleep=[0]
       
       cfg=[];
       cfg.keepindividual='yes';
-      cfg.parameter={'powspctrm' 'plvspctrm','stdpow','stdplv'};
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs','stdpow','stdplv'};
       grindlo_tacPaud_comb2=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{:});
       grindlo_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
       grindhi_tacPaud_comb2=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
@@ -5964,7 +6748,7 @@ for sleep=[0]
       
       
       cfg=[];
-      cfg.parameter={'powspctrm' 'plvspctrm','stdpow','stdplv'};
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs','stdpow','stdplv'};
       gravelo_tacPaud_comb2=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{:});
       gravelo_tacMSpN_comb2=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{:});
       gravehi_tacPaud_comb2=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{:});
@@ -6125,7 +6909,7 @@ for sleep=[0]
         cfg=[];
         cfg.operation='subtract';
         cfg.parameter='powspctrm';
-        cfg.parameter={'powspctrm' 'plvspctrm'};
+        cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
         freqloall_TPA_MSPN_comb2{ii}=ft_math(cfg,freqloall_tacPaud_comb2{ii},freqloall_tacMSpN_comb2{ii});
         freqhiall_TPA_MSPN_comb2{ii}=ft_math(cfg,freqhiall_tacPaud_comb2{ii},freqhiall_tacMSpN_comb2{ii});
         
@@ -6136,7 +6920,7 @@ for sleep=[0]
       end % end ii
       
       cfg=[];
-      cfg.parameter={'powspctrm' 'plvspctrm'};
+      cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
       gravelo_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{:});
       gravehi_TPA_MSPN_comb2=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{:});
       if audtacflag
@@ -6187,7 +6971,1032 @@ for sleep=[0]
 end % sleep
 
 
-%%  Plotting results
+
+
+
+%% Plotting time courses of TFP / PLF
+
+chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
+chanplot{2}={'CP5' 'POz' 'Pz' 'P3' 'P4' 'C4' 'O1' 'O2' 'P7' 'PO7'}; % occipital; % same as for ERP
+% coloruse=varycolor(10);
+soalist=[1 3 4 5 6 7 9];
+colorblindD  =[204 101 0]/256;
+colorblindApT=[5 165 255]/256;
+colorblindMpN=[0 59 179]/256;
+colorblindT  =[255 51 166]/256;
+colorblindA  =[0 158 115]/256;
+colorblindM  =[0 0 0]/256;
+colorblindN  =[128 128 128]/256;
+
+
+llind=0;
+for ll=soalist
+  llind=llind+1;
+  % for ll=[3 4 5 6 7 9];
+  %   load(['grindTFR_cond'  num2str(ll) '_sleep0_iter31_trialkc-1_usetr3_mcseed13_itc.mat']);
+  load(['statsgrave_TFR_cond' num2str(ll) '3100_iter31_trialkc-1_usetr3_mcseed13_itc.mat'])
+  
+  chpl{1}=match_str(gravelo_TPA_MSPN_comb1.label,chanplot{1});
+  chpl{2}=match_str(gravelo_TPA_MSPN_comb1.label,chanplot{2});
+  timeuse=gravelo_TPA_MSPN_comb1.time(21:end-20);
+  %   timwin=[gravelo_TPA_MSPN_comb1.time(21) gravelo_TPA_MSPN_comb1.time(end-20)];
+  stattimese=dsearchn(stattl_mc_comb1.time',[timeuse(1) timeuse(end)]');
+  stattimeuse=stattl_mc_comb1.time(stattimese(1):stattimese(2));
+  
+  for cp=1:2
+    figure(1)
+    frequse=1:2;
+    base1=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base2=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base=mean([base1 base2]);
+    %     subplot(2,7,(cp-1)*7+llind);
+    subplot(7,2,(llind-1)*2+cp);
+    pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
+    pk.Color=colorblindD;
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
+    pk.Color=colorblindApT;
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
+    pk.Color=colorblindMpN;
+    hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
+    ylim([-1 2.5])
+    xlim([-0.6 1.8]);
+    
+    figure(2)
+    frequse=3:6;
+    base1=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base2=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base=mean([base1 base2]);
+    %     subplot(2,7,(cp-1)*7+llind);
+    subplot(7,2,(llind-1)*2+cp);
+    pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
+    pk.Color=coloruse(5,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
+    pk.Color=coloruse(1,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
+    pk.Color=coloruse(10,:);
+    hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
+    ylim([-3 3])
+    xlim([-0.6 1.8]);
+    
+    figure(3)
+    frequse=6:14;
+    base1=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base2=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base=mean([base1 base2]);
+    %     subplot(2,7,(cp-1)*7+llind);
+    subplot(7,2,(llind-1)*2+cp);
+    pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
+    pk.Color=coloruse(5,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
+    pk.Color=coloruse(1,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
+    pk.Color=coloruse(10,:);
+    hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
+    ylim([-0.7 0.7])
+    xlim([-0.6 1.8]);
+    
+    figure(4)
+    frequse=3:9;
+    base1=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base2=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+    base=mean([base1 base2]);
+    %     subplot(2,7,(cp-1)*7+llind);
+    subplot(7,2,(llind-1)*2+cp);
+    pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
+    pk.Color=coloruse(5,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
+    pk.Color=coloruse(1,:);
+    hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
+    pk.Color=coloruse(10,:);
+    hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
+    ylim([-2.5 2.5])
+    xlim([-0.6 1.8]);
+    
+  end
+  
+  %   print(ll,[fdir 'TFR_tacPaud_MSpN_diff_' num2str(ll) '.png'],'-dpng')
+  print(1,[fdir 'TFR_tacPaud_MSpN_diff_theta.png'],'-dpng')
+  print(2,[fdir 'TFR_tacPaud_MSpN_diff_alpha.png'],'-dpng')
+  print(3,[fdir 'TFR_tacPaud_MSpN_diff_beta.png'],'-dpng')
+  print(4,[fdir 'TFR_tacPaud_MSpN_diff_alfbet.png'],'-dpng')
+  print(1,[fdir 'TFR_tacPaud_MSpN_diff_theta.eps'],'-depsc')
+  print(2,[fdir 'TFR_tacPaud_MSpN_diff_alpha.eps'],'-depsc')
+  print(3,[fdir 'TFR_tacPaud_MSpN_diff_beta.eps'],'-depsc')
+  print(4,[fdir 'TFR_tacPaud_MSpN_diff_alfbet.eps'],'-depsc')
+  
+end
+
+%%
+
+% for ll=soalist
+%   llind=llind+1;
+%   % for ll=[3 4 5 6 7 9];
+%   load(['grindTFR_cond'  num2str(ll) '_sleep0_iter31_trialkc-1_usetr3_mcseed13_itc.mat']);
+%
+%   chpl{1}=match_str(grindlo_tacPaud_comb1.label,chanplot{1});
+%   chpl{2}=match_str(grindlo_tacPaud_comb1.label,chanplot{2});
+%
+%   cfg=[];cfg.operation='subtract';cfg.parameter='powspctrm';
+%   grindlo_TPA_MSPN_comb1=ft_math(cfg,grindlo_tacPaud_comb1,grindlo_tacMSpN_comb1);
+%
+%   cfg=[];cfg.variance='yes';gravelo_tacPaud_comb1=ft_freqdescriptives(cfg, grindlo_tacPaud_comb1);
+%   cfg=[];cfg.variance='yes';gravelo_tacMSpN_comb1=ft_freqdescriptives(cfg, grindlo_tacMSpN_comb1);
+%   cfg=[];cfg.variance='yes';gravelo_TPA_MSPN_comb1=ft_freqdescriptives(cfg, grindlo_TPA_MSPN_comb1);
+%
+%
+%   cp=1;
+%
+%   clear base
+%   figure(1)
+%   frequse=1:2;
+%   subplot(2,7,(cp-1)*7+llind);
+%   hold on;pk=errorbar(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)))
+%   pk.Color=coloruse(10,:);
+%   hold on;pk=errorbar(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)))
+%   pk.Color=coloruse(5,:);
+%   ylim([-0.5 2.5])
+%   xlim([-0.6 1.8]);
+%
+%   base1=squeeze(nanmean(nanmean(grindlo_tacPaud_comb1.powspctrm(:,chpl{cp},frequse,51),2),1));
+%   base2=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,51),2),1));
+%   base=mean([base1 base2]);
+%
+%
+%  figure;errorbar(timeuse,squeeze(nanmean(nanmean(freqout.powspctrm(chpl{cp},frequse,21:end-20),2),1)),squeeze(nanmean(nanmean(freqout.powspctrmsem(chpl{cp},frequse,21:end-20),2),1)),'m')
+%
+% end
+
+%%  Plotting band-specific line plots results
+chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
+chanplot{2}={'CP5' 'POz' 'Pz' 'P3' 'P4' 'C4' 'O1' 'O2' 'P7' 'PO7'}; % occipital; % same as for ERP
+chanplot{3}={'C1' 'Cz' 'C2' 'CP1' 'CPz' 'CP2' 'P1' 'Pz' 'P2'}; % Centred on CPz
+chanplot{4}={'P3' 'P1' 'Pz' 'P2' 'P4' 'PO3' 'POz' 'PO4' 'O1' 'O2' 'Oz'};
+chanlabel{1}='Frontocentral electrodes';
+chanlabel{2}='Occipital-parietal electrodes';
+soalist=[1 3 4 5 6 7 9];
+tt=3;
+fftaddflag=0;
+synchasynch=0;
+tacbasemax=min(-.15,soades-.15);
+baseline2=[tacbasemax(1) tacbasemax(1)+.08];
+itcdepsampflag=1;
+ftver=0;
+mcseed=13;
+sleep=0;
+if sleep
+  ss=12;
+  trialkc=-1; % change me
+  iter=11;
+  usetr=1;
+else
+  ss=10;
+  iter=31;
+  usetr=3;
+  trialkc=-1;
+end
+plotplvflag=0;
+plottfrflag=0;
+peakfindflag=1;
+coloruse=varycolor(10);
+% optimsied to be maximally apart and distinct
+% 1  TacPAud
+% 2  Nul
+% 3  MS_synch
+% 4  Tac
+% 5  diff_TPAMSPN
+% 6  diff_synchAsynch
+% 7  MS
+% 8  MS_asynch
+% 9  Aud
+% 10 MSpN
+plotallmask=1; % =0 means each subplot will use significane mask relevant for those sensors & time plotted only
+% =1 means each subplot will use mask relevant for all sensors even those not plotted.
+colorblindD  =[204 101 0]/256;
+colorblindApT=[5 165 255]/256;
+colorblindMpN=[0 59 179]/256;
+colorblindT  =[255 51 166]/256;
+colorblindA  =[0 158 115]/256;
+colorblindM  =[0 0 0]/256;
+colorblindN  =[128 128 128]/256;
+
+
+% Do unisensory plotting & peak finding first.
+
+load(['grindTFR_UniMsNul_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'grind*');
+load(['stats_TFR_UniMSNul_sleep0_trialkc-1_itc.mat'])
+
+ll=5;
+cfg=[];
+cfg.avgoverrpt='yes';
+tmp2=ft_selectdata(cfg,grindlo_tNulAlone{5,10});
+
+tmp4=ft_selectdata(cfg,grindlo_tTacAlone{5,10});
+tmp4.tfrmaskS=logical(zeros(size(tmp4.powspctrm)));
+tmp4.plvmaskS=logical(zeros(size(tmp4.powspctrm)));
+tmp4.tfrmaskL=logical(zeros(size(tmp4.powspctrm)));
+tmp4.plvmaskL=logical(zeros(size(tmp4.powspctrm)));
+tmp4.tfrmaskS(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(end)))=stattl_mc_TacVsNul_short{ll,ss}.mask;
+tmp4.tfrmaskL(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(end))) =stattl_mc_TacVsNul_long{ll,ss}.mask;
+tmp4.plvmaskS(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.mask;
+tmp4.plvmaskL(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.mask;
+
+tmp9=ft_selectdata(cfg,grindlo_tAudAlone{5,10});
+tmp9.tfrmaskS=logical(zeros(size(tmp9.powspctrm)));
+tmp9.plvmaskS=logical(zeros(size(tmp9.powspctrm)));
+tmp9.tfrmaskL=logical(zeros(size(tmp9.powspctrm)));
+tmp9.plvmaskL=logical(zeros(size(tmp9.powspctrm)));
+tmp9.tfrmaskS(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(end)))=stattl_mc_AudVsNul_short{ll,ss}.mask;
+tmp9.tfrmaskL(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(end))) =stattl_mc_AudVsNul_long{ll,ss}.mask;
+tmp9.plvmaskS(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.mask;
+tmp9.plvmaskL(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.mask;
+
+clear pow*
+pow{1}=tmp2;
+pow{2}=tmp4;
+pow{3}=tmp9;
+
+stattimwinS=[stattl_mc_AudVsNul_short{ll,ss}.time(1) stattl_mc_AudVsNul_short{ll,ss}.time(end)];
+stattimwinL=[stattl_mc_AudVsNul_long{ll,ss}.time(1) stattl_mc_AudVsNul_long{ll,ss}.time(end)];
+
+% average over bands first
+for pp=1:3
+  for ff=1:2 % two diff freq bands
+    cfg=[];
+    if ff==1
+      cfg.frequency   = [4 6.5];
+    elseif ff==2
+      cfg.frequency   = [8 20];
+    end
+    cfg.avgoverfreq = 'yes';
+    cfg.nanmean     = 'yes';
+    powf{pp,ff}=ft_selectdata(cfg,pow{pp});
+  end
+end
+clear pow
+% baseline correct first, then remove baseline area for plotting
+
+for ff=1:2,
+  base=powf{2,ff};
+  base.powspctrm=repmat(nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3),nanmean(powf{3,ff}.powspctrm(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+  base.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3),nanmean(powf{3,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+  base.tfrmaskL=repmat(nanmean(powf{2,ff}.tfrmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+  base.plvmaskL=repmat(nanmean(powf{2,ff}.plvmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+  for pp=1:3
+    cfg=[];
+    if pp>1
+      cfg.parameter={'powspctrm' 'plvabs' 'tfrmaskL' 'plvmaskL'};
+    else
+      cfg.parameter={'powspctrm' 'plvabs'};
+    end
+    cfg.operation='subtract';
+    powfb{pp,ff}=ft_math(cfg,powf{pp,ff},base)
+    
+    
+    cfg=[];
+    cfg.latency=[tacbasemax(ll) 1.3];
+    powfb{pp,ff}=ft_selectdata(cfg,powfb{pp,ff});
+    
+    powfb{pp,ff}.tfravg=squeeze(powfb{pp,ff}.powspctrm);
+    powfb{pp,ff}.plvavg=squeeze(powfb{pp,ff}.plvabs);
+    if pp>1
+      powfb{pp,ff}.tfrmaskL=squeeze(powfb{pp,ff}.tfrmaskL);
+      powfb{pp,ff}.plvmaskL=squeeze(powfb{pp,ff}.plvmaskL);
+    end
+    powfb{pp,ff}.dimord='chan_time';
+    powfb{pp,ff}=rmfield(powfb{pp,ff},'freq');
+    powfb{pp,ff}=rmfield(powfb{pp,ff},'powspctrm');
+    powfb{pp,ff}=rmfield(powfb{pp,ff},'plvabs');
+    if plotallmask && pp>1
+      powfb{pp,ff}.tfrmaskL=repmat(ceil(mean(powfb{pp,ff}.tfrmaskL,1)),[size(powfb{pp,ff}.tfrmaskL,1) 1]);
+      powfb{pp,ff}.plvmaskL=repmat(ceil(mean(powfb{pp,ff}.plvmaskL,1)),[size(powfb{pp,ff}.plvmaskL,1) 1]);
+    end
+  end
+end
+
+% peak finding
+chpl{1}=match_str(powfb{2,1}.label,chanplot{1});
+chpl{2}=match_str(powfb{2,1}.label,chanplot{2});
+[mx,mind]=max(nanmean(powfb{2,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
+timeTacThetaTfr=powfb{2,1}.time(mind); % 0.21
+[mx,mind]=max(nanmean(powfb{3,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
+timeAudThetaTfr=powfb{3,1}.time(mind); % 0.16
+[mx,mind]=max(nanmean(powfb{2,2}.tfravg(chpl{2},:),1));   % Tactile alpha beta OP
+timeTacAlpbetTfr=powfb{2,2}.time(mind); % 0.94
+%plv
+[mx,mind]=max(nanmean(powfb{2,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
+timeTacThetaPlv=powfb{2,1}.time(mind); % 0.14
+[mx,mind]=max(nanmean(powfb{3,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
+timeAudThetaPlv=powfb{3,1}.time(mind); % 0.13
+
+
+for cg=1:length(chanplot)
+  for ff=1:2
+    cfg=[];
+    cfg.layout='elec1010.lay';
+    if ff==1
+      cfg.ylim=[-2.5 2.5];  % or [1 2.5]?
+    elseif ff==2
+      cfg.ylim=[-2.5 2.5];
+    end
+    cfg.linewidth=3;
+    cfg.xlim=[-.6 1.8];
+    cfg.channel=chanplot{cg};
+    cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
+    cfg.interactive='no';
+    cfg.parameter='tfravg';
+    figure(10*(cg+1)+(ff-1)*100)
+    ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+    hold on;plot(powfb{1,ff}.time,0,'k');
+    set(gca,'XTick',[-.6:.1:1.8])
+    set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+    set(gca,'FontSize',30)
+    title([])
+    plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
+    plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
+    plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+    plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+    plot(cfg.xlim,[0 0],'Color','k')
+    for pp=2:3
+      highlight=logical(powfb{pp,ff}.tfrmaskL(17,:));
+      begsample = find(diff([0 highlight 0])== 1);
+      endsample = find(diff([0 highlight 0])==-1)-1;
+      for ii=1:length(begsample)
+        begx=powfb{pp,ff}.time(begsample(ii));
+        begy=powfb{pp,ff}.time(endsample(ii));
+        if pp==2
+          plot([begx begy], [cfg.ylim(2)-.5 cfg.ylim(2)-.5],'Color',colorblindT,'LineWidth',6)
+        elseif pp==3
+          plot([begx begy], [cfg.ylim(2)-.3 cfg.ylim(2)-.3],'Color',colorblindA,'LineWidth',6)
+        end
+      end
+    end % pp
+    axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+    %     legend('Null','Tactile','Auditory')
+  end % ff
+end % cg
+print(20,[fdir 'tfr_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
+print(20+100,[fdir 'tfr_UniNul_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+print(30,[fdir 'tfr_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
+print(30+100,[fdir 'tfr_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+
+
+for cg=1:length(chanplot)
+  for ff=1:2
+    cfg=[];
+    cfg.layout='elec1010.lay';
+    if ff==1
+      cfg.ylim=[-.1 .4];  % or [1 2.5]?
+    elseif ff==2
+      cfg.ylim=[-.1 .4];
+    end
+    cfg.linewidth=3;
+    cfg.xlim=[-.6 1.8];
+    cfg.channel=chanplot{cg};
+    cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
+    cfg.interactive='no';
+    cfg.parameter='plvavg';
+    figure(10*(cg+3)+(ff-1)*100)
+    ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+    hold on;plot(powfb{1,ff}.time,0,'k');
+    set(gca,'XTick',[-.6:.1:1.8])
+    set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+    set(gca,'FontSize',30)
+    title([])
+    plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
+    plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
+    plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+    plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+    plot(cfg.xlim,[0 0],'Color','k')
+    for pp=2:3
+      highlight=logical(powfb{pp,ff}.plvmaskL(17,:));
+      begsample = find(diff([0 highlight 0])== 1);
+      endsample = find(diff([0 highlight 0])==-1)-1;
+      for ii=1:length(begsample)
+        begx=powfb{pp,ff}.time(begsample(ii));
+        begy=powfb{pp,ff}.time(endsample(ii));
+        if pp==2
+          plot([begx begy], [cfg.ylim(2)-.04 cfg.ylim(2)-.04],'Color',colorblindT,'LineWidth',6)
+        elseif pp==3
+          plot([begx begy], [cfg.ylim(2)-.02 cfg.ylim(2)-.02],'Color',colorblindA,'LineWidth',6)
+        end
+      end
+    end % pp
+    axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+    %     legend('Null','Tactile','Auditory')
+  end % ff
+end % cg
+print(40,[fdir 'plv_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
+print(40+100,[fdir 'plv_UniNul_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+print(50,[fdir 'plv_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
+print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+
+
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+for ll=soalist
+% for ll=[3 7]
+  % for ll=9
+  close all
+  clear grave* stat* tmp*
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
+  %   baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
+  stattimwin=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
+  
+  
+  
+  % power
+  if plottfrflag
+    clear pow*
+    
+    cfg=[];
+    tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+    tmpA.mask=logical(zeros(size(tmpA.powspctrm)));
+    tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1.time(1)):dsearchn(tmpA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+    tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+    tmpsA.mask=logical(zeros(size(tmpsA.powspctrm)));
+    tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+    tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+    tmpuA.mask=logical(zeros(size(tmpuA.powspctrm)));
+    tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+    
+    pow{1}=tmpuA;
+    pow{2}=tmpsA;
+    pow{3}=tmpA;
+    
+    % average over bands first
+    for pp=1:3
+      for ff=1:2 % two diff freq bands
+        cfg=[];
+        if ff==1 % 6 , 9 doesn't matter
+          %           if ll==1 || ll==3
+          %             cfg.frequency   = [4 8.5];
+          %           elseif ll==5 || ll==7 || ll==4 || ll==6  || ll==9
+          cfg.frequency   = [4 6.5];
+          %           end
+        elseif ff==2
+          %           if ll==1 || ll==3
+          %             cfg.frequency   = [10 20];
+          %           elseif ll==5 || ll==7 || ll==4 || ll==6  || ll==9
+          cfg.frequency   = [8 20];
+          %           end
+        else
+          disp('help');keyboard
+        end
+        cfg.avgoverfreq = 'yes';
+        cfg.nanmean     = 'yes';
+        powf{pp,ff}=ft_selectdata(cfg,pow{pp});
+      end
+    end
+    clear pow
+    
+    % baseline correct first, then remove baseline area for plotting
+    for ff=1:2,
+      %       base=nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3)),3);
+      baset=powf{2,ff};
+      baset.powspctrm=repmat(nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+      %       base.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3),nanmean(powf{3,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+      baset.mask=repmat(nanmean(powf{2,ff}.mask(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+      %         cfg=[];
+      %         cfg.baseline=[gravelo_TPA_MSPN_comb1.time(49) gravelo_TPA_MSPN_comb1.time(53)];
+      %         cfg.baselinetype='absolute';
+      %         cfg.parameter={'powspctrm' 'mask'};
+      %         powfb{pp,ff}=ft_freqbaseline(cfg, powf{pp,ff});
+      cfg=[];
+      cfg.parameter={'powspctrm' 'mask'};
+      cfg.operation='subtract';
+      powfb{1,ff}=ft_math(cfg,powf{1,ff},baset)
+      powfb{2,ff}=ft_math(cfg,powf{2,ff},baset)
+      powfb{3,ff}=powf{3,ff};
+      
+      for pp=1:3
+        cfg=[];
+        if ll==1
+          if ff==1
+            cfg.latency=[tacbasemax(ll) 1.2];
+          elseif ff==2
+            cfg.latency=[tacbasemax(ll) 1.2];
+          end
+        elseif ll==3
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==4
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==5
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==6
+          cfg.latency=[tacbasemax(ll) 1.3+.02];
+        elseif ll==7
+          cfg.latency=[tacbasemax(ll) 1.3+.07];
+        elseif ll==9
+          if ff==1
+            cfg.latency=[tacbasemax(ll) 1.3+.2];
+          elseif ff==2
+            cfg.latency=[tacbasemax(ll) 1.3+.50];
+          end
+        end
+        powfb{pp,ff}=ft_selectdata(cfg,powfb{pp,ff});
+        
+        powfb{pp,ff}.avg=squeeze(powfb{pp,ff}.powspctrm);
+        powfb{pp,ff}.mask=squeeze(powfb{pp,ff}.mask);
+        powfb{pp,ff}.dimord='chan_time';
+        powfb{pp,ff}=rmfield(powfb{pp,ff},'freq');
+        powfb{pp,ff}=rmfield(powfb{pp,ff},'powspctrm');
+        if plotallmask
+          powfb{pp,ff}.mask=repmat(ceil(mean(powfb{pp,ff}.mask,1)),[size(powfb{pp,ff}.mask,1) 1]);
+        end
+        if ff==2 && ll==1 % remove stat window from alp/bet when it's only for 8 Hz (from theta)
+          powfb{pp,ff}.mask=zeros(size(powfb{pp,ff}.mask));
+        end
+      end % pp
+    end
+    
+    
+    for cg=1:length(chanplot)
+      for ff=1:2
+        cfg=[];
+        cfg.parameter='avg';
+        cfg.layout='elec1010.lay';
+        if ff==1
+          cfg.ylim=[-2.5 2.5];  % or [1 2.5]?
+        elseif ff==2
+          cfg.ylim=[-2.5 2.5];
+        end
+        cfg.linewidth=3;
+        cfg.xlim=[-.6 1.8];
+        if cg>length(chanplot)
+          cfg.channel=tmpd5.label(any(tmpd5.mask,2));
+        else
+          cfg.channel=chanplot{cg};
+        end
+        cfg.graphcolor=[colorblindApT; colorblindMpN; colorblindD];
+        cfg.interactive='no';
+        cfg.maskparameter='mask';
+        cfg.maskstyle='box'; % default
+        %     subplot(4,1,cg)
+        %     subplot(1,2,cg)
+        figure(ll+10*(cg+1)+(ff-1)*100)
+        ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+        hold on;plot(powfb{1,ff}.time,0,'k');
+        set(gca,'XTick',[-.6:.1:1.8])
+        set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+        set(gca,'FontSize',30)
+        title([])
+        plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+        plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+        plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+        plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+        %         plot(cfg.xlim,[0 0],'Color',coloruse(10,:),'LineWidth',1)
+        plot(cfg.xlim,[0 0],'Color','k')
+        axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+        if cg==3
+          legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+        end
+      end % ff
+    end % cg
+    print(ll+20,[fdir 'tfr_tacPaud_MSpN_diff_FC_' num2str(ll) '_theta' '.png'],'-dpng')
+    print(ll+20+100,[fdir 'tfr_tacPaud_MSpN_diff_FC_' num2str(ll) '_alpbet' '.png'],'-dpng')
+    print(ll+30,[fdir 'tfr_tacPaud_MSpN_diff_OP_' num2str(ll) '_theta' '.png'],'-dpng')
+    print(ll+30+100,[fdir 'tfr_tacPaud_MSpN_diff_OP_' num2str(ll) '_alpbet' '.png'],'-dpng')
+    print(ll+20,[fdir 'tfr_tacPaud_MSpN_diff_FC_' num2str(ll) '_theta' '.eps'],'-depsc')
+    print(ll+20+100,[fdir 'tfr_tacPaud_MSpN_diff_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc')
+    print(ll+30,[fdir 'tfr_tacPaud_MSpN_diff_OP_' num2str(ll) '_theta' '.eps'],'-depsc')
+    print(ll+30+100,[fdir 'tfr_tacPaud_MSpN_diff_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc')
+    
+    if peakfindflag
+      if ll==3
+        [mx,mindD3]=max(nanmean(powfb{3,1}.avg(chpl{1},:),1));
+        timeTacThetaTFR_AT70=powfb{3,1}.time(mindD3);
+      elseif ll==7
+        [mx,mindD3]=max(nanmean(powfb{3,1}.avg(chpl{1},:),1));
+        timeTacThetaTFR_TA70=powfb{3,1}.time(mindD3);
+      end
+      
+      if exist('timeTacThetaTFR_AT70') && exist('timeTacThetaTFR_TA70')
+        timeTacThetaTFR_Diff=mean([timeTacThetaTFR_AT70 timeTacThetaTFR_TA70]);
+        timeTacThetaTFR_Uni=mean([timeTacThetaTfr timeAudThetaTfr]);
+        for pp=1:3,
+          peakthetaTFR_Diff(pp,ll)=nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff)),1);
+          peakthetaTFR_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Uni)),1);
+        end
+      end
+      
+      % posterior alpha/beta ERS rebound
+      for pp=1:3,
+        peakAlphaTFR_Diff(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-40:end-10),1),2);
+        peakalphaTFR_Tac(pp,ll) =nanmean(powfb{pp,2}.avg(chpl{2},dsearchn(powfb{pp,2}.time',timeTacAlpbet)),1);
+      end
+      
+%       stend=dsearchn(gravelo_tacPaud_comb1.time',[max(0,soades(ll)) max(0,soades(ll))+.5]');
+%       timepeak=stend(1):stend(2);
+%       stendL=dsearchn(gravelo_tacPaud_comb1.time',[max(0,soades(ll))+.5 max(0,soades(ll))+1.2]');
+%       timepeakL=stendL(1):stendL(2);
+      
+%       % theta Tfr
+%       [mx,mindD]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
+%       
+%       [mx,mindU]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
+%       timepeakoutU(ll)=gravelo_tacPaud_comb1.time(timepeak(mindU));
+%       [mx,mindM]=max(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
+%       timepeakoutM(ll)=gravelo_tacMSpN_comb1.time(timepeak(mindM));
+%       grpeaktheta(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(mindU)),2),1));
+%       grpeaktheta(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(mindM)),2),1));
+%       grpeaktheta(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(21)),2),1));
+%       grpeaktheta(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(mindU)),2),1));
+%       grpeaktheta(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(mindM)),2),1));
+%       grpeaktheta(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(21)),2),1));
+%       
+%       % alpha ERD
+%       [mx,mindU]=min(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak),2),1)));
+%       timeAERDoutU(ll)=gravelo_tacPaud_comb1.time(timepeak(mindU));
+%       [mx,mindM]=min(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak),2),1)));
+%       timeAERDoutM(ll)=gravelo_tacMSpN_comb1.time(timepeak(mindM));
+%       grpeakAERD(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(mindU)),2),1));
+%       grpeakAERD(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(mindM)),2),1));
+%       grpeakAERD(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(21)),2),1));
+%       grpeakAERD(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(mindU)),2),1));
+%       grpeakAERD(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(mindM)),2),1));
+%       grpeakAERD(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(21)),2),1));
+%       
+%       % alpha ERS rebound
+%       [mx,mindU]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL),2),1)));
+%       timeAERSoutU(ll)=gravelo_tacPaud_comb1.time(timepeakL(mindU));
+%       [mx,mindM]=max(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL),2),1)));
+%       timeAERSoutM(ll)=gravelo_tacMSpN_comb1.time(timepeakL(mindM));
+%       grpeakAERS(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(mindU)),2),1));
+%       grpeakAERS(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(mindM)),2),1));
+%       grpeakAERS(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(21)),2),1));
+%       grpeakAERS(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(mindU)),2),1));
+%       grpeakAERS(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(mindM)),2),1));
+%       grpeakAERS(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(21)),2),1));
+%       
+%       save(['grpeak_sleep' num2str(sleep) '_trialkc' num2str(trialkc)  '.mat'],'grpeak*','time*out*');
+      
+      
+      
+    end %peak
+    
+    
+  end % plottfrflag
+  
+  if plotplvflag
+    clear pow*
+    cfg=[];
+    tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+    tmpA.mask=logical(zeros(size(tmpA.powspctrm)));
+    tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
+    tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+    tmpsA.mask=logical(zeros(size(tmpsA.powspctrm)));
+    tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
+    tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+    tmpuA.mask=logical(zeros(size(tmpuA.powspctrm)));
+    tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
+    
+    pow{1}=tmpuA;
+    pow{2}=tmpsA;
+    pow{3}=tmpA;
+    
+    % average over bands first
+    for pp=1:3
+      for ff=1:2 % two diff freq bands
+        cfg=[];
+        if ff==1
+          cfg.frequency   = [4 8.5];
+        elseif ff==2
+          cfg.frequency   = [10 20];
+        end
+        cfg.avgoverfreq = 'yes';
+        cfg.nanmean     = 'yes';
+        powf{pp,ff}=ft_selectdata(cfg,pow{pp});
+      end
+    end
+    clear pow
+    
+    % baseline correct first, then remove baseline area for plotting
+    for ff=1:2,
+      %         cfg=[];
+      %         cfg.baseline=[gravelo_TPA_MSPN_comb1.time(49) gravelo_TPA_MSPN_comb1.time(53)];
+      %         cfg.baselinetype='absolute';
+      %         cfg.parameter={'plvabs' 'mask'};
+      %         powfb{pp,ff}=ft_freqbaseline(cfg, powf{pp,ff});
+      basep=powf{2,ff};
+      basep.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+      basep.mask=repmat(nanmean(powf{2,ff}.mask(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+      cfg=[];
+      cfg.parameter={'plvabs' 'mask'};
+      cfg.operation='subtract';
+      powfb{1,ff}=ft_math(cfg,powf{1,ff},basep)
+      powfb{2,ff}=ft_math(cfg,powf{2,ff},basep)
+      powfb{3,ff}=powf{3,ff};
+      
+      for pp=1:3
+        cfg=[];
+        if ll==1
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==3
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==4
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==5
+          cfg.latency=[tacbasemax(ll) 1.3];
+        elseif ll==6
+          cfg.latency=[tacbasemax(ll) 1.3+.02];
+        elseif ll==7
+          cfg.latency=[tacbasemax(ll) 1.3+.07];
+        elseif ll==9
+          cfg.latency=[tacbasemax(ll) 1.3+.50];
+        end
+        powfb{pp,ff}=ft_selectdata(cfg,powfb{pp,ff});
+        
+        powfb{pp,ff}.avg=squeeze(powfb{pp,ff}.plvabs);
+        powfb{pp,ff}.mask=squeeze(powfb{pp,ff}.mask);
+        powfb{pp,ff}.dimord='chan_time';
+        powfb{pp,ff}=rmfield(powfb{pp,ff},'freq');
+        powfb{pp,ff}=rmfield(powfb{pp,ff},'plvabs');
+        if plotallmask
+          powfb{pp,ff}.mask=repmat(ceil(mean(powfb{pp,ff}.mask,1)),[size(powfb{pp,ff}.mask,1) 1]);
+        end
+      end
+    end
+    
+    for cg=1:length(chanplot)
+      for ff=1:2
+        
+        cfg=[];
+        cfg.parameter='avg';
+        cfg.layout='elec1010.lay';
+        if ff==1
+          cfg.ylim=[-.1 .4];  % or [1 2.5]?
+        elseif ff==2
+          cfg.ylim=[-.1 .4];
+        end
+        cfg.linewidth=3;
+        cfg.xlim=[-.6 1.8];
+        if cg>length(chanplot)
+          cfg.channel=tmpd5.label(any(tmpd5.mask,2));
+        else
+          cfg.channel=chanplot{cg};
+        end
+        cfg.graphcolor=[colorblindApT; colorblindMpN; colorblindD];
+        cfg.interactive='no';
+        cfg.maskparameter='mask';
+        cfg.maskstyle='box'; % default
+        %     subplot(4,1,cg)
+        %     subplot(1,2,cg)
+        figure(ll+10*(cg+1)+(ff-1)*100)
+        ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+        hold on;plot(powfb{1,ff}.time,0,'k');
+        set(gca,'XTick',[-.6:.1:1.8])
+        set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+        set(gca,'FontSize',30)
+        title([])
+        plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
+        plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+        plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+        plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+        %         plot(cfg.xlim,[0 0],'Color',coloruse(10,:),'LineWidth',1)
+        plot(cfg.xlim,[0 0],'Color','k')
+        axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+        if cg==3
+          legend('A+T','MS+N','Difference')
+%           legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+        end
+      end % ff
+    end % cg
+    print(ll+20,[fdir 'plv_tacPaud_MSpN_diff_FC_' num2str(ll) '_theta' '.png'],'-dpng')
+    print(ll+20+100,[fdir 'plv_tacPaud_MSpN_diff_FC_' num2str(ll) '_alpbet' '.png'],'-dpng')
+    print(ll+30,[fdir 'plv_tacPaud_MSpN_diff_OP_' num2str(ll) '_theta' '.png'],'-dpng')
+    print(ll+30+100,[fdir 'plv_tacPaud_MSpN_diff_OP_' num2str(ll) '_alpbet' '.png'],'-dpng')
+    print(ll+20,[fdir 'plv_tacPaud_MSpN_diff_FC_' num2str(ll) '_theta' '.eps'],'-depsc')
+    print(ll+20+100,[fdir 'plv_tacPaud_MSpN_diff_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc')
+    print(ll+30,[fdir 'plv_tacPaud_MSpN_diff_OP_' num2str(ll) '_theta' '.eps'],'-depsc')
+    print(ll+30+100,[fdir 'plv_tacPaud_MSpN_diff_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc')
+    
+    
+    if peakfindflag
+      timeThetaPLV_Uni=mean([timeTacThetaPlv timeAudThetaPlv]);
+      for pp=1:3,
+        peakthetaPLV_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni)),1);
+      end
+    end % peak
+  
+    
+  end %plvplotflag
+  
+  
+end
+
+%% plot peak bars
+
+data=peakthetaTFR_Diff(:,soalist)';
+starind=[1 2 3 6];
+yminmax=[-.2 1.3];
+figind=56;
+figname=[fdir 'tfr_condDiff_theta.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
+data=peakAlphaTFR_Diff(:,soalist)';
+starind=[2 3 4 6];
+yminmax=[-.7 2.3];
+figind=57;
+figname=[fdir 'tfr_condDiff_alpha.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
+data=peakthetaPLV_Uni(:,soalist)';
+starind=[2 6];
+yminmax=[-.07 .37];
+figind=58;
+figname=[fdir 'plv_condDiff_theta.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
+% figure(56); % preferred
+% subplot(2,1,1);ph=bar(peakthetaTFR_Diff(1:2,soalist)');ylim([-0.2 1.3])
+% set(ph(1),'FaceColor',coloruse(1,:))
+% set(ph(2),'FaceColor',coloruse(10,:))
+% set(gca,'XTickLabel',{ '' '' '' '' '' '' ''   })
+% set(gca,'XTickLabelRotation',0)
+% set(gca,'FontSize',18)
+% title('TFP Theta, FC channels')
+% subplot(2,1,2);ph=bar(peakthetaTFR_Diff(3,soalist),0.3);ylim([-0.2 1.3])
+% set(ph(1),'FaceColor',coloruse(5,:))
+% set(gca,'XTickLabel',{ 'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'   })
+% set(gca,'XTickLabelRotation',45)
+% set(gca,'FontSize',18)
+% print(56,[fdir 'tfr_theta_peak.eps'],'-depsc')
+% % figure(57);
+% % subplot(2,1,1);ph=bar(peakthetaTFR_Uni(1:2,soalist)');ylim([-0.2 2.1])
+% % set(ph(1),'FaceColor',coloruse(1,:))
+% % set(ph(2),'FaceColor',coloruse(10,:))
+% % subplot(2,1,2);ph=bar(peakthetaTFR_Uni(3,soalist),0.3);ylim([-0.2 2.1])
+% % set(ph(1),'FaceColor',coloruse(5,:))
+% 
+% 
+% figure(58);  % preferred
+% subplot(2,1,1);ph=bar(peakAlphaTFR_Diff(1:2,soalist)');ylim([-0.7 2.3])
+% set(ph(1),'FaceColor',coloruse(1,:))
+% set(ph(2),'FaceColor',coloruse(10,:))
+% set(gca,'XTickLabel',{ '' '' '' '' '' '' ''   })
+% set(gca,'XTickLabelRotation',0)
+% set(gca,'FontSize',18)
+% title('TFP Alpha/Beta, Par. channels')
+% subplot(2,1,2);ph=bar(peakAlphaTFR_Diff(3,soalist),0.3);ylim([-0.7 2.3])
+% set(ph(1),'FaceColor',coloruse(5,:))
+% set(gca,'XTickLabel',{ 'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'   })
+% set(gca,'XTickLabelRotation',45)
+% set(gca,'FontSize',18)
+% print(58,[fdir 'tfr_alpha_peak.eps'],'-depsc')
+% % figure(59);
+% % subplot(2,1,1);ph=bar(peakalphaTFR_Tac(1:2,soalist)');ylim([-0.7 2.1])
+% % set(ph(1),'FaceColor',coloruse(1,:))
+% % set(ph(2),'FaceColor',coloruse(10,:))
+% % subplot(2,1,2);ph=bar(peakalphaTFR_Tac(3,soalist),0.3);ylim([-0.7 2.1])
+% % set(ph(1),'FaceColor',coloruse(5,:))
+% 
+% figure(60);
+% subplot(2,1,1);ph=bar(peakthetaPLV_Uni(1:2,soalist)');ylim([-0.07 0.37])
+% set(ph(1),'FaceColor',coloruse(1,:))
+% set(ph(2),'FaceColor',coloruse(10,:))
+% set(gca,'XTickLabel',{ '' '' '' '' '' '' ''   })
+% set(gca,'XTickLabelRotation',0)
+% set(gca,'FontSize',18)
+% title('PLF Theta, FC channels')
+% subplot(2,1,2);ph=bar(peakthetaPLV_Uni(3,soalist),0.3);ylim([-0.07 0.37])
+% set(ph(1),'FaceColor',coloruse(5,:))
+% set(gca,'XTickLabel',{ 'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'   })
+% set(gca,'XTickLabelRotation',45)
+% set(gca,'FontSize',18)
+% print(60,[fdir 'plv_theta_peak.eps'],'-depsc')
+% 
+% % line lots to match ERP now instead
+% try close(57); end;
+% figure(57);
+% x=[-.6 -.35 -.1 0 .1 .35 .6];
+% [ph,h1,h2]=plotyy(x,peakthetaTFR_Diff(1,soalist),x,peakthetaTFR_Diff(3,soalist));
+% line(x,peakthetaTFR_Diff(2,soalist),'Parent',ph(1));
+% line([-.8 .8], [0 0], 'Parent', ph(2));
+% set(h2,'Color',coloruse([5 ],:),'Marker','*','MarkerSize',15,'LineWidth',3,'LineStyle',':');
+% set(ph(2).Children(1),'Color',coloruse(5,:))
+% set(ph(1).Children(1),'Color',coloruse(10,:),'Marker','^','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1).Children(2),'Color',coloruse(1,:),'Marker','v','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1),'YColor',coloruse([10 ],:));
+% set(ph(2),'YColor',coloruse([5 ],:));
+% set(ph,'FontSize',15)
+% set(ph,'LineWidth',3)
+% xlim(ph(2), [-.8 .8])
+% xlim(ph(1), [-.8 .8])
+% ylim(ph(1), [-.2 1.3])
+% ylim(ph(2), [-.2 1.3])
+% set(gca,'Xtick',x)
+% set(gca,'XTickLabel',{ '-500' '-70' '-20' '0' '20' '70' '500'})
+% xlabel('Multisensory Asynchrony (ms)')
+% legend('A+T','MS+N','Difference')
+% ylabel('Theta Power (uV^2)')
+% print(57,[fdir 'TFP_condDiff_theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+% 
+% 
+% try close(58); end;
+% figure(58);
+% x=[-.6 -.35 -.1 0 .1 .35 .6];
+% [ph,h1,h2]=plotyy(x,peakAlphaTFR_Diff(1,soalist),x,peakAlphaTFR_Diff(3,soalist));
+% line(x,peakAlphaTFR_Diff(2,soalist),'Parent',ph(1));
+% line([-.8 .8], [0 0], 'Parent', ph(2));
+% set(h2,'Color',coloruse([5 ],:),'Marker','*','MarkerSize',15,'LineWidth',3,'LineStyle',':');
+% set(ph(2).Children(1),'Color',coloruse(5,:))
+% set(ph(1).Children(1),'Color',coloruse(10,:),'Marker','^','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1).Children(2),'Color',coloruse(1,:),'Marker','v','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1),'YColor',coloruse([10 ],:));
+% set(ph(2),'YColor',coloruse([5 ],:));
+% set(ph,'FontSize',15)
+% set(ph,'LineWidth',3)
+% xlim(ph(2), [-.8 .8])
+% xlim(ph(1), [-.8 .8])
+% ylim(ph(1), [-.7 2.3])
+% ylim(ph(2), [-.7 2.3])
+% set(gca,'Xtick',x)
+% set(gca,'XTickLabel',{ '-500' '-70' '-20' '0' '20' '70' '500'})
+% xlabel('Multisensory Asynchrony (ms)')
+% legend('A+T','MS+N','Difference')
+% ylabel('Alpha/Beta Power (uV^2)')
+% print(58,[fdir 'TFP_condDiff_alpha_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+% 
+% 
+% try close(59); end;
+% figure(59);
+% x=[-.6 -.35 -.1 0 .1 .35 .6];
+% [ph,h1,h2]=plotyy(x,peakthetaPLV_Uni(1,soalist),x,peakthetaPLV_Uni(3,soalist));
+% line(x,peakthetaPLV_Uni(2,soalist),'Parent',ph(1));
+% line([-.8 .8], [0 0], 'Parent', ph(2));
+% set(h2,'Color',coloruse([5 ],:),'Marker','*','MarkerSize',15,'LineWidth',3,'LineStyle',':');
+% set(ph(2).Children(1),'Color',coloruse(5,:))
+% set(ph(1).Children(1),'Color',coloruse(10,:),'Marker','^','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1).Children(2),'Color',coloruse(1,:),'Marker','v','MarkerSize',15,'LineWidth',3,'LineStyle',':')
+% set(ph(1),'YColor',coloruse([10 ],:));
+% set(ph(2),'YColor',coloruse([5 ],:));
+% set(ph,'FontSize',15)
+% set(ph,'LineWidth',3)
+% xlim(ph(2), [-.8 .8])
+% xlim(ph(1), [-.8 .8])
+% ylim(ph(1), [-.07 .37])
+% ylim(ph(2), [-.07 .37])
+% set(gca,'Xtick',x)
+% set(gca,'XTickLabel',{ '-500' '-70' '-20' '0' '20' '70' '500'})
+% xlabel('Multisensory Asynchrony (ms)')
+% legend('A+T','MS+N','Difference')
+% ylabel('Phase locking factor')
+% print(59,[fdir 'PLV_condDiff_theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+
+for ll=3
+  close all
+  clear grave* stat* tmp*
+  load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
+  %   baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
+%   stattimwin=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
+
+
+cfg=[];
+cfg.avgoverfreq='yes';
+cfg.frequency=[4 6.5];
+grdiff_theta=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+cfg.frequency=[8 20];
+grdiff_alpha=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+
+
+  cfg=[];
+  cfg.layout='elec1010.lay';
+  cfg.highlight          = 'on';
+  cfg.highlightsymbol    = '*';
+  cfg.highlightsize      = 10;
+  cfg.comment='no';
+  
+  cfg.parameter='powspctrm';
+  cfg.xlim=[timeTacThetaTFR_Diff-.1 timeTacThetaTFR_Diff+.1];
+  cfg.zlim=[-1 1];
+  cfg.highlightchannel   =  chanplot{1};
+  figure(120+ll);
+  ft_topoplotTFR(cfg,grdiff_theta);
+  print(120+ll,[fdir 'TFP_topoDiff_Theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+  
+  cfg.parameter='powspctrm';
+  cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-40 end-10]);
+  cfg.zlim=[-1.7 1.7];
+  cfg.highlightchannel   =  chanplot{2};
+  figure(130+ll);
+  ft_topoplotTFR(cfg,grdiff_alpha);
+  print(130+ll,[fdir 'TFP_topoDiff_Alpha_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+
+  cfg.parameter='plvabs';
+  cfg.xlim=[timeThetaPLV_Uni-.03 timeThetaPLV_Uni+.03];
+  cfg.zlim=[-.2 .2];
+  cfg.highlightchannel   =  chanplot{1};
+  figure(140+ll);
+  ft_topoplotTFR(cfg,grdiff_theta);
+  print(140+ll,[fdir 'PLV_topoDiff_Theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+  
+end
+
+
+
+
+%%  Plotting TF image results
 
 
 chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
@@ -6202,331 +8011,293 @@ tt=3;
 fftaddflag=0;
 synchasynch=0;
 tacbasemax=min(-.15,soades-.15);
-% load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) '.mat']);
-stdir='/home/zumerj/audtac/eeg_data/statsgrave_oldstattimwin/';
+baseline2=[tacbasemax(1) tacbasemax(1)+.08];
 
-sleep=0;
+% load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) '.mat']);
+% stdir='/home/zumerj/audtac/eeg_data/statsgrave_oldstattimwin/';
+
+itcdepsampflag=1;
+%
+sleep=1;
 if sleep
   ss=12;
-else
-  ss=10;
-  iter=27;
+  trialkc=-1;
+  iter=11;
   usetr=1;
   mcseed=13;
+else
+  ss=10;
+  %   iter=27;
+  %   usetr=1;
+  iter=31;
+  usetr=3;
+  mcseed=13;
+  trialkc=-1;
 end
+
 
 pre30plot=0; % awkward.... leave for 0 for new iter27.
 commentson=0; % sometimes we want comments on, to see xlim & ylim used; for final figures turn off.
+plotplvflag=1;
+plottfrflag=1;
 
 % for all ll, print at least a TFR even if nothing significant.
-for ll=soalist
-  % for ll=[7 9]
+% for ll=soalist
+for ll=[1]
   close all
   clear grave* stat*
   if pre30plot
     load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
     %   load([stdir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '.mat']);
   else
-    load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat']);
+    if itcdepsampflag
+      load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
+    else
+      load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '.mat']);
+    end
   end
   
   for combval=1
     close all
     clear adda
     % power
-    if fftaddflag
-      cfg=[];
-      cfg.latency=[stattl_mc_fftadd.time(1) stattl_mc_fftadd.time(end)];
-      tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_fftadd);
-      tmp.mask=stattl_mc_fftadd.mask;
-      tmps=ft_selectdata(cfg,gravelo_tacMSpN_fftadd);
-      tmps.mask=stattl_mc_fftadd.mask;
-      tmpu=ft_selectdata(cfg,gravelo_tacPaud_fftadd);
-      tmpu.mask=stattl_mc_fftadd.mask;
-    else
-      if combval==1
+    if plottfrflag
+      if fftaddflag
         cfg=[];
-        cfg.latency=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
-        tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-        tmp.mask=stattl_mc_comb1.mask;
-        tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-        tmps.mask=stattl_mc_comb1.mask;
-        tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-        tmpu.mask=stattl_mc_comb1.mask;
+        cfg.latency=[stattl_mc_fftadd.time(1) stattl_mc_fftadd.time(end)];
+        tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_fftadd);
+        tmp.mask=stattl_mc_fftadd.mask;
+        tmps=ft_selectdata(cfg,gravelo_tacMSpN_fftadd);
+        tmps.mask=stattl_mc_fftadd.mask;
+        tmpu=ft_selectdata(cfg,gravelo_tacPaud_fftadd);
+        tmpu.mask=stattl_mc_fftadd.mask;
+      else
+        if combval==1
+          cfg=[];
+          cfg.latency=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
+          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+          tmp.mask=stattl_mc_comb1.mask;
+          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+          tmps.mask=stattl_mc_comb1.mask;
+          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+          tmpu.mask=stattl_mc_comb1.mask;
+          
+          cfg=[];
+          tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+          tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+          tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1.time(1)):dsearchn(tmpA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+          tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+          tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+          tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+          tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+          tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+          tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
+        elseif combval==2
+          cfg=[];
+          cfg.latency=[stattl_mc_comb2.time(1) stattl_mc_comb2.time(end)];
+          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+          tmp.mask=stattl_mc_comb2.mask;
+          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+          tmps.mask=stattl_mc_comb2.mask;
+          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+          tmpu.mask=stattl_mc_comb2.mask;
+        end
+        %         cfg=[];
+        %         tmpn=ft_selectdata(cfg,gravelo_tNulAlone_comb );
+        %         tmpt=ft_selectdata(cfg,gravelo_tTacAlone_comb );
+        %         tmpa=ft_selectdata(cfg,gravelo_tAudAlone_comb );
+        %         tmpm=ft_selectdata(cfg,gravelo_tMSAlone_comb );
+        
+        %       gravelo_tNulAlone_comb.mask=logical(ones(size(gravelo_tNulAlone_comb.powspctrm)));
+        %       gravelo_tTacAlone_comb.mask=logical(ones(size(gravelo_tTacAlone_comb.powspctrm)));
+        %       gravelo_tAudAlone_comb.mask=logical(ones(size(gravelo_tAudAlone_comb.powspctrm)));
+        %       gravelo_tMSAlone_comb.mask= logical(ones(size(gravelo_tMSAlone_comb.powspctrm)));
+      end
+      
+      %     if 0
+      %       cfg=[];
+      %       cfg.avgoverchan='yes';
+      %       if ~isempty(tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3)))))
+      %         cfg.channel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3))));
+      %       else
+      %         cfg.channel='all';
+      %       end
+      %       tmp1=ft_selectdata(cfg,tmp);
+      %       tmp1.mask=logical(ceil(tmp1.mask));
+      %
+      %       figure(10*ll);
+      %       cfg=[];
+      %       cfg.parameter='powspctrm';
+      %       cfg.layout='elec1010.lay';
+      %       cfg.maskparameter='mask';
+      %       cfg.maskalpha=0.5;
+      %       cfg.zlim='maxabs';
+      %       ft_singleplotTFR(cfg,tmp1);
+      %       print(10*ll,[fdir 'tfrlo_final_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+      %     end
+      
+      
+      % plot TFR of powspctrm, for each suplot: u and m and difference.
+      zlim=[-3 3];
+      baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
+      
+      if 0
+        pow{1}=gravelo_tMSAlone_comb;
+        pow{2}=tmpu;
+        pow{3}=tmps;
+        pow{4}=tmp;
+        
+        chansel=chanplot{1};
+        figinds=10*ll;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_crop_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
+        
+        chansel=chanplot{2};
+        figinds=10*ll+1;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_crop_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
+        
+        chansel=[chanplot{1} chanplot{2}];
+        figinds=10*ll+2;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_crop_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
+      end
+      
+      %     pow{1}=gravelo_tMSAlone_comb;
+      %     pow{2}=tmpuA;
+      %     pow{3}=tmpsA;
+      %     pow{4}=tmpA;
+      pow{1}=tmpuA;
+      pow{2}=tmpsA;
+      pow{3}=tmpA;
+      
+      % baseline correct first, then remove baseline area for plotting
+      for pp=1:3
         
         cfg=[];
-        tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-        tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-        tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1.time(1)):dsearchn(tmpA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
-        tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-        tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-        tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
-        tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-        tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-        tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
-      elseif combval==2
+        cfg.baseline=baseline2;
+        cfg.baselinetype='absolute';
+        cfg.parameter={'powspctrm' 'mask'};
+        pow{pp}=ft_freqbaseline(cfg, pow{pp})
+        
         cfg=[];
-        cfg.latency=[stattl_mc_comb2.time(1) stattl_mc_comb2.time(end)];
-        tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-        tmp.mask=stattl_mc_comb2.mask;
-        tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-        tmps.mask=stattl_mc_comb2.mask;
-        tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-        tmpu.mask=stattl_mc_comb2.mask;
+        if ll==1 | ll==3 | ll==4 | ll==5
+          cfg.latency=[-0.5 1.3];
+        elseif ll==6
+          cfg.latency=[-0.5+.02 1.3+.02];
+        elseif ll==7
+          cfg.latency=[-0.5+.07 1.3+.07];
+        elseif ll==9
+          cfg.latency=[-0.5+.50 1.3+.50];
+        end
+        pow{pp}=ft_selectdata(cfg,pow{pp});
       end
-      %         cfg=[];
-      %         tmpn=ft_selectdata(cfg,gravelo_tNulAlone_comb );
-      %         tmpt=ft_selectdata(cfg,gravelo_tTacAlone_comb );
-      %         tmpa=ft_selectdata(cfg,gravelo_tAudAlone_comb );
-      %         tmpm=ft_selectdata(cfg,gravelo_tMSAlone_comb );
-      gravelo_tNulAlone_comb.mask=logical(ones(size(gravelo_tNulAlone_comb.powspctrm)));
-      gravelo_tTacAlone_comb.mask=logical(ones(size(gravelo_tTacAlone_comb.powspctrm)));
-      gravelo_tAudAlone_comb.mask=logical(ones(size(gravelo_tAudAlone_comb.powspctrm)));
-      gravelo_tMSAlone_comb.mask= logical(ones(size(gravelo_tMSAlone_comb.powspctrm)));
-    end
-    
-    %     if 0
-    %       cfg=[];
-    %       cfg.avgoverchan='yes';
-    %       if ~isempty(tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3)))))
-    %         cfg.channel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3))));
-    %       else
-    %         cfg.channel='all';
-    %       end
-    %       tmp1=ft_selectdata(cfg,tmp);
-    %       tmp1.mask=logical(ceil(tmp1.mask));
-    %
-    %       figure(10*ll);
-    %       cfg=[];
-    %       cfg.parameter='powspctrm';
-    %       cfg.layout='elec1010.lay';
-    %       cfg.maskparameter='mask';
-    %       cfg.maskalpha=0.5;
-    %       cfg.zlim='maxabs';
-    %       ft_singleplotTFR(cfg,tmp1);
-    %       print(10*ll,[fdir 'tfrlo_final_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    %     end
-    
-    
-    % plot TFR of powspctrm, for each suplot: u and m and difference.
-    zlim=[-3 3];
-    baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
-    
-    if 0
-      pow{1}=gravelo_tMSAlone_comb;
-      pow{2}=tmpu;
-      pow{3}=tmps;
-      pow{4}=tmp;
       
       chansel=chanplot{1};
       figinds=10*ll;
       figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_crop_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
+      figstrings{1}=[fdir 'tfrlo_all_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
+      %     tfr_subchannel_3cond_plotRows_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
       
       chansel=chanplot{2};
       figinds=10*ll+1;
       figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_crop_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
+      figstrings{1}=[fdir 'tfrlo_all_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
       
       chansel=[chanplot{1} chanplot{2}];
       figinds=10*ll+2;
       figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_crop_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline1)
-    end
-    
-    %     pow{1}=gravelo_tMSAlone_comb;
-    %     pow{2}=tmpuA;
-    %     pow{3}=tmpsA;
-    %     pow{4}=tmpA;
-    pow{1}=tmpuA;
-    pow{2}=tmpsA;
-    pow{3}=tmpA;
-    baseline2=[tacbasemax(1) tacbasemax(1)+.08];
-    
-    chansel=chanplot{1};
-    figinds=10*ll;
-    figstrings=[];
-    figstrings{1}=[fdir 'tfrlo_all_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-    tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
-    %     tfr_subchannel_3cond_plotRows_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
-    
-    chansel=chanplot{2};
-    figinds=10*ll+1;
-    figstrings=[];
-    figstrings{1}=[fdir 'tfrlo_all_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-    tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
-    
-    chansel=[chanplot{1} chanplot{2}];
-    figinds=10*ll+2;
-    figstrings=[];
-    figstrings{1}=[fdir 'tfrlo_all_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-    tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
-    
-    masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
-    if ~isempty(masktime)
-      chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
-      figinds=10*ll+9;
-      figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_all_allsig_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+      figstrings{1}=[fdir 'tfrlo_all_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
       tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
-    end
-    
-    %     % tried this out but doesn't look right; baselining seems to make sense for display prior to contrast
-    %     zlim=[0 10];
-    %     baseline='no';
-    
-    
-    % old way
-    %     chansel=chanplot{1};
-    %     figinds=10*ll;
-    %     figstrings=[];
-    %     figstrings{1}=[fdir 'tfrlo_final_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'];
-    %     baseline=[tmp.time(1) tmp.time(9)];
-    %     tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-    %
-    %     chansel=chanplot{2};
-    %     figinds=10*ll+1;
-    %     figstrings=[];
-    %     figstrings{1}=[fdir 'tfrlo_final_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'];
-    %     baseline=[tmp.time(1) tmp.time(9)];
-    %     tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-    
-    
-    % theta topo
-    if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
-      cfg=[];
-      cfg.parameter='powspctrm';
-      cfg.layout='elec1010.lay';
-      cfg.maskalpha=0.5;
-      if sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[4 8.5]; % theta here includes 8 hz (nothing in alpha above 8)
-      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[4 10.5]; % theta here includes 8 hz (nothing in alpha above 8)
-      else
-        cfg.ylim=[4 6.5];
-      end
-      cfg.zlim=[-1.4 1.4];
-      cfg.highlight='on';
-      if commentson
-        cfg.comment='auto';
-      else
-        cfg.comment='no';
-      end
-      %       masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
-      %       cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-      masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-      difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
-      clear masktime
-      if any(difftimes>1)
-        finddifftimes=find(difftimes>1);
-        for dd=1:length(finddifftimes)+1
-          if dd==1
-            masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
-          elseif dd==length(finddifftimes)+1
-            masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
-          else
-            masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
-          end
-        end
-      else
-        masktime{1}=masktime_tmp;
-      end
-      for dd=1:length(masktime)
-        %     if ll==1
-        %       cfg.xlim=[.1 .35];
-        %     elseif ll==3
-        %       cfg.xlim=[.06 .42];
-        %     elseif ll==5
-        %       cfg.xlim=[-.04 .36];
-        %     elseif ll==7
-        %       cfg.xlim=[.1 .44];
-        %     end
-        cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
-        %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
-        cfg.baseline=baseline2;
-        figure(10*ll+8);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+8,[fdir 'tfrlo_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-        figure(10*ll+3);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+3,[fdir 'tfrlo_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-        cfg.zlim=[-1.4 1.4];
-        %     cfg.zlim='maxabs';
-        %     cfg.baseline='no';
-        figure(10*ll+4);
-        ft_topoplotTFR(cfg,tmpA);
-        print(10*ll+4,[fdir 'tfrlo_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-      end
       
-      
-      if 0; %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-        %         chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-        chansel=cfg.highlightchannel;
-        zlim=[-3 3];
-        figinds=10*ll+1000;
+      masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
+      if ~isempty(masktime)
+        sigchan=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
+        chansel=sigchan;
+        figinds=10*ll+9;
         figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_final_Xtheta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        baseline=[tmp.time(1) tmp.time(9)];
-        tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+        figstrings{1}=[fdir 'tfrlo_all_allsig_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
+        
+        clear bk fr
+        for sc=1:length(sigchan),bk(sc)=~isempty(cell2mat(strfind(sigchan(sc),'P'))) | ~isempty(cell2mat(strfind(sigchan(sc),'O')));end
+        for sc=1:length(sigchan),fr(sc)=~isempty(cell2mat(strfind(sigchan(sc),'F'))) | ~isempty(cell2mat(strfind(sigchan(sc),'A')));end
+        chansel=sigchan(find(fr));
+        figinds=10*ll+9+50;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_all_sigFC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
+        
+        chansel=sigchan(find(bk));
+        figinds=10*ll+9+60;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_all_sigOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
       end
       
-    end
-    
-    % alpha topo
-    skipplot=0;
-    if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
-      cfg=[];
-      if sleep==0 && ll==3 && combval==1  && pre30plot==1 % ??
-        cfg.ylim=[10 12];
-        %       cfg.xlim=[0 .1];
-        %       elseif ll==7
-        %         cfg.ylim=[8 10];
-        %       cfg.xlim=[.16 .3];
-      elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
-        cfg.ylim=[8 14];
-      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
-        skipplot=1; % theta goes up to 8Hz
-      elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[8 13];
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[10 14];
-      elseif sleep==0 && ll==5 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[8 12];
-      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[8 12];
-      elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
-        cfg.ylim=[8 12];
-      elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
-        skipplot=1; % theta goes up to 10Hz
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[8 12];
-      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[8 12];
-      elseif sleep==0 && ll==1 && iter==27 && usetr==1
-%         cfg.ylim=[8 14];
-        cfg.ylim=[8 28]; % combine with beta (skip beta below)
-      elseif sleep==0 && ll==3 && iter==27 && usetr==1
-%         cfg.ylim=[8 12];
-        cfg.ylim=[8 30]; % combine with beta (skip beta below)
-      elseif sleep==0 && ll==4 && iter==27 && usetr==1
-%         cfg.ylim=[10 12];
-        cfg.ylim=[10 24]; % combine with beta (skip beta below)
-      elseif sleep==0 && ll==5 && iter==27 && usetr==1
-%         cfg.ylim=[8 12];
-        cfg.ylim=[8 30]; % combine with beta (skip beta below)
-      elseif sleep==0 && ll==7 && iter==27 && usetr==1
-        skipplot=1; % blur up from theta
-      else
-        disp('get ylim right per ll alpha')
-        tmp.freq(find(mean(mean(tmp.mask,1),3)))
-        keyboard
+      
+      % all channels
+      if 0
+        chansel=tmp.label;
+        figinds=10*ll+8;
+        figstrings=[];
+        figstrings{1}=[fdir 'tfrlo_all_allchan_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline2)
       end
-      if skipplot==0
+      
+      %     % tried this out but doesn't look right; baselining seems to make sense for display prior to contrast
+      %     zlim=[0 10];
+      %     baseline='no';
+      
+      
+      % old way
+      %     chansel=chanplot{1};
+      %     figinds=10*ll;
+      %     figstrings=[];
+      %     figstrings{1}=[fdir 'tfrlo_final_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'];
+      %     baseline=[tmp.time(1) tmp.time(9)];
+      %     tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+      %
+      %     chansel=chanplot{2};
+      %     figinds=10*ll+1;
+      %     figstrings=[];
+      %     figstrings{1}=[fdir 'tfrlo_final_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'];
+      %     baseline=[tmp.time(1) tmp.time(9)];
+      %     tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+      
+      
+      % theta topo
+      skipplot=0;
+      if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
+        cfg=[];
+        cfg.parameter='powspctrm';
+        cfg.layout='elec1010.lay';
+        cfg.maskalpha=0.5;
+        if sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[4 8.5]; % theta here includes 8 hz (nothing in alpha above 8)
+        elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[4 8.5]; % theta here includes 8 hz (nothing in alpha above 8)
+        elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
+          cfg.ylim=[4 10.5]; % theta here includes 8 hz (nothing in alpha above 8)
+        elseif sleep==1 && ll==9 && trialkc==-1
+          skipplot=1; % combine with alpha
+        else
+          cfg.ylim=[4 6.5];  % ll==7 & ll==4
+        end
+        cfg.zlim=[-1.4 1.4];
+        cfg.highlight='on';
+        if commentson
+          cfg.comment='auto';
+        else
+          cfg.comment='no';
+        end
+        %       masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
+        %       cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
         masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
         difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
         clear masktime
@@ -6544,477 +8315,127 @@ for ll=soalist
         else
           masktime{1}=masktime_tmp;
         end
-        cfg.parameter='powspctrm';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        %       cfg.zlim=[-1.4 1.4];
-        cfg.highlight='on';
-        cfg.baseline=baseline2;
-        if commentson
-          cfg.comment='auto';
-        else
-          cfg.comment='no';
+        if sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
+          masktime_tmp=masktime{1};
+          clear masktime
+          masktime{1}=masktime_tmp(1:55);
+          masktime{2}=masktime_tmp(56:end);
         end
         for dd=1:length(masktime)
+          %     if ll==1
+          %       cfg.xlim=[.1 .35];
+          %     elseif ll==3
+          %       cfg.xlim=[.06 .42];
+          %     elseif ll==5
+          %       cfg.xlim=[-.04 .36];
+          %     elseif ll==7
+          %       cfg.xlim=[.1 .44];
+          %     end
           cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          cfg.zlim=[-9 9];
-          figure(10*ll+5);
+          %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+          %       cfg.baseline=[tmp1.time(1) tmp1.time(9)];
+          cfg.baseline=baseline2;
+          cfg.highlightsize=25;
+          cfg.highlightsymbol='.';
+          figure(10*ll+8);
           ft_topoplotTFR(cfg,tmpuA);
-          print(10*ll+5,[fdir 'tfrlo_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-          figure(10*ll+6);
+          print(10*ll+8,[fdir 'tfrlo_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          figure(10*ll+3);
           ft_topoplotTFR(cfg,tmpsA);
-          print(10*ll+6,[fdir 'tfrlo_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-          cfg.zlim=[-9 9];
-          figure(10*ll+7);
+          print(10*ll+3,[fdir 'tfrlo_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          cfg.zlim=[-1.4 1.4];
+          %     cfg.zlim='maxabs';
+          %     cfg.baseline='no';
+          figure(10*ll+4);
           ft_topoplotTFR(cfg,tmpA);
-          print(10*ll+7,[fdir 'tfrlo_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+          print(10*ll+4,[fdir 'tfrlo_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
         end
         
         
-        
-        if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+        if 0; %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+          %         chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+          chansel=cfg.highlightchannel;
           zlim=[-3 3];
-          figinds=10*ll+1000+1;
+          figinds=10*ll+1000;
           figstrings=[];
-          figstrings{1}=[fdir 'tfrlo_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{1}=[fdir 'tfrlo_final_Xtheta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
           baseline=[tmp.time(1) tmp.time(9)];
           tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
         end
-      end % skipplot
-    end
-    
-    % beta topo
-    if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
-      cfg=[];
-      if sleep==0 && ll==5 && pre30plot==1
-        cfg.ylim=[14 30];
-        %       cfg.xlim=[.2 .28];
-      elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
-        cfg.ylim=[13 15];
-      elseif sleep==0 && ll==3 && combval==1 && pre30plot==1
-        cfg.ylim=[14 28];
-      elseif sleep==0 && ll==6 && combval==1 && pre30plot==1
-        cfg.ylim=[16 28];
-      elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[14 30];
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[16 30];
-      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
-        cfg.ylim=[14 22];
-      elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
-        cfg.ylim=[14 22];
-      elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[14 30];
-      elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
-        cfg.ylim=[14 18];
-      elseif sleep==0 && ll==1 && iter==27 && usetr==1
-%         cfg.ylim=[16 28];
-        skipplot=1; % combine with alpha above
-      elseif sleep==0 && ll==3 && iter==27 && usetr==1
-%         cfg.ylim=[14 30];
-        skipplot=1; % combine with alpha above
-      elseif sleep==0 && ll==4 && iter==27 && usetr==1
-%         cfg.ylim=[14 24];
-        skipplot=1; % combine with alpha above
-      elseif sleep==0 && ll==5 && iter==27 && usetr==1
-%         cfg.ylim=[14 30];
-        skipplot=1; % combine with alpha above
-      elseif sleep==0 && ll==6 && iter==27 && usetr==1
-        cfg.ylim=[14 30];
-      else
-        disp('get ylim right per ll beta')
-        tmp.freq(find(mean(mean(tmp.mask,1),3)))
-        keyboard
-      end
-      if skipplot==0
-      
-      masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-      difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
-      clear masktime
-      if any(difftimes>1)
-        finddifftimes=find(difftimes>1);
-        for dd=1:length(finddifftimes)+1
-          if dd==1
-            masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
-          elseif dd==length(finddifftimes)+1
-            masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
-          else
-            masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
-          end
-        end
-      else
-        masktime{1}=masktime_tmp;
-      end
-      cfg.parameter='powspctrm';
-      cfg.layout='elec1010.lay';
-      cfg.maskalpha=0.5;
-      %       cfg.zlim=[-1.4 1.4];
-      cfg.highlight='on';
-      cfg.baseline=baseline2;
-      if commentson
-        cfg.comment='auto';
-      else
-        cfg.comment='no';
-      end
-      for dd=1:length(masktime)
-        cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        cfg.zlim=[-1.1 1.1];
-        figure(10*ll+5);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+5,[fdir 'tfrlo_topoU_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-        figure(10*ll+6);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+6,[fdir 'tfrlo_topoM_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-        cfg.zlim=[-1.1 1.1];
-        figure(10*ll+7);
-        ft_topoplotTFR(cfg,tmpA);
-        print(10*ll+7,[fdir 'tfrlo_topoDiff_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-      end
-      
-      
-      if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-        chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-        zlim=[-2 2];
-        figinds=10*ll+1000+2;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_final_Xbeta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        baseline=[tmp.time(1) tmp.time(9)];
-        tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-      end
-      end % skipplot
-    end
-    
-    
-    
-    
-    
-    %    %  % %%%%%%% PLV   %%%%%%%%
-    for adda=2
-      if combval==1
-        if adda==1
-          cfg=[];
-          cfg.latency=[stattl_mc_comb1plvadi.time(1) stattl_mc_comb1plvadi.time(end)];
-          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-          tmp.mask=stattl_mc_comb1plvadi.mask;
-          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-          tmps.mask=stattl_mc_comb1plvadi.mask;
-          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-          tmpu.mask=stattl_mc_comb1plvadi.mask;
-          
-          cfg=[];
-          tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-          tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-          tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-          tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-          tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-          tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-          tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-          tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-          tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-        elseif adda==2
-          cfg=[];
-          cfg.latency=[stattl_mc_comb1plvdai.time(1) stattl_mc_comb1plvdai.time(end)];
-          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-          tmp.mask=stattl_mc_comb1plvdai.mask;
-          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-          tmps.mask=stattl_mc_comb1plvdai.mask;
-          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-          tmpu.mask=stattl_mc_comb1plvdai.mask;
-          
-          cfg=[];
-          tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-          tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-          tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-          tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-          tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-          tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-          tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-          tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-          tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-        end
-      elseif combval==2
-        if adda==1
-          cfg=[];
-          cfg.latency=[stattl_mc_comb2plvadi.time(1) stattl_mc_comb2plvadi.time(end)];
-          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-          tmp.mask=stattl_mc_comb2plvadi.mask;
-          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-          tmps.mask=stattl_mc_comb2plvadi.mask;
-          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-          tmpu.mask=stattl_mc_comb2plvadi.mask;
-        elseif adda==2
-          cfg=[];
-          cfg.latency=[stattl_mc_comb2plvdai.time(1) stattl_mc_comb2plvdai.time(end)];
-          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-          tmp.mask=stattl_mc_comb2plvdai.mask;
-          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-          tmps.mask=stattl_mc_comb2plvdai.mask;
-          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-          tmpu.mask=stattl_mc_comb2plvdai.mask;
-        end
-      end
-      
-      tmp.plvavgangwrap=wrapToPi(tmp.plvavgang);
-      tmps.plvavgangwrap=wrapToPi(tmps.plvavgang);
-      tmpu.plvavgangwrap=wrapToPi(tmpu.plvavgang);
-      tmpA.plvavgangwrap=wrapToPi(tmpA.plvavgang);
-      tmpsA.plvavgangwrap=wrapToPi(tmpsA.plvavgang);
-      tmpuA.plvavgangwrap=wrapToPi(tmpuA.plvavgang);
-      gravelo_tNulAlone_comb.plvavgangwrap=wrapToPi(gravelo_tNulAlone_comb.plvavgang);
-      gravelo_tTacAlone_comb.plvavgangwrap=wrapToPi(gravelo_tTacAlone_comb.plvavgang);
-      gravelo_tAudAlone_comb.plvavgangwrap=wrapToPi(gravelo_tAudAlone_comb.plvavgang);
-      gravelo_tMSAlone_comb.plvavgangwrap= wrapToPi(gravelo_tMSAlone_comb.plvavgang);
-      
-      %       if 0
-      %         cfg=[];
-      %         cfg.avgoverchan='yes';
-      %         if ~isempty(tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3)))))
-      %           cfg.channel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3))));
-      %         else
-      %           cfg.channel='all';
-      %         end
-      %         tmp1=ft_selectdata(cfg,tmp);
-      %         tmp1.mask=logical(ceil(tmp1.mask));
-      %
-      %         figure(100*ll);
-      %         cfg=[];
-      %         cfg.parameter='plvavgabs';
-      %         cfg.layout='elec1010.lay';
-      %         cfg.maskparameter='mask';
-      %         cfg.maskalpha=0.5;
-      %         cfg.zlim='maxabs';
-      %         ft_singleplotTFR(cfg,tmp1);
-      %         print(100*ll,[fdir 'plvabslo_final_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-      %         figure(100*ll+10);
-      %         cfg.parameter='plvavgang';
-      %         ft_singleplotTFR(cfg,tmp1);
-      %         print(100*ll+10,[fdir 'plvanglo_final_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-      %       end
-      
-      
-      % plot TFR of plv abs and plv ang, for each suplot: u and m and difference.
-      if pre30plot
-        zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-      else
-        zlim=[0 0.5; .1 .25;   -20 400; -10 300];
-      end
-      
-      if 0
-        pow{1}=gravelo_tMSAlone_comb;
-        pow{2}=tmpu;
-        pow{3}=tmps;
-        pow{4}=tmp;
         
-        chansel=chanplot{1};
-        figinds=[100*ll;  100*ll+10];
-        figstrings{1}=[fdir 'plvabslo_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-        
-        chansel=chanplot{2};
-        figinds=[100*ll+1;  100*ll+10+1];
-        figstrings{1}=[fdir 'plvabslo_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-        
-        chansel=[chanplot{1} chanplot{2}];
-        figinds=[100*ll+2;  100*ll+10+2];
-        figstrings{1}=[fdir 'plvabslo_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-      end
-      
-      clear pow
-      if pre30plot
-        pow{1}=gravelo_tMSAlone_comb;
-        pow{2}=tmpuA;
-        pow{3}=tmpsA;
-        pow{4}=tmpA;
-      else
-        pow{1}=tmpuA;
-        pow{2}=tmpsA;
-        pow{3}=tmpA;
-      end
-      
-      disp('starting PLF plotting')
-      %       keyboard
-      chansel=chanplot{1};
-      figinds=[100*ll;  100*ll+10];
-      figstrings{1}=[fdir 'plvabslo_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      figstrings{2}=[fdir 'plvanglo_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-      
-      chansel=chanplot{2};
-      figinds=[100*ll+1;  100*ll+10+1];
-      figstrings{1}=[fdir 'plvabslo_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      figstrings{2}=[fdir 'plvanglo_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-      
-      chansel=[chanplot{1} chanplot{2}];
-      figinds=[100*ll+2;  100*ll+10+2];
-      figstrings{1}=[fdir 'plvabslo_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      figstrings{2}=[fdir 'plvanglo_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-      
-      masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
-      if ~isempty(masktime)
-        chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
-        figinds=[100*ll+9;  100*ll+10+9];
-        figstrings{1}=[fdir 'plvabslo_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-      end
-      
-      % theta topo
-      if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
-        cfg=[];
-        if sleep==0 && ll==3 && pre30plot==1
-          cfg.ylim=[4 6.5];
-        elseif sleep==0 && ll==6 && adda==1 && pre30plot==1
-          cfg.ylim=[5 6.5];
-        elseif sleep==0 && ll==7 && pre30plot==1
-          cfg.ylim=[4 6.5];
-        elseif sleep==0 && ll==3 && iter==31 && usetr==3
-          cfg.ylim=[4 8.5];
-        elseif sleep==0 && ll==7 && iter==31 && usetr==3
-          cfg.ylim=[4 8.5];
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[5.5 8.5];
-        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[4 6.5];
-        elseif sleep==0 && ll==3 && iter==27 && usetr==1
-          cfg.ylim=[4 8.5];
-        elseif sleep==0 && ll==7 && iter==27 && usetr==1
-          cfg.ylim=[4 8.5];
-        else
-          disp('get ylim right per ll theta plv')
-          tmp.freq(find(mean(mean(tmp.mask,1),3)))
-          keyboard
-        end
-        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        cfg.parameter='plvavgabs';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        cfg.zlim=[-.25 .25];
-        cfg.highlight='on';
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
-        cfg.baseline=baseline2;
-        cfg.zlim=[-.25 .25];
-        if commentson
-          cfg.comment='auto';
-        else
-          cfg.comment='no';
-        end
-        figure(100*ll+8);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+8,[fdir 'plvabslo_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+3);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+3,[fdir 'plvabslo_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-.15 .15];
-        figure(100*ll+4);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+4,[fdir 'plvabslo_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        
-        if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=cfg.highlightchannel;
-          zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-          zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-          figinds=[100*ll+20+1;  100*ll+30+1];
-          figstrings{1}=[fdir 'plvabslo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-        end
-        
-        cfg.parameter='plvavgangwrap';
-        if sleep==0 && ll==3 && pre30plot==1
-          cfg.xlim=[0.19 0.19];
-        elseif sleep==0 && ll==6 && combval==1 && adda==1 && pre30plot==1
-          cfg.xlim=[0.41 0.41];
-        elseif sleep==0 && ll==6 && combval==2 && adda==1 && pre30plot==1
-          cfg.xlim=[0.32 0.32];
-        elseif sleep==0 && ll==7 && combval==1 && pre30plot==1
-          cfg.xlim=[.21 .21];
-        elseif sleep==0 && ll==7 && combval==2 && pre30plot==1
-          cfg.xlim=[.23 .23];
-        elseif sleep==0 && ll==3 && iter==31 && usetr==3
-          cfg.xlim=[.16 .16];
-        elseif sleep==0 && ll==7 && iter==31 && usetr==3
-          cfg.xlim=[.11 .11];
-        elseif sleep==0 && ll==3 && iter==32 && usetr==3
-          cfg.xlim=[.03 .03];
-        elseif sleep==0 && ll==7 && iter==32 && usetr==3
-          cfg.xlim=[.11 .11];
-        elseif sleep==0 && ll==3 && iter==27 && usetr==1
-          cfg.xlim=[.02 .02];
-        elseif sleep==0 && ll==7 && iter==27 && usetr==1
-          cfg.xlim=[.11 .11];
-        else
-          disp('get xlim right per ll theta plv')
-          tmp.time(find(mean(mean(tmp.mask,2),3)))
-          keyboard
-        end
-        cfg.zlim=[-4 4];
-        figure(100*ll+8+10);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(100*ll+8+10,[fdir 'plvanglo_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+3+10);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(100*ll+3+10,[fdir 'plvanglo_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(100*ll+4+10);
-        ft_topoplotTFR(cfg,tmpA);
-        print(100*ll+4+10,[fdir 'plvanglo_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
       end
       
       % alpha topo
       skipplot=0;
       if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
         cfg=[];
-        if sleep==0 && ll==6 && [adda==1 || (combval==2 && adda==2)] && pre30plot==1
-          cfg.ylim=[8 11];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
-          cfg.ylim=[8 14]; % slightly into beta but then no beta
-        elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+        if sleep==0 && ll==3 && combval==1  && pre30plot==1 % ??
+          cfg.ylim=[10 12];
+          %       cfg.xlim=[0 .1];
+          %       elseif ll==7
+          %         cfg.ylim=[8 10];
+          %       cfg.xlim=[.16 .3];
+        elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
+          cfg.ylim=[8 14];
+        elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==3
+          skipplot=1; % theta goes up to 8Hz
+        elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
+          %         cfg.ylim=[8 13];
+          skipplot=1; % theta goes up to 8Hz;  beta goes down to 12 Hz
+        elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[10 18]; % final; merge with beta
+        elseif sleep==0 && ll==5 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[10 24]; % combine with beta
+        elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[8 12];  % and then ignore bits of higher beta
+        elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
           cfg.ylim=[8 12];
-        elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
-          cfg.ylim=[9 12];
-        elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
-          cfg.ylim=[8 9];
-        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==31 && usetr==3
-          skipplot=1;
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.ylim=[8 14];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.ylim=[8 15]; % 2 clusters: early beta and later alpha
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
-          skipplot=1;
-        elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 11];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 14];
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[8 14];
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
-          % only at 8Hz, so will tie in with theta
-          skipplot=1;
+        elseif sleep==0 && ll==1 && combval==1 && iter==31 && usetr==2
+          skipplot=1; % theta goes up to 10Hz
+        elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
+          cfg.ylim=[8 12];
+        elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
+          cfg.ylim=[8 12];
+        elseif sleep==0 && ll==1 && iter==27 && usetr==1
+          %         cfg.ylim=[8 14];
+          cfg.ylim=[8 28]; % combine with beta (skip beta below)
         elseif sleep==0 && ll==3 && iter==27 && usetr==1
-          skipplot=1;
-        elseif sleep==0 && ll==6 && iter==27 && usetr==1
-          cfg.ylim=[8 14]; % 2 clusters: early beta and later alpha
+          %         cfg.ylim=[8 12];
+          cfg.ylim=[8 30]; % combine with beta (skip beta below)
+        elseif sleep==0 && ll==4 && iter==27 && usetr==1
+          %         cfg.ylim=[10 12];
+          cfg.ylim=[10 24]; % combine with beta (skip beta below)
+        elseif sleep==0 && ll==5 && iter==27 && usetr==1
+          %         cfg.ylim=[8 12];
+          cfg.ylim=[8 30]; % combine with beta (skip beta below)
         elseif sleep==0 && ll==7 && iter==27 && usetr==1
-          skipplot=1; % only at 8Hz, so will tie in with theta
+          skipplot=1; % blur up from theta
+        elseif sleep==1 && ll==9 && trialkc==-1
+          cfg.ylim=[6 14]; % blur from theta to alpha to low beta, just 1 effect
+        elseif sleep==1 && ll==5 && trialkc==0
+          skipplot=1; % blur down from beta
+        elseif sleep==1 && ll==9 && trialkc==0
+          skipplot=1; % blur down from beta
         else
-          disp('get ylim right per ll alpha plv')
+          disp('get ylim right per ll alpha')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
           keyboard
         end
         if skipplot==0
-          masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-          difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          if sleep==0 && ll==4 && iter==31
+            masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',14),:),2),1))); % 14 Hz
+            difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',14),:),2),1))));
+          elseif sleep==0 && ll==5 && iter==31
+            masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',18),:),2),1)));
+            difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',18),:),2),1))));
+          elseif sleep==0 && ll==7 && iter==31
+            masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',10),:),2),1)));
+            difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',10),:),2),1))));
+          else
+            masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+            difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          end
           clear masktime
           if any(difftimes>1)
             finddifftimes=find(difftimes>1);
@@ -7030,79 +8451,58 @@ for ll=soalist
           else
             masktime{1}=masktime_tmp;
           end
+          cfg.parameter='powspctrm';
+          cfg.layout='elec1010.lay';
+          cfg.maskalpha=0.5;
+          %       cfg.zlim=[-1.4 1.4];
+          cfg.highlight='on';
+          cfg.baseline=baseline2;
+          if commentson
+            cfg.comment='auto';
+          else
+            cfg.comment='no';
+          end
           for dd=1:length(masktime)
-            
-            cfg.parameter='plvavgabs';
-            cfg.layout='elec1010.lay';
-            cfg.maskalpha=0.5;
-            %     cfg.zlim='maxabs';
-            cfg.highlight='on';
             cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
             cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-            cfg.baseline=baseline2;
-            cfg.zlim=[-.15 .15];
-            if commentson
-              cfg.comment='auto';
+            if sleep==0 && ll==4 && iter==31 % blend with beta
+              cfg.zlim=[-4 4];
+            elseif sleep==0 && ll==5 && iter==31 % blend with beta
+              cfg.zlim=[-4 4];
             else
-              cfg.comment='no';
+              cfg.zlim=[-9 9];
             end
-            figure(100*ll+5);
+            cfg.highlightsize=25;
+            cfg.highlightsymbol='.';
+            figure(10*ll+5);
             ft_topoplotTFR(cfg,tmpuA);
-            print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-            figure(100*ll+6);
+            print(10*ll+5,[fdir 'tfrlo_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            figure(10*ll+6);
             ft_topoplotTFR(cfg,tmpsA);
-            print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
-            cfg.zlim=[-.1 .1];
-            figure(100*ll+7);
+            print(10*ll+6,[fdir 'tfrlo_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            if sleep==0 && ll==4 && iter==31 % blend with beta
+              cfg.zlim=[-4 4];
+            elseif sleep==0 && ll==5 && iter==31 % blend with beta
+              cfg.zlim=[-4 4];
+            else
+              cfg.zlim=[-9 9];
+            end
+            figure(10*ll+7);
             ft_topoplotTFR(cfg,tmpA);
-            print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            print(10*ll+7,[fdir 'tfrlo_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
           end
           
           
-          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-            chansel=cfg.highlightchannel;
-            zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-            figinds=[100*ll+40+1;  100*ll+50+1];
-            figstrings{1}=[fdir 'plvabslo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            figstrings{2}=[fdir 'plvanglo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-          end
           
-          cfg.parameter='plvavgangwrap';
-          if sleep==0 && ll==6 && pre30plot==1
-            cfg.xlim=[.34 .34];
-          elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
-            cfg.xlim=[0 0];
-          elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
-            cfg.xlim=[-.06 -.06];
-          elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
-            cfg.xlim=[.21 .21];
-          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
-            cfg.xlim=[.2 .2];
-          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-            cfg.xlim=[.2 .2];
-          elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
-            cfg.xlim=[.17 .17];
-          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
-            cfg.xlim=[.11 .11];
-          elseif sleep==0 && ll==6 iter==27 && usetr==1
-            cfg.xlim=[.2 .2];
-          else
-            disp('get xlim right per ll alpha plv')
-            tmp.time(find(mean(mean(tmp.mask,2),3)))
-            keyboard
+          if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+            chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+            zlim=[-3 3];
+            figinds=10*ll+1000+1;
+            figstrings=[];
+            figstrings{1}=[fdir 'tfrlo_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            baseline=[tmp.time(1) tmp.time(9)];
+            tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
           end
-          cfg.zlim=[-4 4];
-          figure(100*ll+5+10);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5+10,[fdir 'plvanglo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6+10);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6+10,[fdir 'plvanglo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+7+10);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7+10,[fdir 'plvanglo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
         end % skipplot
       end
       
@@ -7110,460 +8510,220 @@ for ll=soalist
       skipplot=0;
       if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
         cfg=[];
-        if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
+        if sleep==0 && ll==5 && pre30plot==1
+          cfg.ylim=[14 30];
+          %       cfg.xlim=[.2 .28];
+        elseif sleep==0 && ll==1 && combval==1 && pre30plot==1
           cfg.ylim=[13 15];
-        elseif sleep==0 && ll==3 && pre30plot==1
-          cfg.ylim=[13 15];
-        elseif sleep==1 && ll==1 && pre30plot==1
-          cfg.ylim=[13 21];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
-          % only 14 hz, tied on with alpha; ignore
-          skipplot=1;
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.ylim=[11 27]; % there are 2 clusters: early beta and later alpha
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
-          cfg.ylim=[15 25];
-        elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
-          % only '6' (14 hz), tied on with alpha; ignore
-          skipplot=1;
-        elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
-          % only '6' (14 hz), tied on with alpha; ignore
-          skipplot=1;
-        elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
-          cfg.ylim=[15 25];
-          %         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
-          %           cfg.ylim=[13 19];
-        elseif sleep==0 && ll==6 && iter==27 && usetr==1
+        elseif sleep==0 && ll==3 && combval==1 && pre30plot==1
+          cfg.ylim=[14 28];
+        elseif sleep==0 && ll==6 && combval==1 && pre30plot==1
+          cfg.ylim=[16 28];
+        elseif sleep==0 && ll==3 && combval==1 && iter==31 && usetr==3
+          cfg.ylim=[14 30]; % final
+        elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==3
+          %         cfg.ylim=[12 30];
+          skipplot=1;  % final
+        elseif sleep==0 && ll==5 && combval==1 && iter==31 && usetr==3
+          skipplot=1; % merge with alpha
+        elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==3
+          %         cfg.ylim=[14 22];
+          skipplot=1;  % final
+        elseif sleep==0 && ll==4 && combval==1 && iter==32 && usetr==3
+          cfg.ylim=[14 22];
+        elseif sleep==0 && ll==4 && combval==1 && iter==31 && usetr==2
+          cfg.ylim=[14 30];
+        elseif sleep==0 && ll==7 && combval==1 && iter==31 && usetr==2
           cfg.ylim=[14 18];
+        elseif sleep==0 && ll==1 && iter==27 && usetr==1
+          %         cfg.ylim=[16 28];
+          skipplot=1; % combine with alpha above
+        elseif sleep==0 && ll==3 && iter==27 && usetr==1
+          %         cfg.ylim=[14 30];
+          skipplot=1; % combine with alpha above
+        elseif sleep==0 && ll==4 && iter==27 && usetr==1
+          %         cfg.ylim=[14 24];
+          skipplot=1; % combine with alpha above
+        elseif sleep==0 && ll==5 && iter==27 && usetr==1
+          %         cfg.ylim=[14 30];
+          skipplot=1; % combine with alpha above
+        elseif sleep==0 && ll==6 && iter==27 && usetr==1
+          cfg.ylim=[14 30];
+        elseif sleep==1 && ll==9 && trialkc==-1
+          skipplot=1; % combine with alpha above
+        elseif sleep==1 && ll==5 && trialkc==0
+          cfg.ylim=[10 18];
+        elseif sleep==1 && ll==9 && trialkc==0
+          cfg.ylim=[10 18];
         else
-          disp('get ylim right per ll beta plv')
+          disp('get ylim right per ll beta')
           tmp.freq(find(mean(mean(tmp.mask,1),3)))
           keyboard
         end
         if skipplot==0
-          masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-          cfg.parameter='plvavgabs';
+          %         if sleep==0 && ll==4 && iter==31
+          %           masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+          %           masktime_tmp=masktime_tmp(26:end); % 1:25 is covered by alpha plot
+          %           difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          %         else
+          masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+          difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+          %         end
+          clear masktime
+          if any(difftimes>1)
+            finddifftimes=find(difftimes>1);
+            for dd=1:length(finddifftimes)+1
+              if dd==1
+                masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
+              elseif dd==length(finddifftimes)+1
+                masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
+              else
+                masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+              end
+            end
+          else
+            masktime{1}=masktime_tmp;
+          end
+          cfg.parameter='powspctrm';
           cfg.layout='elec1010.lay';
           cfg.maskalpha=0.5;
-          %     cfg.zlim='maxabs';
+          %       cfg.zlim=[-1.4 1.4];
           cfg.highlight='on';
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
           cfg.baseline=baseline2;
-          cfg.zlim=[-.15 .15];
           if commentson
             cfg.comment='auto';
           else
             cfg.comment='no';
           end
-          figure(100*ll+5);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5,[fdir 'plvabslo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6,[fdir 'plvabslo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-.1 .1];
-          figure(100*ll+7);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          
-          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-            chansel=cfg.highlightchannel;
-            zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-            figinds=[100*ll+40+1;  100*ll+50+1];
-            figstrings{1}=[fdir 'plvabslo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            figstrings{2}=[fdir 'plvanglo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+          for dd=1:length(masktime)
+            cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
+            cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+            cfg.zlim=[-1.1 1.1];
+            cfg.highlightsize=25;
+            cfg.highlightsymbol='.';
+            figure(10*ll+5);
+            ft_topoplotTFR(cfg,tmpuA);
+            print(10*ll+5,[fdir 'tfrlo_topoU_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            figure(10*ll+6);
+            ft_topoplotTFR(cfg,tmpsA);
+            print(10*ll+6,[fdir 'tfrlo_topoM_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            cfg.zlim=[-1.1 1.1];
+            figure(10*ll+7);
+            ft_topoplotTFR(cfg,tmpA);
+            print(10*ll+7,[fdir 'tfrlo_topoDiff_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
           end
           
-          cfg.parameter='plvavgangwrap';
-          if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
-            cfg.xlim=[.32 .32];
-          elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
-            cfg.xlim=[0 0];
-          elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
-            cfg.xlim=[-.06 -.06];
-          elseif sleep==1 && ll==1 && adda==2 && pre30plot==1
-            cfg.xlim=[0.05 0.61];
-          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
-            cfg.xlim=[.12 .12];
-          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
-            cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
-          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
-            cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
-          elseif sleep==0 && ll==6 && iter==27 && usetr==1
-            cfg.xlim=[.03 .03];
-          else
-            disp('get xlim right per ll beta plv')
-            tmp.time(find(mean(mean(tmp.mask,2),3)))
-            keyboard
+          
+          if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+            chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+            zlim=[-2 2];
+            figinds=10*ll+1000+2;
+            figstrings=[];
+            figstrings{1}=[fdir 'tfrlo_final_Xbeta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            baseline=[tmp.time(1) tmp.time(9)];
+            tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
           end
-          cfg.zlim=[-4 4];
-          figure(100*ll+5+10);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5+10,[fdir 'plvanglo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6+10);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6+10,[fdir 'plvanglo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+7+10);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7+10,[fdir 'plvanglo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        end % skippplot
+        end % skipplot
       end
       
-    end % adda
+    end % plottfrflag
     
-  end % combval
-  
-  % %
-  
-  if synchasynch && ll<5
-    for combval=1
-      close all
-      clear adda
-      % power
-      if combval==1
-        cfg=[];
-        cfg.latency=[stattl_synch_comb1.time(1) stattl_synch_comb1.time(end)];
-        tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
-        tmp.mask=stattl_synch_comb1.mask;
-        tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
-        tmps.mask=stattl_synch_comb1.mask;
-        tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
-        tmpu.mask=stattl_synch_comb1.mask;
-        
-        cfg=[];
-        tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
-        tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-        tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1.time(1)):dsearchn(tmpA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
-        tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
-        tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-        tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
-        tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
-        tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-        tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
-      elseif combval==2
-        cfg=[];
-        cfg.latency=[stattl_synch_comb2.time(1) stattl_synch_comb2.time(end)];
-        tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
-        tmp.mask=stattl_synch_comb2.mask;
-        tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
-        tmps.mask=stattl_synch_comb2.mask;
-        tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
-        tmpu.mask=stattl_synch_comb2.mask;
-      end
-      gravelo_tMSAlone_comb.mask= logical(ones(size(gravelo_tMSAlone_comb.powspctrm)));
-      
-      
-      % plot TFR of powspctrm, for each suplot: u and m and difference.
-      zlim=[-3 3];
-      baseline3=[-.15 -.07];
-      
-      if 0
-        pow{1}=gravelo_tMSAlone_comb;
-        pow{2}=tmpu;
-        pow{3}=tmps;
-        pow{4}=tmp;
-        
-        chansel=chanplot{1};
-        figinds=10*ll;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_synch_crop_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-        
-        chansel=chanplot{2};
-        figinds=10*ll+1;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_synch_crop_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-        
-        chansel=[chanplot{1} chanplot{2}];
-        figinds=10*ll+2;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_synch_crop_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-      end
-      
-      pow{1}=gravelo_tMSAlone_comb;
-      pow{2}=tmpuA;
-      pow{3}=tmpsA;
-      pow{4}=tmpA;
-      
-      chansel=chanplot{1};
-      figinds=10*ll;
-      figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_synch_all_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-      
-      chansel=chanplot{2};
-      figinds=10*ll+1;
-      figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_synch_all_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-      
-      chansel=[chanplot{1} chanplot{2}];
-      figinds=10*ll+2;
-      figstrings=[];
-      figstrings{1}=[fdir 'tfrlo_synch_all_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-      tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-      
-      masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
-      if ~isempty(masktime)
-        chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
-        figinds=10*ll+9;
-        figstrings=[];
-        figstrings{1}=[fdir 'tfrlo_synch_all_allsig_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
-      end
-      
-      % theta topo
-      if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
-        masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
-        cfg=[];
-        cfg.parameter='powspctrm';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        if ll==4
-          cfg.ylim=[4 8.5];
-        else
-          cfg.ylim=[4 6.5];
-        end
-        cfg.zlim=[-1.4 1.4];
-        cfg.highlight='on';
-        cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        %     if ll==1
-        %       cfg.xlim=[.1 .35];
-        %     elseif ll==3
-        %       cfg.xlim=[.06 .42];
-        %     elseif ll==5
-        %       cfg.xlim=[-.04 .36];
-        %     elseif ll==7
-        %       cfg.xlim=[.1 .44];
-        %     end
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
-        cfg.baseline=baseline3;
-        figure(10*ll+8);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+8,[fdir 'tfrlo_synch_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(10*ll+3);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+3,[fdir 'tfrlo_synch_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-1.4 1.4];
-        %     cfg.zlim='maxabs';
-        %     cfg.baseline='no';
-        figure(10*ll+4);
-        ft_topoplotTFR(cfg,tmpA);
-        print(10*ll+4,[fdir 'tfrlo_synch_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        
-        if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-          zlim=[-3 3];
-          figinds=10*ll+1000;
-          figstrings=[];
-          figstrings{1}=[fdir 'tfrlo_synch_final_Xtheta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          baseline=[tmp.time(1) tmp.time(9)];
-          tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-        end
-        
-      end
-      
-      % alpha topo
-      if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
-        cfg=[];
-        if ll==3
-          cfg.ylim=[8 11];
-        elseif ll==4
-          cfg.ylim=[10 14];
-        else
-          keyboard
-        end
-        disp('get ylim right per ll alpha synch')
-        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        if ll==3 || ll==4
-          cfg.xlim=[tmp.time(masktime(1)) .5];
-        else
-          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        end
-        cfg.parameter='powspctrm';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        cfg.zlim=[-9 9];
-        cfg.highlight='on';
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        cfg.baseline=baseline3;
-        figure(10*ll+5);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+5,[fdir 'tfrlo_synch_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(10*ll+6);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+6,[fdir 'tfrlo_synch_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-9 9];
-        %     cfg.zlim='maxabs';
-        %     cfg.baseline='no';
-        figure(10*ll+7);
-        ft_topoplotTFR(cfg,tmpA);
-        print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        if ll==3 || ll==4
-          cfg.xlim=[.5 tmp.time(masktime(end))];
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          figure(10*ll+5);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(10*ll+5,[fdir 'tfrlo_synch_topoU_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(10*ll+6);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(10*ll+6,[fdir 'tfrlo_synch_topoM_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-9 9];
-          %     cfg.zlim='maxabs';
-          %     cfg.baseline='no';
-          figure(10*ll+7);
-          ft_topoplotTFR(cfg,tmpA);
-          print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        end
-        
-        if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-          zlim=[-3 3];
-          figinds=10*ll+1000+1;
-          figstrings=[];
-          figstrings{1}=[fdir 'tfrlo_synch_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          baseline=[tmp.time(1) tmp.time(9)];
-          tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-        end
-      end
-      
-      % beta topo
-      if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
-        cfg=[];
-        if ll==3
-          cfg.ylim=[14 28];
-        elseif ll==4
-          cfg.ylim=[16 30];
-        else
-          keyboard
-        end
-        disp('get ylim right per ll beta synch')
-        masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-        if ll==3 || ll==4
-          cfg.xlim=[tmp.time(masktime(1)) .5];
-        else
-          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-        end
-        cfg.parameter='powspctrm';
-        cfg.layout='elec1010.lay';
-        cfg.maskalpha=0.5;
-        cfg.zlim=[-1.1 1.1];
-        cfg.highlight='on';
-        cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-        cfg.baseline=baseline3;
-        figure(10*ll+5);
-        ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+5,[fdir 'tfrlo_synch_topoU_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        figure(10*ll+6);
-        ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+6,[fdir 'tfrlo_synch_topoM_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        cfg.zlim=[-1.1 1.1];
-        %     cfg.baseline='no';
-        %     cfg.zlim='maxabs';
-        figure(10*ll+7);
-        ft_topoplotTFR(cfg,tmpA);
-        print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        if ll==3 || ll==4
-          cfg.xlim=[.5 tmp.time(masktime(end))];
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          figure(10*ll+5);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(10*ll+5,[fdir 'tfrlo_synch_topoU_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(10*ll+6);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(10*ll+6,[fdir 'tfrlo_synch_topoM_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-1.1 1.1];
-          %     cfg.baseline='no';
-          %     cfg.zlim='maxabs';
-          figure(10*ll+7);
-          ft_topoplotTFR(cfg,tmpA);
-          print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        end
-        
-        
-        if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-          chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
-          zlim=[-2 2];
-          figinds=10*ll+1000+2;
-          figstrings=[];
-          figstrings{1}=[fdir 'tfrlo_synch_final_Xbeta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          baseline=[tmp.time(1) tmp.time(9)];
-          tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
-        end
-      end
-      
-      
-      
-      
-      
+    
+    
+    
+    if plotplvflag
       %    %  % %%%%%%% PLV   %%%%%%%%
-      for adda=2
+      for adda=3
         if combval==1
           if adda==1
             cfg=[];
-            cfg.latency=[stattl_synch_comb1plvadi.time(1) stattl_synch_comb1plvadi.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
-            tmp.mask=stattl_synch_comb1plvadi.mask;
-            tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
-            tmps.mask=stattl_synch_comb1plvadi.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
-            tmpu.mask=stattl_synch_comb1plvadi.mask;
+            cfg.latency=[stattl_mc_comb1plvadi.time(1) stattl_mc_comb1plvadi.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+            tmp.mask=stattl_mc_comb1plvadi.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+            tmps.mask=stattl_mc_comb1plvadi.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+            tmpu.mask=stattl_mc_comb1plvadi.mask;
             
             cfg=[];
-            tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+            tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
-            tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
+            tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
-            tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
+            tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
+            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
           elseif adda==2
             cfg=[];
-            cfg.latency=[stattl_synch_comb1plvdai.time(1) stattl_synch_comb1plvdai.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
-            tmp.mask=stattl_synch_comb1plvdai.mask;
-            tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
-            tmps.mask=stattl_synch_comb1plvdai.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
-            tmpu.mask=stattl_synch_comb1plvdai.mask;
+            cfg.latency=[stattl_mc_comb1plvdai.time(1) stattl_mc_comb1plvdai.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+            tmp.mask=stattl_mc_comb1plvdai.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+            tmps.mask=stattl_mc_comb1plvdai.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+            tmpu.mask=stattl_mc_comb1plvdai.mask;
             
             cfg=[];
-            tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+            tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
-            tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+            tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
-            tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+            tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
+            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+          elseif adda==3
+            cfg=[];
+            cfg.latency=[stattl_mc_comb1plvabsDepT.time(1) stattl_mc_comb1plvabsDepT.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+            tmp.mask=stattl_mc_comb1plvabsDepT.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+            tmps.mask=stattl_mc_comb1plvabsDepT.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+            tmpu.mask=stattl_mc_comb1plvabsDepT.mask;
+            
+            cfg=[];
+            tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+            tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
+            tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+            tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
+            tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+            tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
           end
         elseif combval==2
           if adda==1
             cfg=[];
-            cfg.latency=[stattl_synch_comb2plvadi.time(1) stattl_synch_comb2plvadi.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
-            tmp.mask=stattl_synch_comb2plvadi.mask;
-            tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
-            tmps.mask=stattl_synch_comb2plvadi.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
-            tmpu.mask=stattl_synch_comb2plvadi.mask;
+            cfg.latency=[stattl_mc_comb2plvadi.time(1) stattl_mc_comb2plvadi.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+            tmp.mask=stattl_mc_comb2plvadi.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+            tmps.mask=stattl_mc_comb2plvadi.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+            tmpu.mask=stattl_mc_comb2plvadi.mask;
           elseif adda==2
             cfg=[];
-            cfg.latency=[stattl_synch_comb2plvdai.time(1) stattl_synch_comb2plvdai.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
-            tmp.mask=stattl_synch_comb2plvdai.mask;
-            tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
-            tmps.mask=stattl_synch_comb2plvdai.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
-            tmpu.mask=stattl_synch_comb2plvdai.mask;
+            cfg.latency=[stattl_mc_comb2plvdai.time(1) stattl_mc_comb2plvdai.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+            tmp.mask=stattl_mc_comb2plvdai.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+            tmps.mask=stattl_mc_comb2plvdai.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+            tmpu.mask=stattl_mc_comb2plvdai.mask;
+          elseif adda==3
+            cfg=[];
+            cfg.latency=[stattl_mc_comb2plvabsDepT.time(1) stattl_mc_comb2plvabsDepT.time(end)];
+            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+            tmp.mask=stattl_mc_comb2plvabsDepT.mask;
+            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+            tmps.mask=stattl_mc_comb2plvabsDepT.mask;
+            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+            tmpu.mask=stattl_mc_comb2plvabsDepT.mask;
           end
         end
         
@@ -7573,10 +8733,52 @@ for ll=soalist
         tmpA.plvavgangwrap=wrapToPi(tmpA.plvavgang);
         tmpsA.plvavgangwrap=wrapToPi(tmpsA.plvavgang);
         tmpuA.plvavgangwrap=wrapToPi(tmpuA.plvavgang);
+        %       gravelo_tNulAlone_comb.plvavgangwrap=wrapToPi(gravelo_tNulAlone_comb.plvavgang);
+        %       gravelo_tTacAlone_comb.plvavgangwrap=wrapToPi(gravelo_tTacAlone_comb.plvavgang);
+        %       gravelo_tAudAlone_comb.plvavgangwrap=wrapToPi(gravelo_tAudAlone_comb.plvavgang);
+        %       gravelo_tMSAlone_comb.plvavgangwrap= wrapToPi(gravelo_tMSAlone_comb.plvavgang);
+        
+        %       if 0
+        %         cfg=[];
+        %         cfg.avgoverchan='yes';
+        %         if ~isempty(tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3)))))
+        %           cfg.channel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,:),2),3))));
+        %         else
+        %           cfg.channel='all';
+        %         end
+        %         tmp1=ft_selectdata(cfg,tmp);
+        %         tmp1.mask=logical(ceil(tmp1.mask));
+        %
+        %         figure(100*ll);
+        %         cfg=[];
+        %         cfg.parameter='plvavgabs';
+        %         cfg.layout='elec1010.lay';
+        %         cfg.maskparameter='mask';
+        %         cfg.maskalpha=0.5;
+        %         cfg.zlim='maxabs';
+        %         ft_singleplotTFR(cfg,tmp1);
+        %         print(100*ll,[fdir 'plvabslo_final_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+        %         figure(100*ll+10);
+        %         cfg.parameter='plvavgang';
+        %         ft_singleplotTFR(cfg,tmp1);
+        %         print(100*ll+10,[fdir 'plvanglo_final_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+        %       end
+        
         
         % plot TFR of plv abs and plv ang, for each suplot: u and m and difference.
-        zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-        
+        if pre30plot
+          zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+        else
+          if adda==3
+            if sleep  % both trialkc =-1 and =0
+              zlim=[0 0.34; -0.16 0.16;   -20 400; -10 300];
+            else
+              zlim=[0 0.61; -0.16 0.16;   -20 400; -10 300];
+            end
+          else
+            zlim=[0 0.5; .1 .25;   -20 400; -10 300];
+          end
+        end
         
         if 0
           pow{1}=gravelo_tMSAlone_comb;
@@ -7586,246 +8788,1099 @@ for ll=soalist
           
           chansel=chanplot{1};
           figinds=[100*ll;  100*ll+10];
-          figstrings{1}=[fdir 'plvabslo_synch_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_synch_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{1}=[fdir 'plvabslo_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{2}=[fdir 'plvanglo_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
           
           chansel=chanplot{2};
           figinds=[100*ll+1;  100*ll+10+1];
-          figstrings{1}=[fdir 'plvabslo_synch_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_synch_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{1}=[fdir 'plvabslo_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{2}=[fdir 'plvanglo_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
           
           chansel=[chanplot{1} chanplot{2}];
           figinds=[100*ll+2;  100*ll+10+2];
-          figstrings{1}=[fdir 'plvabslo_synch_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_synch_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{1}=[fdir 'plvabslo_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{2}=[fdir 'plvanglo_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
         end
         
-        pow{1}=gravelo_tMSAlone_comb;
-        pow{2}=tmpuA;
-        pow{3}=tmpsA;
-        pow{4}=tmpA;
+        clear pow
+        if pre30plot
+          pow{1}=gravelo_tMSAlone_comb;
+          pow{2}=tmpuA;
+          pow{3}=tmpsA;
+          pow{4}=tmpA;
+        else
+          pow{1}=tmpuA;
+          pow{2}=tmpsA;
+          pow{3}=tmpA;
+        end
         
+        for pp=1:length(pow)
+          
+          %         cfg=[];
+          %         cfg.baseline=baseline2;
+          %         cfg.baselinetype='absolute';
+          %         cfg.parameter={'powspctrm' 'mask'};
+          %         pow{pp}=ft_freqbaseline(cfg, pow{pp})
+          
+          cfg=[];
+          if ll==1 | ll==3 | ll==4 | ll==5
+            cfg.latency=[-0.5 1.3];
+          elseif ll==6
+            cfg.latency=[-0.5+.02 1.3+.02];
+          elseif ll==7
+            cfg.latency=[-0.5+.07 1.3+.07];
+          elseif ll==9
+            cfg.latency=[-0.5+.50 1.3+.50];
+          end
+          pow{pp}=ft_selectdata(cfg,pow{pp});
+        end
+        
+        
+        %       disp('starting PLF plotting')
+        %       keyboard
         chansel=chanplot{1};
         figinds=[100*ll;  100*ll+10];
-        figstrings{1}=[fdir 'plvabslo_synch_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_synch_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+        figstrings{1}=[fdir 'plvabslo_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        figstrings{2}=[fdir 'plvanglo_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
         
         chansel=chanplot{2};
         figinds=[100*ll+1;  100*ll+10+1];
-        figstrings{1}=[fdir 'plvabslo_synch_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_synch_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+        figstrings{1}=[fdir 'plvabslo_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        figstrings{2}=[fdir 'plvanglo_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
         
         chansel=[chanplot{1} chanplot{2}];
         figinds=[100*ll+2;  100*ll+10+2];
-        figstrings{1}=[fdir 'plvabslo_synch_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        figstrings{2}=[fdir 'plvanglo_synch_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+        figstrings{1}=[fdir 'plvabslo_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        figstrings{2}=[fdir 'plvanglo_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+        tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
         
         masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
         if ~isempty(masktime)
           chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
           figinds=[100*ll+9;  100*ll+10+9];
-          figstrings{1}=[fdir 'plvabslo_synch_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          figstrings{2}=[fdir 'plvanglo_synch_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-          tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+          figstrings{1}=[fdir 'plvabslo_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          figstrings{2}=[fdir 'plvanglo_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+          tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
         end
         
         % theta topo
+        skipplot=0;
         if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
           cfg=[];
-          if ll==3 && adda==1
+          if sleep==0 && ll==3 && pre30plot==1
             cfg.ylim=[4 6.5];
-          elseif ll==3 && adda==2
-            cfg.ylim=[5.5 6.5];
+          elseif sleep==0 && ll==6 && adda==1 && pre30plot==1
+            cfg.ylim=[5 6.5];
+          elseif sleep==0 && ll==7 && pre30plot==1
+            cfg.ylim=[4 6.5];
+          elseif sleep==0 && ll==3 && iter==31 && usetr==3 && adda==2
+            cfg.ylim=[4 8.5];  %
+          elseif sleep==0 && ll==3 && iter==31 && usetr==3 && adda==3
+            cfg.ylim=[4 6.5];  % final
+          elseif sleep==0 && ll==7 && iter==31 && usetr==3
+            cfg.ylim=[4 8.5]; % final
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[5.5 8.5];
+          elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[4 6.5];
+          elseif sleep==0 && ll==3 && iter==27 && usetr==1
+            cfg.ylim=[4 8.5];
+          elseif sleep==0 && ll==7 && iter==27 && usetr==1
+            cfg.ylim=[4 8.5];
+          elseif sleep==1 && ll==9 && trialkc==-1
+            cfg.ylim=[4 4.5];
+            cfg.baseline=[-0.35 -0.27];  % NaN in original baseline window
+          elseif sleep==1 && ll==5 && trialkc==0
+            cfg.ylim=[4 8.5];
           else
+            disp('get ylim right per ll theta plv')
+            tmp.freq(find(mean(mean(tmp.mask,1),3)))
             keyboard
           end
-          disp('get ylim right per ll theta synch plv')
           masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-          cfg.parameter='plvavgabs';
+          if adda==2
+            cfg.parameter='plvavgabs';
+          else adda==3
+            cfg.parameter='plvabs';
+          end
           cfg.layout='elec1010.lay';
           cfg.maskalpha=0.5;
           cfg.zlim=[-.25 .25];
           cfg.highlight='on';
           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
-          cfg.baseline=baseline3;
+          cfg.baseline=baseline2;
           cfg.zlim=[-.25 .25];
+          if commentson
+            cfg.comment='auto';
+          else
+            cfg.comment='no';
+          end
+          cfg.highlightsize=25;
+          cfg.highlightsymbol='.';
           figure(100*ll+8);
           ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+8,[fdir 'plvabslo_synch_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          print(100*ll+8,[fdir 'plvabslo_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
           figure(100*ll+3);
           ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+3,[fdir 'plvabslo_synch_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          print(100*ll+3,[fdir 'plvabslo_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
           cfg.zlim=[-.15 .15];
           figure(100*ll+4);
           ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+4,[fdir 'plvabslo_synch_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          
-          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-            chansel=cfg.highlightchannel;
-            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-            figinds=[100*ll+20+1;  100*ll+30+1];
-            figstrings{1}=[fdir 'plvabslo_synch_final_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            figstrings{2}=[fdir 'plvanglo_synch_final_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-          end
-          
-          cfg.parameter='plvavgangwrap';
-          if ll==3 && adda==1
-            cfg.xlim=[0.19 0.19];
-          elseif ll==3 && adda==2
-            cfg.xlim=[0 0];
-          else
-            keyboard
-          end
-          disp('get xlim right per ll theta synch plv')
-          cfg.zlim=[-4 4];
-          figure(100*ll+8+10);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+8+10,[fdir 'plvanglo_synch_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+3+10);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+3+10,[fdir 'plvanglo_synch_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+4+10);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+4+10,[fdir 'plvanglo_synch_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        end
-        
-        % alpha topo
-        if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
-          cfg=[];
-          if ll==3 && adda==1
-            cfg.ylim=[8 9];
-          else
-            keyboard
-          end
-          disp('get ylim right per ll alpha synch plv')
-          masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-          cfg.parameter='plvavgabs';
-          cfg.layout='elec1010.lay';
-          cfg.maskalpha=0.5;
-          %     cfg.zlim='maxabs';
-          cfg.highlight='on';
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          cfg.baseline=baseline3;
-          cfg.zlim=[-.15 .15];
-          figure(100*ll+5);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5,[fdir 'plvabslo_synch_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6,[fdir 'plvabslo_synch_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-.1 .1];
-          figure(100*ll+7);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7,[fdir 'plvabslo_synch_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          
-          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-            chansel=cfg.highlightchannel;
-            %             zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-            figinds=[100*ll+40+1;  100*ll+50+1];
-            figstrings{1}=[fdir 'plvabslo_synch_final_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            figstrings{2}=[fdir 'plvanglo_synch_final_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
-          end
-          
-          cfg.parameter='plvavgangwrap';
-          if ll==3 && adda==1
-            cfg.xlim=[0.19 0.19];
-          else
-            keyboard
-          end
-          disp('get xlim right per ll alpha synch plv')
-          cfg.zlim=[-4 4];
-          figure(100*ll+5+10);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5+10,[fdir 'plvanglo_synch_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6+10);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6+10,[fdir 'plvanglo_synch_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+7+10);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7+10,[fdir 'plvanglo_synch_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-        end
-        
-        % beta topo
-        if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
-          cfg=[];
-          if ll==6 && combval==1 && adda==2
-            cfg.ylim=[13 15];
-            %         elseif ll==3
-            %           cfg.ylim=[13 20];
-            %           keyboard
-          else
-            keyboard
-          end
-          disp('get ylim right per ll beta synch plv')
-          masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
-          cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
-          cfg.parameter='plvavgabs';
-          cfg.layout='elec1010.lay';
-          cfg.maskalpha=0.5;
-          %     cfg.zlim='maxabs';
-          cfg.highlight='on';
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-          cfg.baseline=baseline;
-          cfg.zlim=[-.15 .15];
-          figure(100*ll+5);
-          ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5,[fdir 'plvabslo_synch_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6);
-          ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6,[fdir 'plvabslo_synch_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-.1 .1];
-          figure(100*ll+7);
-          ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7,[fdir 'plvabslo_synch_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          print(100*ll+4,[fdir 'plvabslo_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
           
           if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
             chansel=cfg.highlightchannel;
             zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
             zlim=[0 0.6; -.25 .25; -20 400; -10 300];
-            figinds=[100*ll+40+1;  100*ll+50+1];
-            figstrings{1}=[fdir 'plvabslo_synch_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            figstrings{2}=[fdir 'plvanglo_synch_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
-            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+            figinds=[100*ll+20+1;  100*ll+30+1];
+            figstrings{1}=[fdir 'plvabslo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            figstrings{2}=[fdir 'plvanglo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+            tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
           end
           
           cfg.parameter='plvavgangwrap';
-          if ll==6 && combval==1 && adda==2
-            cfg.xlim=[.32 .32];
-          elseif ll==3 && combval==1 && adda==1
-            cfg.xlim=[0 0];
-          elseif ll==3 && adda==2
-            cfg.xlim=[-.06 -.06];
+          if sleep==0 && ll==3 && pre30plot==1
+            cfg.xlim=[0.19 0.19];
+          elseif sleep==0 && ll==6 && combval==1 && adda==1 && pre30plot==1
+            cfg.xlim=[0.41 0.41];
+          elseif sleep==0 && ll==6 && combval==2 && adda==1 && pre30plot==1
+            cfg.xlim=[0.32 0.32];
+          elseif sleep==0 && ll==7 && combval==1 && pre30plot==1
+            cfg.xlim=[.21 .21];
+          elseif sleep==0 && ll==7 && combval==2 && pre30plot==1
+            cfg.xlim=[.23 .23];
+          elseif sleep==0 && ll==3 && iter==31 && usetr==3
+            cfg.xlim=[.11 .11]; % final
+          elseif sleep==0 && ll==7 && iter==31 && usetr==3
+            cfg.xlim=[.2 .2]; % final
+          elseif sleep==0 && ll==3 && iter==32 && usetr==3
+            cfg.xlim=[.03 .03];
+          elseif sleep==0 && ll==7 && iter==32 && usetr==3
+            cfg.xlim=[.11 .11];
+          elseif sleep==0 && ll==3 && iter==27 && usetr==1
+            cfg.xlim=[.02 .02];
+          elseif sleep==0 && ll==7 && iter==27 && usetr==1
+            cfg.xlim=[.11 .11];
+            %         elseif sleep==1 && ll==9 && trialkc==-1
+            %           cfg.xlim=[0.5 1.11];
+            %         elseif sleep==1 && ll==5 && trialkc==0
+            %           cfg.xlim=[0.01 0.62];
           else
+            disp('get xlim right per ll theta plv')
+            tmp.time(find(mean(mean(tmp.mask,1),2)))
             keyboard
           end
-          disp('get xlim right per ll beta synch plv')
           cfg.zlim=[-4 4];
-          figure(100*ll+5+10);
+          cfg.highlightsize=25;
+          cfg.highlightsymbol='.';
+          figure(100*ll+8+10);
           ft_topoplotTFR(cfg,tmpuA);
-          print(100*ll+5+10,[fdir 'plvanglo_synch_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+6+10);
+          print(100*ll+8+10,[fdir 'plvanglo_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+3+10);
           ft_topoplotTFR(cfg,tmpsA);
-          print(100*ll+6+10,[fdir 'plvanglo_synch_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          figure(100*ll+7+10);
+          print(100*ll+3+10,[fdir 'plvanglo_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          figure(100*ll+4+10);
           ft_topoplotTFR(cfg,tmpA);
-          print(100*ll+7+10,[fdir 'plvanglo_synch_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          print(100*ll+4+10,[fdir 'plvanglo_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+        end
+        
+        % alpha topo
+        skipplot=0;
+        if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
+          cfg=[];
+          if sleep==0 && ll==6 && [adda==1 || (combval==2 && adda==2)] && pre30plot==1
+            cfg.ylim=[8 11];
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
+            cfg.ylim=[8 14]; % slightly into beta but then no beta
+          elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+            cfg.ylim=[8 12];
+          elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
+            cfg.ylim=[9 12];
+          elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
+            cfg.ylim=[8 9];
+          elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==31 && usetr==3
+            skipplot=1;
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.ylim=[8 14];
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.ylim=[8 15]; % 2 clusters: early beta and later alpha
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+            skipplot=1;
+          elseif sleep==0 && ll==7 && combval==1 && adda==3 && iter==31 && usetr==3
+            skipplot=1;
+          elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[8 11];
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[8 14];
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[8 14];
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+            % only at 8Hz, so will tie in with theta
+            skipplot=1;
+          elseif sleep==0 && ll==3 && iter==27 && usetr==1
+            skipplot=1;
+          elseif sleep==0 && ll==6 && iter==27 && usetr==1
+            cfg.ylim=[8 14]; % 2 clusters: early beta and later alpha
+          elseif sleep==0 && ll==7 && iter==27 && usetr==1
+            skipplot=1; % only at 8Hz, so will tie in with theta
+          elseif sleep==1 && ll==3 && trialkc==-1
+            cfg.ylim=[8 14];
+          elseif sleep==1 && ll==5 && trialkc==0
+            skipplot=1; % tie in with theta
+          elseif sleep==1 && ll==6 && trialkc==0
+            skipplot=1; % tie in with beta
+          else
+            disp('get ylim right per ll alpha plv')
+            tmp.freq(find(mean(mean(tmp.mask,1),3)))
+            keyboard
+          end
+          if skipplot==0
+            masktime_tmp=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+            difftimes=diff(find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1))));
+            clear masktime
+            if any(difftimes>1)
+              finddifftimes=find(difftimes>1);
+              for dd=1:length(finddifftimes)+1
+                if dd==1
+                  masktime{dd}=masktime_tmp(1):masktime_tmp(find(difftimes>1));
+                elseif dd==length(finddifftimes)+1
+                  masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(end);
+                else
+                  masktime{dd}=masktime_tmp(finddifftimes(dd-1)+1):masktime_tmp(finddifftimes(dd));
+                end
+              end
+            else
+              masktime{1}=masktime_tmp;
+            end
+            for dd=1:length(masktime)
+              
+              if adda==2
+                cfg.parameter='plvavgabs';
+              else adda==3
+                cfg.parameter='plvabs';
+              end
+              cfg.layout='elec1010.lay';
+              cfg.maskalpha=0.5;
+              %     cfg.zlim='maxabs';
+              cfg.highlight='on';
+              cfg.xlim=[tmp.time(masktime{dd}(1)) tmp.time(masktime{dd}(end))];
+              cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+              cfg.baseline=baseline2;
+              cfg.zlim=[-.15 .15];
+              if commentson
+                cfg.comment='auto';
+              else
+                cfg.comment='no';
+              end
+              cfg.highlightsize=25;
+              cfg.highlightsymbol='.';
+              figure(100*ll+5);
+              ft_topoplotTFR(cfg,tmpuA);
+              print(100*ll+5,[fdir 'plvabslo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+              figure(100*ll+6);
+              ft_topoplotTFR(cfg,tmpsA);
+              print(100*ll+6,[fdir 'plvabslo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+              cfg.zlim=[-.1 .1];
+              figure(100*ll+7);
+              ft_topoplotTFR(cfg,tmpA);
+              print(100*ll+7,[fdir 'plvabslo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '_time' num2str(dd) '.eps'],'-depsc2')
+            end
+            
+            
+            if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+              chansel=cfg.highlightchannel;
+              zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+              zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+              figinds=[100*ll+40+1;  100*ll+50+1];
+              figstrings{1}=[fdir 'plvabslo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+              figstrings{2}=[fdir 'plvanglo_all_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+              tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
+            end
+            
+            cfg.parameter='plvavgangwrap';
+            if sleep==0 && ll==6 && pre30plot==1
+              cfg.xlim=[.34 .34];
+              %           elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+              %             cfg.xlim=[0 0];
+              %           elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
+              %             cfg.xlim=[-.06 -.06];
+              %           elseif sleep==0 && ll==3 && combval==2 && adda==1 && pre30plot==1
+              %             cfg.xlim=[.21 .21];
+              %           elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
+              %             cfg.xlim=[.2 .2];
+              %           elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+              %             cfg.xlim=[.2 .2];
+              %           elseif sleep==0 && ll==3 && combval==1 && adda==2 && iter==32 && usetr==3
+              %             cfg.xlim=[.17 .17];
+              %           elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+              %             cfg.xlim=[.11 .11];
+              %           elseif sleep==0 && ll==6 iter==27 && usetr==1
+              %             cfg.xlim=[.2 .2];
+            elseif sleep==1 && ll==3 && trialkc==-1
+              cfg.xlim=[1.03 1.03];
+            else
+              disp('get xlim right per ll alpha plv')
+              tmp.time(find(mean(mean(tmp.mask,1),2)))
+              keyboard
+            end
+            cfg.highlightsize=25;
+            cfg.highlightsymbol='.';
+            cfg.zlim=[-4 4];
+            figure(100*ll+5+10);
+            ft_topoplotTFR(cfg,tmpuA);
+            print(100*ll+5+10,[fdir 'plvanglo_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            figure(100*ll+6+10);
+            ft_topoplotTFR(cfg,tmpsA);
+            print(100*ll+6+10,[fdir 'plvanglo_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            figure(100*ll+7+10);
+            ft_topoplotTFR(cfg,tmpA);
+            print(100*ll+7+10,[fdir 'plvanglo_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          end % skipplot
+        end
+        
+        % beta topo
+        skipplot=0;
+        if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
+          cfg=[];
+          if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
+            cfg.ylim=[13 15];
+          elseif sleep==0 && ll==3 && pre30plot==1
+            cfg.ylim=[13 15];
+          elseif sleep==1 && ll==1 && pre30plot==1
+            cfg.ylim=[13 21];
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==31 && usetr==3
+            % only 14 hz, tied on with alpha; ignore
+            skipplot=1;
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.ylim=[11 27]; % there are 2 clusters: early beta and later alpha
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+            cfg.ylim=[15 25]; % final
+          elseif sleep==0 && ll==5 && combval==1 && adda==2 && iter==32 && usetr==3
+            % only '6' (14 hz), tied on with alpha; ignore
+            skipplot=1;
+          elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==32 && usetr==3
+            % only '6' (14 hz), tied on with alpha; ignore
+            skipplot=1;
+          elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+            cfg.ylim=[15 25];
+            %         elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==2
+            %           cfg.ylim=[13 19];
+          elseif sleep==0 && ll==6 && iter==27 && usetr==1
+            cfg.ylim=[14 18];
+          elseif sleep==1 && ll==6 && trialkc==0
+            cfg.ylim=[12 18];
+          else
+            disp('get ylim right per ll beta plv')
+            tmp.freq(find(mean(mean(tmp.mask,1),3)))
+            keyboard
+          end
+          if skipplot==0
+            masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+            if sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+              masktime=masktime(1:10);   % early beta blob only
+            end
+            cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+            if adda==2
+              cfg.parameter='plvavgabs';
+            else adda==3
+              cfg.parameter='plvabs';
+            end
+            cfg.layout='elec1010.lay';
+            cfg.maskalpha=0.5;
+            %     cfg.zlim='maxabs';
+            cfg.highlight='on';
+            cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+            cfg.baseline=baseline2;
+            cfg.zlim=[-.15 .15];
+            if commentson
+              cfg.comment='auto';
+            else
+              cfg.comment='no';
+            end
+            cfg.highlightsize=25;
+            cfg.highlightsymbol='.';
+            figure(100*ll+5);
+            ft_topoplotTFR(cfg,tmpuA);
+            print(100*ll+5,[fdir 'plvabslo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            figure(100*ll+6);
+            ft_topoplotTFR(cfg,tmpsA);
+            print(100*ll+6,[fdir 'plvabslo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            cfg.zlim=[-.1 .1];
+            figure(100*ll+7);
+            ft_topoplotTFR(cfg,tmpA);
+            print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            
+            if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+              chansel=cfg.highlightchannel;
+              zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+              zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+              figinds=[100*ll+40+1;  100*ll+50+1];
+              figstrings{1}=[fdir 'plvabslo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+              figstrings{2}=[fdir 'plvanglo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+              tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
+            end
+            
+            cfg.parameter='plvavgangwrap';
+            if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
+              cfg.xlim=[.32 .32];
+              %           elseif sleep==0 && ll==3 && combval==1 && adda==1 && pre30plot==1
+              %             cfg.xlim=[0 0];
+              %           elseif sleep==0 && ll==3 && adda==2 && pre30plot==1
+              %             cfg.xlim=[-.06 -.06];
+              %           elseif sleep==1 && ll==1 && adda==2 && pre30plot==1
+              %             cfg.xlim=[0.05 0.61];
+              %           elseif sleep==0 && ll==6 && combval==1 && adda==2 && iter==31 && usetr==3
+              %             cfg.xlim=[.12 .12];
+              %           elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==31 && usetr==3
+              %             cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
+              %           elseif sleep==0 && ll==7 && combval==1 && adda==2 && iter==32 && usetr==3
+              %             cfg.xlim=[.11 .11]; % this is beginning time for sign period; is that consistent with done above/previously?
+              %           elseif sleep==0 && ll==6 && iter==27 && usetr==1
+              %             cfg.xlim=[.03 .03];
+              %           elseif sleep==1 && ll==6 && trialkc==0
+              %             cfg.xlim=[.05 .62];
+            else
+              disp('get xlim right per ll beta plv')
+              tmp.time(find(mean(mean(tmp.mask,1),2)))
+              keyboard
+            end
+            cfg.zlim=[-4 4];
+            cfg.highlightsize=25;
+            cfg.highlightsymbol='.';
+            figure(100*ll+5+10);
+            ft_topoplotTFR(cfg,tmpuA);
+            print(100*ll+5+10,[fdir 'plvanglo_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            figure(100*ll+6+10);
+            ft_topoplotTFR(cfg,tmpsA);
+            print(100*ll+6+10,[fdir 'plvanglo_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+            figure(100*ll+7+10);
+            ft_topoplotTFR(cfg,tmpA);
+            print(100*ll+7+10,[fdir 'plvanglo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+          end % skippplot
         end
         
       end % adda
       
-    end % combval
-  end  % if ll<5
+    end % plotplvflag
+    
+  end % combval
+  
+  % %
+  
+  %   if synchasynch && ll<5
+  %     for combval=1
+  %       close all
+  %       clear adda
+  %       % power
+  %       if combval==1
+  %         cfg=[];
+  %         cfg.latency=[stattl_synch_comb1.time(1) stattl_synch_comb1.time(end)];
+  %         tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %         tmp.mask=stattl_synch_comb1.mask;
+  %         tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %         tmps.mask=stattl_synch_comb1.mask;
+  %         tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %         tmpu.mask=stattl_synch_comb1.mask;
+  %
+  %         cfg=[];
+  %         tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %         tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+  %         tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1.time(1)):dsearchn(tmpA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
+  %         tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %         tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+  %         tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
+  %         tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %         tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+  %         tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1.time(end)))=stattl_synch_comb1.mask;
+  %       elseif combval==2
+  %         cfg=[];
+  %         cfg.latency=[stattl_synch_comb2.time(1) stattl_synch_comb2.time(end)];
+  %         tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
+  %         tmp.mask=stattl_synch_comb2.mask;
+  %         tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
+  %         tmps.mask=stattl_synch_comb2.mask;
+  %         tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
+  %         tmpu.mask=stattl_synch_comb2.mask;
+  %       end
+  %       gravelo_tMSAlone_comb.mask= logical(ones(size(gravelo_tMSAlone_comb.powspctrm)));
+  %
+  %
+  %       % plot TFR of powspctrm, for each suplot: u and m and difference.
+  %       zlim=[-3 3];
+  %       baseline3=[-.15 -.07];
+  %
+  %       if 0
+  %         pow{1}=gravelo_tMSAlone_comb;
+  %         pow{2}=tmpu;
+  %         pow{3}=tmps;
+  %         pow{4}=tmp;
+  %
+  %         chansel=chanplot{1};
+  %         figinds=10*ll;
+  %         figstrings=[];
+  %         figstrings{1}=[fdir 'tfrlo_synch_crop_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %
+  %         chansel=chanplot{2};
+  %         figinds=10*ll+1;
+  %         figstrings=[];
+  %         figstrings{1}=[fdir 'tfrlo_synch_crop_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %
+  %         chansel=[chanplot{1} chanplot{2}];
+  %         figinds=10*ll+2;
+  %         figstrings=[];
+  %         figstrings{1}=[fdir 'tfrlo_synch_crop_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %       end
+  %
+  %       pow{1}=gravelo_tMSAlone_comb;
+  %       pow{2}=tmpuA;
+  %       pow{3}=tmpsA;
+  %       pow{4}=tmpA;
+  %
+  %       chansel=chanplot{1};
+  %       figinds=10*ll;
+  %       figstrings=[];
+  %       figstrings{1}=[fdir 'tfrlo_synch_all_FC_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %       tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %
+  %       chansel=chanplot{2};
+  %       figinds=10*ll+1;
+  %       figstrings=[];
+  %       figstrings{1}=[fdir 'tfrlo_synch_all_OP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %       tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %
+  %       chansel=[chanplot{1} chanplot{2}];
+  %       figinds=10*ll+2;
+  %       figstrings=[];
+  %       figstrings{1}=[fdir 'tfrlo_synch_all_FCOP_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %       tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %
+  %       masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
+  %       if ~isempty(masktime)
+  %         chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
+  %         figinds=10*ll+9;
+  %         figstrings=[];
+  %         figstrings{1}=[fdir 'tfrlo_synch_all_allsig_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot_pow(pow,chansel,zlim,figinds,figstrings,baseline3)
+  %       end
+  %
+  %       % theta topo
+  %       if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
+  %         masktime=find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1)));
+  %         cfg=[];
+  %         cfg.parameter='powspctrm';
+  %         cfg.layout='elec1010.lay';
+  %         cfg.maskalpha=0.5;
+  %         if ll==4
+  %           cfg.ylim=[4 8.5];
+  %         else
+  %           cfg.ylim=[4 6.5];
+  %         end
+  %         cfg.zlim=[-1.4 1.4];
+  %         cfg.highlight='on';
+  %         cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %         %     if ll==1
+  %         %       cfg.xlim=[.1 .35];
+  %         %     elseif ll==3
+  %         %       cfg.xlim=[.06 .42];
+  %         %     elseif ll==5
+  %         %       cfg.xlim=[-.04 .36];
+  %         %     elseif ll==7
+  %         %       cfg.xlim=[.1 .44];
+  %         %     end
+  %         cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,1:2,dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+  %         cfg.baseline=baseline3;
+  %         figure(10*ll+8);
+  %         ft_topoplotTFR(cfg,tmpuA);
+  %         print(10*ll+8,[fdir 'tfrlo_synch_topoU_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         figure(10*ll+3);
+  %         ft_topoplotTFR(cfg,tmpsA);
+  %         print(10*ll+3,[fdir 'tfrlo_synch_topoM_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         cfg.zlim=[-1.4 1.4];
+  %         %     cfg.zlim='maxabs';
+  %         %     cfg.baseline='no';
+  %         figure(10*ll+4);
+  %         ft_topoplotTFR(cfg,tmpA);
+  %         print(10*ll+4,[fdir 'tfrlo_synch_topoDiff_theta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %
+  %         if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %           chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+  %           zlim=[-3 3];
+  %           figinds=10*ll+1000;
+  %           figstrings=[];
+  %           figstrings{1}=[fdir 'tfrlo_synch_final_Xtheta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           baseline=[tmp.time(1) tmp.time(9)];
+  %           tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+  %         end
+  %
+  %       end
+  %
+  %       % alpha topo
+  %       if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
+  %         cfg=[];
+  %         if ll==3
+  %           cfg.ylim=[8 11];
+  %         elseif ll==4
+  %           cfg.ylim=[10 14];
+  %         else
+  %           keyboard
+  %         end
+  %         disp('get ylim right per ll alpha synch')
+  %         masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+  %         if ll==3 || ll==4
+  %           cfg.xlim=[tmp.time(masktime(1)) .5];
+  %         else
+  %           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %         end
+  %         cfg.parameter='powspctrm';
+  %         cfg.layout='elec1010.lay';
+  %         cfg.maskalpha=0.5;
+  %         cfg.zlim=[-9 9];
+  %         cfg.highlight='on';
+  %         cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %         cfg.baseline=baseline3;
+  %         figure(10*ll+5);
+  %         ft_topoplotTFR(cfg,tmpuA);
+  %         print(10*ll+5,[fdir 'tfrlo_synch_topoU_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         figure(10*ll+6);
+  %         ft_topoplotTFR(cfg,tmpsA);
+  %         print(10*ll+6,[fdir 'tfrlo_synch_topoM_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         cfg.zlim=[-9 9];
+  %         %     cfg.zlim='maxabs';
+  %         %     cfg.baseline='no';
+  %         figure(10*ll+7);
+  %         ft_topoplotTFR(cfg,tmpA);
+  %         print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_alpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         if ll==3 || ll==4
+  %           cfg.xlim=[.5 tmp.time(masktime(end))];
+  %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %           figure(10*ll+5);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(10*ll+5,[fdir 'tfrlo_synch_topoU_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(10*ll+6);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(10*ll+6,[fdir 'tfrlo_synch_topoM_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           cfg.zlim=[-9 9];
+  %           %     cfg.zlim='maxabs';
+  %           %     cfg.baseline='no';
+  %           figure(10*ll+7);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_alpha2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         end
+  %
+  %         if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %           chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+  %           zlim=[-3 3];
+  %           figinds=10*ll+1000+1;
+  %           figstrings=[];
+  %           figstrings{1}=[fdir 'tfrlo_synch_final_Xalpha_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           baseline=[tmp.time(1) tmp.time(9)];
+  %           tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+  %         end
+  %       end
+  %
+  %       % beta topo
+  %       if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
+  %         cfg=[];
+  %         if ll==3
+  %           cfg.ylim=[14 28];
+  %         elseif ll==4
+  %           cfg.ylim=[16 30];
+  %         else
+  %           keyboard
+  %         end
+  %         disp('get ylim right per ll beta synch')
+  %         masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+  %         if ll==3 || ll==4
+  %           cfg.xlim=[tmp.time(masktime(1)) .5];
+  %         else
+  %           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %         end
+  %         cfg.parameter='powspctrm';
+  %         cfg.layout='elec1010.lay';
+  %         cfg.maskalpha=0.5;
+  %         cfg.zlim=[-1.1 1.1];
+  %         cfg.highlight='on';
+  %         cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %         cfg.baseline=baseline3;
+  %         figure(10*ll+5);
+  %         ft_topoplotTFR(cfg,tmpuA);
+  %         print(10*ll+5,[fdir 'tfrlo_synch_topoU_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         figure(10*ll+6);
+  %         ft_topoplotTFR(cfg,tmpsA);
+  %         print(10*ll+6,[fdir 'tfrlo_synch_topoM_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         cfg.zlim=[-1.1 1.1];
+  %         %     cfg.baseline='no';
+  %         %     cfg.zlim='maxabs';
+  %         figure(10*ll+7);
+  %         ft_topoplotTFR(cfg,tmpA);
+  %         print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_beta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         if ll==3 || ll==4
+  %           cfg.xlim=[.5 tmp.time(masktime(end))];
+  %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %           figure(10*ll+5);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(10*ll+5,[fdir 'tfrlo_synch_topoU_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(10*ll+6);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(10*ll+6,[fdir 'tfrlo_synch_topoM_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           cfg.zlim=[-1.1 1.1];
+  %           %     cfg.baseline='no';
+  %           %     cfg.zlim='maxabs';
+  %           figure(10*ll+7);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(10*ll+7,[fdir 'tfrlo_synch_topoDiff_beta2_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         end
+  %
+  %
+  %         if 0 %~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %           chansel=setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}));
+  %           zlim=[-2 2];
+  %           figinds=10*ll+1000+2;
+  %           figstrings=[];
+  %           figstrings{1}=[fdir 'tfrlo_synch_final_Xbeta_combval' num2str(combval) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           baseline=[tmp.time(1) tmp.time(9)];
+  %           tfr_subchannel_3cond_plot_pow(tmp,tmpu,tmps,chansel,zlim,figinds,figstrings,baseline)
+  %         end
+  %       end
+  %
+  %
+  %
+  %
+  %
+  %       %    %  % %%%%%%% PLV   %%%%%%%%
+  %       for adda=2
+  %         if combval==1
+  %           if adda==1
+  %             cfg=[];
+  %             cfg.latency=[stattl_synch_comb1plvadi.time(1) stattl_synch_comb1plvadi.time(end)];
+  %             tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %             tmp.mask=stattl_synch_comb1plvadi.mask;
+  %             tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %             tmps.mask=stattl_synch_comb1plvadi.mask;
+  %             tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %             tmpu.mask=stattl_synch_comb1plvadi.mask;
+  %
+  %             cfg=[];
+  %             tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+  %             tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
+  %             tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+  %             tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
+  %             tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+  %             tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1plvadi.time(end)))=stattl_synch_comb1plvadi.mask;
+  %           elseif adda==2
+  %             cfg=[];
+  %             cfg.latency=[stattl_synch_comb1plvdai.time(1) stattl_synch_comb1plvdai.time(end)];
+  %             tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %             tmp.mask=stattl_synch_comb1plvdai.mask;
+  %             tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %             tmps.mask=stattl_synch_comb1plvdai.mask;
+  %             tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %             tmpu.mask=stattl_synch_comb1plvdai.mask;
+  %
+  %             cfg=[];
+  %             tmpA=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb1);
+  %             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+  %             tmpA.mask(:,:,dsearchn(tmpA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
+  %             tmpsA=ft_selectdata(cfg,gravelo_tMSasynch_comb1);
+  %             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+  %             tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
+  %             tmpuA=ft_selectdata(cfg,gravelo_tMSsynch_comb1);
+  %             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+  %             tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_synch_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_synch_comb1plvdai.time(end)))=stattl_synch_comb1plvdai.mask;
+  %           end
+  %         elseif combval==2
+  %           if adda==1
+  %             cfg=[];
+  %             cfg.latency=[stattl_synch_comb2plvadi.time(1) stattl_synch_comb2plvadi.time(end)];
+  %             tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
+  %             tmp.mask=stattl_synch_comb2plvadi.mask;
+  %             tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
+  %             tmps.mask=stattl_synch_comb2plvadi.mask;
+  %             tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
+  %             tmpu.mask=stattl_synch_comb2plvadi.mask;
+  %           elseif adda==2
+  %             cfg=[];
+  %             cfg.latency=[stattl_synch_comb2plvdai.time(1) stattl_synch_comb2plvdai.time(end)];
+  %             tmp=ft_selectdata(cfg,gravelo_TMSs_TMSa_comb2);
+  %             tmp.mask=stattl_synch_comb2plvdai.mask;
+  %             tmps=ft_selectdata(cfg,gravelo_tMSasynch_comb2);
+  %             tmps.mask=stattl_synch_comb2plvdai.mask;
+  %             tmpu=ft_selectdata(cfg,gravelo_tMSsynch_comb2);
+  %             tmpu.mask=stattl_synch_comb2plvdai.mask;
+  %           end
+  %         end
+  %
+  %         tmp.plvavgangwrap=wrapToPi(tmp.plvavgang);
+  %         tmps.plvavgangwrap=wrapToPi(tmps.plvavgang);
+  %         tmpu.plvavgangwrap=wrapToPi(tmpu.plvavgang);
+  %         tmpA.plvavgangwrap=wrapToPi(tmpA.plvavgang);
+  %         tmpsA.plvavgangwrap=wrapToPi(tmpsA.plvavgang);
+  %         tmpuA.plvavgangwrap=wrapToPi(tmpuA.plvavgang);
+  %
+  %         % plot TFR of plv abs and plv ang, for each suplot: u and m and difference.
+  %         zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+  %
+  %
+  %         if 0
+  %           pow{1}=gravelo_tMSAlone_comb;
+  %           pow{2}=tmpu;
+  %           pow{3}=tmps;
+  %           pow{4}=tmp;
+  %
+  %           chansel=chanplot{1};
+  %           figinds=[100*ll;  100*ll+10];
+  %           figstrings{1}=[fdir 'plvabslo_synch_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           figstrings{2}=[fdir 'plvanglo_synch_crop_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %
+  %           chansel=chanplot{2};
+  %           figinds=[100*ll+1;  100*ll+10+1];
+  %           figstrings{1}=[fdir 'plvabslo_synch_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           figstrings{2}=[fdir 'plvanglo_synch_crop_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %
+  %           chansel=[chanplot{1} chanplot{2}];
+  %           figinds=[100*ll+2;  100*ll+10+2];
+  %           figstrings{1}=[fdir 'plvabslo_synch_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           figstrings{2}=[fdir 'plvanglo_synch_crop_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %         end
+  %
+  %         pow{1}=gravelo_tMSAlone_comb;
+  %         pow{2}=tmpuA;
+  %         pow{3}=tmpsA;
+  %         pow{4}=tmpA;
+  %
+  %         chansel=chanplot{1};
+  %         figinds=[100*ll;  100*ll+10];
+  %         figstrings{1}=[fdir 'plvabslo_synch_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         figstrings{2}=[fdir 'plvanglo_synch_all_FC_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %
+  %         chansel=chanplot{2};
+  %         figinds=[100*ll+1;  100*ll+10+1];
+  %         figstrings{1}=[fdir 'plvabslo_synch_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         figstrings{2}=[fdir 'plvanglo_synch_all_OP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %
+  %         chansel=[chanplot{1} chanplot{2}];
+  %         figinds=[100*ll+2;  100*ll+10+2];
+  %         figstrings{1}=[fdir 'plvabslo_synch_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         figstrings{2}=[fdir 'plvanglo_synch_all_FCOP_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %         tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %
+  %         masktime=find(squeeze(any(mean(tmp.mask(:,1:end,:),2),1)));
+  %         if ~isempty(masktime)
+  %           chansel=tmp.label(find(ceil(mean(mean(tmp.mask(:,:,dsearchn(tmp.time',tmp.time(masktime(1))):dsearchn(tmp.time',tmp.time(masktime(end)))),2),3))));
+  %           figinds=[100*ll+9;  100*ll+10+9];
+  %           figstrings{1}=[fdir 'plvabslo_synch_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           figstrings{2}=[fdir 'plvanglo_synch_all_allsig_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %           tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %         end
+  %
+  %         % theta topo
+  %         if ~isempty(find(squeeze(any(mean(tmp.mask(:,1:2,:),2),1))))
+  %           cfg=[];
+  %           if ll==3 && adda==1
+  %             cfg.ylim=[4 6.5];
+  %           elseif ll==3 && adda==2
+  %             cfg.ylim=[5.5 6.5];
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get ylim right per ll theta synch plv')
+  %           masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+  %           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %           cfg.parameter='plvavgabs';
+  %           cfg.layout='elec1010.lay';
+  %           cfg.maskalpha=0.5;
+  %           cfg.zlim=[-.25 .25];
+  %           cfg.highlight='on';
+  %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+  %           cfg.baseline=baseline3;
+  %           cfg.zlim=[-.25 .25];
+  %           figure(100*ll+8);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+8,[fdir 'plvabslo_synch_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+3);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+3,[fdir 'plvabslo_synch_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           cfg.zlim=[-.15 .15];
+  %           figure(100*ll+4);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+4,[fdir 'plvabslo_synch_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %
+  %           if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %             chansel=cfg.highlightchannel;
+  %             zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+  %             figinds=[100*ll+20+1;  100*ll+30+1];
+  %             figstrings{1}=[fdir 'plvabslo_synch_final_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             figstrings{2}=[fdir 'plvanglo_synch_final_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %           end
+  %
+  %           cfg.parameter='plvavgangwrap';
+  %           if ll==3 && adda==1
+  %             cfg.xlim=[0.19 0.19];
+  %           elseif ll==3 && adda==2
+  %             cfg.xlim=[0 0];
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get xlim right per ll theta synch plv')
+  %           cfg.zlim=[-4 4];
+  %           figure(100*ll+8+10);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+8+10,[fdir 'plvanglo_synch_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+3+10);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+3+10,[fdir 'plvanglo_synch_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+4+10);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+4+10,[fdir 'plvanglo_synch_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         end
+  %
+  %         % alpha topo
+  %         if ~isempty(find(squeeze(any(mean(tmp.mask(:,3:5,:),2),1))))
+  %           cfg=[];
+  %           if ll==3 && adda==1
+  %             cfg.ylim=[8 9];
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get ylim right per ll alpha synch plv')
+  %           masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+  %           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %           cfg.parameter='plvavgabs';
+  %           cfg.layout='elec1010.lay';
+  %           cfg.maskalpha=0.5;
+  %           %     cfg.zlim='maxabs';
+  %           cfg.highlight='on';
+  %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %           cfg.baseline=baseline3;
+  %           cfg.zlim=[-.15 .15];
+  %           figure(100*ll+5);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+5,[fdir 'plvabslo_synch_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+6);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+6,[fdir 'plvabslo_synch_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           cfg.zlim=[-.1 .1];
+  %           figure(100*ll+7);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+7,[fdir 'plvabslo_synch_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %
+  %           if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %             chansel=cfg.highlightchannel;
+  %             %             zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+  %             zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+  %             figinds=[100*ll+40+1;  100*ll+50+1];
+  %             figstrings{1}=[fdir 'plvabslo_synch_final_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             figstrings{2}=[fdir 'plvanglo_synch_final_Xalpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %           end
+  %
+  %           cfg.parameter='plvavgangwrap';
+  %           if ll==3 && adda==1
+  %             cfg.xlim=[0.19 0.19];
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get xlim right per ll alpha synch plv')
+  %           cfg.zlim=[-4 4];
+  %           figure(100*ll+5+10);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+5+10,[fdir 'plvanglo_synch_topoU_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+6+10);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+6+10,[fdir 'plvanglo_synch_topoM_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+7+10);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+7+10,[fdir 'plvanglo_synch_topoDiff_alpha_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         end
+  %
+  %         % beta topo
+  %         if ~isempty(find(squeeze(any(mean(tmp.mask(:,6:10,:),2),1))))
+  %           cfg=[];
+  %           if ll==6 && combval==1 && adda==2
+  %             cfg.ylim=[13 15];
+  %             %         elseif ll==3
+  %             %           cfg.ylim=[13 20];
+  %             %           keyboard
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get ylim right per ll beta synch plv')
+  %           masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
+  %           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+  %           cfg.parameter='plvavgabs';
+  %           cfg.layout='elec1010.lay';
+  %           cfg.maskalpha=0.5;
+  %           %     cfg.zlim='maxabs';
+  %           cfg.highlight='on';
+  %           cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+  %           cfg.baseline=baseline;
+  %           cfg.zlim=[-.15 .15];
+  %           figure(100*ll+5);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+5,[fdir 'plvabslo_synch_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+6);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+6,[fdir 'plvabslo_synch_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           cfg.zlim=[-.1 .1];
+  %           figure(100*ll+7);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+7,[fdir 'plvabslo_synch_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %
+  %           if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
+  %             chansel=cfg.highlightchannel;
+  %             zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+  %             zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+  %             figinds=[100*ll+40+1;  100*ll+50+1];
+  %             figstrings{1}=[fdir 'plvabslo_synch_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             figstrings{2}=[fdir 'plvanglo_synch_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
+  %             tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+  %           end
+  %
+  %           cfg.parameter='plvavgangwrap';
+  %           if ll==6 && combval==1 && adda==2
+  %             cfg.xlim=[.32 .32];
+  %           elseif ll==3 && combval==1 && adda==1
+  %             cfg.xlim=[0 0];
+  %           elseif ll==3 && adda==2
+  %             cfg.xlim=[-.06 -.06];
+  %           else
+  %             keyboard
+  %           end
+  %           disp('get xlim right per ll beta synch plv')
+  %           cfg.zlim=[-4 4];
+  %           figure(100*ll+5+10);
+  %           ft_topoplotTFR(cfg,tmpuA);
+  %           print(100*ll+5+10,[fdir 'plvanglo_synch_topoU_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+6+10);
+  %           ft_topoplotTFR(cfg,tmpsA);
+  %           print(100*ll+6+10,[fdir 'plvanglo_synch_topoM_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %           figure(100*ll+7+10);
+  %           ft_topoplotTFR(cfg,tmpA);
+  %           print(100*ll+7+10,[fdir 'plvanglo_synch_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
+  %         end
+  %
+  %       end % adda
+  %
+  %     end % combval
+  %   end  % if ll<5
   
 end % ll
 
