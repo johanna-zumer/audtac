@@ -28,16 +28,16 @@ sub{23}='p23'; % 61495 20/05/14
 sub{24}='p24'; % 54142 20/05/14
 sub{25}='p25'; % 61840 20/05/14
 
-% sub{100}='p01'; 
-sub{101}='e01'; 
-sub{102}='e02'; 
-sub{103}='e03'; 
-sub{104}='e04'; 
+% sub{100}='p01';
+sub{101}='e01';
+sub{102}='e02';
+sub{103}='e03';
+sub{104}='e04';
 %%%  above is pilot, below is real
-sub{105}='e05'; 
-sub{106}='e06'; 
-sub{107}='e07'; 
-sub{108}='e08'; 
+sub{105}='e05';
+sub{106}='e06';
+sub{107}='e07';
+sub{108}='e08';
 sub{109}='e09';
 sub{110}='e10';
 sub{111}='e11';
@@ -70,132 +70,135 @@ ii=102;
 
 % note: check fin.aud delay
 
-% for ii=101
-files=dir([ddir sub{ii} '*r.mat']);
-
-rtsrall=nan(1,10);
-for bb=1:length(files)
-  clear resptime rts aa ll rtsshuf rtsr touchdelay auddelay
-  load([ddir files(bb).name]);
+for ii=108:132
+  files=dir([ddir sub{ii} '*r.mat']);
   
-  nt=length(info.lightsensor);
-  if ii==17 && bb==2
-    nt=148; % she stopped to ask a question
-  end
-  
-  if nt<5
-    continue
-  end
-  
-  resptime=info.prsout(1:nt)-info.start_time;
-  
-  
-  if ~isfield(fin,'opticSR')
-    cnt=1;
-    opticSR=0;
-    while opticSR==0
-      try
-        opticSR=diff(info.lighttime{cnt}(1:2));
+  rtsrall=nan(1,10);
+  for bb=1:length(files)
+    clear resptime rts aa ll rtsshuf rtsr touchdelay auddelay
+    load([ddir files(bb).name]);
+    
+    nt=length(info.lightsensor);
+    if ii==17 && bb==2
+      nt=148; % she stopped to ask a question
+    end
+    
+    if nt<5
+      continue
+    end
+    
+    resptime=info.prsout(1:nt)-info.start_time;
+    
+    
+    if ~isfield(fin,'opticSR')
+      cnt=1;
+      opticSR=0;
+      while opticSR==0
+        try
+          opticSR=diff(info.lighttime{cnt}(1:2));
+        end
+        cnt=cnt+1;
       end
-      cnt=cnt+1;
-    end
-  else
-    opticSR=fin.opticSR/1000;
-  end
-  
-  
-  for nn=1:nt
-    lighttime=0:opticSR:opticSR*[length(info.lightsensor{nn})-1];
-    if ~isempty(info.lightsensor{nn})
-      % this threshold of 80% is arbitrary...should be tested (70? 90?)
-      tmp=find(info.lightsensor{nn}> .8*[max(info.lightsensor{nn})-min(info.lightsensor{nn})]+min(info.lightsensor{nn}) );
-      %                 touchdelay(nn)=info.lighttime{nn}(tmp(1))-info.lighttime{nn}(1);
-      touchdelay(nn)=lighttime(tmp(1))-lighttime(1);
     else
-      touchdelay(nn)=nan;
+      opticSR=fin.opticSR/1000;
     end
-  end
-  tmp=nanmedian(touchdelay);
-  touchdelay(find(touchdelay>tmp+.05))=nan; % are these too strict?
-  touchdelay(find(touchdelay<tmp-.05))=nan; % ?
-  touchdelay(find(touchdelay<.1))=nan;
-  
-  if ~isfield(fin,'audDelay')
-    auddelay=.019;
-  else
-    auddelay=fin.audDelay/1000;
-  end
-  
-  
-  % just in case some actual audio or tactile didn't occur when it was supposed to
-  soa_seq=info.soa_seq;
-  soa_seq(isnan(info.audio_time) & isnan(info.valve_time))=0;
-  soa_seq(isnan(info.audio_time) & soa_seq~=-2 & soa_seq~=0)=-1;
-  soa_seq(isnan(info.valve_time) & soa_seq~=-1 & soa_seq~=0)=-2;
-  soa_seq=soa_seq(1:nt);
-  
-  
-  soaeff=[info.audio_time(1:nt)+auddelay] - [info.valve_time(1:nt)+touchdelay];
-  soareal=soa_seq; % soa category based on actual SOA times
-  
-  for nn=1:nt
-    if soaeff(nn)<-.25 & soareal(nn)>0
-      soareal(nn)=1;
-    elseif soaeff(nn)<-.05 & soareal(nn)>0
-      soareal(nn)=3;
-    elseif soaeff(nn)<-.01 & soareal(nn)>0
-      soareal(nn)=4;
-    elseif soaeff(nn)<.01 & soareal(nn)>0
-      soareal(nn)=5;
-    elseif soaeff(nn)<.05 & soareal(nn)>0
-      soareal(nn)=6;
-    elseif soaeff(nn)<.25 & soareal(nn)>0
-      soareal(nn)=7;
-    elseif soaeff(nn)>=.25 & soareal(nn)>0
-      soareal(nn)=9;
+    
+    
+    for nn=1:nt
+      lighttime=0:opticSR:opticSR*[length(info.lightsensor{nn})-1];
+      if ~isempty(info.lightsensor{nn}) && ~all(isnan(info.lightsensor{nn}))
+        % this threshold of 80% is arbitrary...should be tested (70? 90?)
+        tmp=find(info.lightsensor{nn}> .8*[max(info.lightsensor{nn})-min(info.lightsensor{nn})]+min(info.lightsensor{nn}) );
+        %                 touchdelay(nn)=info.lighttime{nn}(tmp(1))-info.lighttime{nn}(1);
+        touchdelay(nn)=lighttime(tmp(1))-lighttime(1);
+      else
+        touchdelay(nn)=nan;
+      end
     end
+    tmp=nanmedian(touchdelay);
+    touchdelay(find(touchdelay>tmp+.05))=nan; % are these too strict?
+    touchdelay(find(touchdelay<tmp-.05))=nan; % ?
+    touchdelay(find(touchdelay<.1))=nan;
+    
+    if ~isfield(fin,'audDelay')
+      auddelay=.019;
+    else
+      auddelay=fin.audDelay/1000;
+    end
+    
+    
+    % just in case some actual audio or tactile didn't occur when it was supposed to
+    soa_seq=info.soa_seq;
+    soa_seq(isnan(info.audio_time) & isnan(info.valve_time))=0;
+    soa_seq(isnan(info.audio_time) & soa_seq~=-2 & soa_seq~=0)=-1;
+    soa_seq(isnan(info.valve_time) & soa_seq~=-1 & soa_seq~=0)=-2;
+    soa_seq=soa_seq(1:nt);
+    
+    
+    soaeff=[info.audio_time(1:nt)+auddelay] - [info.valve_time(1:nt)+touchdelay];
+    soareal=soa_seq; % soa category based on actual SOA times
+    
+    for nn=1:nt
+      if soaeff(nn)<-.25 & soareal(nn)>0
+        soareal(nn)=1;
+      elseif soaeff(nn)<-.05 & soareal(nn)>0
+        soareal(nn)=3;
+      elseif soaeff(nn)<-.01 & soareal(nn)>0
+        soareal(nn)=4;
+      elseif soaeff(nn)<.01 & soareal(nn)>0
+        soareal(nn)=5;
+      elseif soaeff(nn)<.05 & soareal(nn)>0
+        soareal(nn)=6;
+      elseif soaeff(nn)<.25 & soareal(nn)>0
+        soareal(nn)=7;
+      elseif soaeff(nn)>=.25 & soareal(nn)>0
+        soareal(nn)=9;
+      end
+    end
+    soa_seq=soareal;
+    %         soareal(isnan(soaeff))=nan;
+    
+    %         if 0
+    %         else % we should use the real times unless we know it's perfect
+    %             soa_seq=soareal;
+    %         end
+    
+    firststimtime=min(info.audio_time(1:nt)+.019-info.start_time, info.valve_time(1:nt)+touchdelay-info.start_time);
+    
+    rts=resptime-firststimtime;
+    
+    
+    [aa,cc]=sort(soa_seq);
+    rtsshuf=[rts(cc)];
+    
+    soaseq=unique(soa_seq(~isnan(soa_seq)));
+    mapcode=[-2 -1 0 1 3 4 5 6 7 9];
+    prevmax=1;
+    for ll=1:length(soaseq)
+      prevmax=max(prevmax,length(find(soa_seq(1:nt)==soaseq(ll))));
+    end
+    rtsr=nan(prevmax,max(length(soaseq),size(rtsrall,2)));
+    prevind=1;
+    for ll=1:length(soaseq)
+      numtr=length(find(soa_seq==soaseq(ll)));
+      rtsr(1:numtr,find(mapcode==soaseq(ll)))=rtsshuf(prevind: prevind+numtr-1);
+      prevind=prevind+numtr;
+    end
+    rtsr(rtsr==rts(1))=nan; % first trial always slow
+    maxmin(ii,:)=[max(rtsr(:)) min(rtsr(:))];
+    find(rtsr<.1)
+    keyboard
+    rtsr(find(rtsr<.1))=nan; % anticipatory? (or fault with computing timetouch?)
+    rtsr(find(rtsr>1))=nan; % asleep?
+    
+    rtsrall=[rtsrall; rtsr];
+    
   end
-  soa_seq=soareal;
-  %         soareal(isnan(soaeff))=nan;
-  
-  %         if 0
-  %         else % we should use the real times unless we know it's perfect
-  %             soa_seq=soareal;
-  %         end
-  
-  firststimtime=min(info.audio_time(1:nt)+.019-info.start_time, info.valve_time(1:nt)+touchdelay-info.start_time);
-  
-  rts=resptime-firststimtime;
-  
-  
-  [aa,cc]=sort(soa_seq);
-  rtsshuf=[rts(cc)];
-  
-  soaseq=unique(soa_seq(~isnan(soa_seq)));
-  mapcode=[-2 -1 0 1 3 4 5 6 7 9];
-  prevmax=1;
-  for ll=1:length(soaseq)
-    prevmax=max(prevmax,length(find(soa_seq(1:nt)==soaseq(ll))));
-  end
-  rtsr=nan(prevmax,max(length(soaseq),size(rtsrall,2)));
-  prevind=1;
-  for ll=1:length(soaseq)
-    numtr=length(find(soa_seq==soaseq(ll)));
-    rtsr(1:numtr,find(mapcode==soaseq(ll)))=rtsshuf(prevind: prevind+numtr-1);
-    prevind=prevind+numtr;
-  end
-  rtsr(rtsr==rts(1))=nan; % first trial always slow
-  rtsr(find(rtsr<.1))=nan; % anticipatory? (or fault with computing timetouch?)
-  rtsr(find(rtsr>1))=nan; % asleep?
-  
-  rtsrall=[rtsrall; rtsr];
-  
-end
-clear rtsr
-rtsr=rtsrall;
-save(['rtsr_' sub{ii} '_cond' num2str(files(bb).name(6)) '.mat'],'rtsr');
-clear rtsr
-% end
+  clear rtsr
+  rtsr=rtsrall;
+  save(['rtsr_' sub{ii} '_cond' num2str(files(bb).name(6)) '.mat'],'rtsr');
+  clear rtsr
+end % ii
 
 figure;errorbar(nanmean(rtsrall(:,[1 2 4:10])),nanstd(rtsrall(:,[1 2 4:10]))./sqrt(sum(~isnan(rtsrall(:,[1 2 4:10])))))
 [h,p]=ttest2(rtsrall(:,1),rtsrall(:,7))
