@@ -66,7 +66,7 @@ sub{131}='e31';
 sub{132}='e32';
 
 
-ii=103;
+ii=130;
 
 %%
 
@@ -226,7 +226,7 @@ for bb=1:length(files)
   firststimtime=min(info.audio_time(1:nt)+auddelay-info.start_time, info.valve_time(1:nt)+touchdelay-info.start_time);
   
   rts=resptime-firststimtime;
-  
+
   
   [aa,cc]=sort(soa_seq);
   rtsshuf=[rts(cc)];
@@ -254,13 +254,15 @@ for bb=1:length(files)
     rtsr(1:numtr,find(mapcode==soaseq(ll)))=rtsshuf(prevind: prevind+numtr-1);
     prevind=prevind+numtr;
   end
-  rtsr(rtsr==rts(1))=nan; % first trial always slow
-  rtsr(find(rtsr<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
-  rtsr(find(rtsr>1))=nan; % asleep?   % Throwing out trials greater than 1s
+%   keyboard
+%   rtsr(rtsr==rts(1))=nan; % first trial always slow
+%   rtsr(find(rtsr<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
+%   rtsr(find(rtsr>1))=nan; % asleep?   % Throwing out trials greater than 1s
   
   rtsrall=[rtsrall; rtsr];
   
 end
+keyboard
 clear rtsr
 rtsr=rtsrall;
 % save(['rtsr_' sub{ii} '_cond' num2str(files(bb).name(6)) '.mat'],'rtsr');
@@ -326,11 +328,23 @@ sub{132}='e32';
 cd(bdir)
 
 load([edir 'iikeep.mat'])
+soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
+iiBuse=setdiff(iiBuse,3:7);
 
 %%
+iiuse=iiSuse;
 rtsrall=nan(1,10);
 diffms=nan(1,max(iiuse));
 pcb=nan(1,max(iiuse));
+
+bbind=1;
+for bb=iiSuse
+  load([bdir 'rtsr_' sub{bb+100} '_condr.mat'])
+  rtsreach{bbind}=rtsr;
+  rtsrmed(bbind,:)=nanmedian(rtsr);
+  bbind=bbind+1;
+end
+
 
 bbind=1;
 for bb=setdiff(union(iiSuse,iiBuse),3)
@@ -397,6 +411,77 @@ ylabel('Reaction Time (s)')
 [h,p]=ttest2(rtsrmed(:,1),rtsrmed(:,7))
 [h,p]=ttest2(rtsrmed(:,2),rtsrall(:,7))
 print(21,'-deps','-noui',['RT_allsubmed']);
+
+%% ANOVA 2 x 3 (sense-leading by asynchrony)
+
+% % % a) as non-repeated-measures anovan
+% % %    P=anovan(Y,GROUP)
+% % nsub=22;
+% % Y=reshape(rtsrmed(3:end,[4 5 6 8 9 10]),[nsub*6 1]);
+% % GROUP{1}=[ones(nsub,1); ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+% % GROUP{2}=[1*ones(nsub,1); 2*ones(nsub,1); 3*ones(nsub,1); 3*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 500, 70, 20
+% % P=anovan(Y,GROUP,'model','full');
+% % % Result:  No interaction; Second factor of Asynchrony is sign (p<0.0001), but not sense-leading factor
+% % % P=anovan(Y,GROUP,'model','full','random',[1 2]);
+% % nsub=22; % ignore 500
+% % Y2=reshape(rtsrmed(3:end,[5 6 8 9]),[nsub*4 1]);
+% % GROUP{1}=[ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+% % GROUP{2}=[1*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 70, 20
+% % P=anovan(Y2,GROUP,'model','full');
+% % % Result:  No interaction; Second factor of Asynchrony is (p<0.0538), but not sense-leading factor
+% % 
+% % % b) as repeated-measures anova_rm (with subtraction of sense-leading to test for asynchrony)
+% % AT=rtsrmed(3:end,[4 5 6]); % 500, 70, 20
+% % TA=rtsrmed(3:end,[10 9 8]); % 500, 70, 20
+% % SLdiff=AT-TA; % sense-leading diff
+% % psl=anova_rm(SLdiff);  
+% % % Result: pls=0.0013 for asynchrony
+% % 
+% % % S500=rtsrmed(3:end,[4 10]); % AT TA
+% % S70=rtsrmed(3:end,[5 9]); % AT TA
+% % S20=rtsrmed(3:end,[6 8]); % AT TA
+% % ASdiff=S70-S20; % sense-leading diff
+% % pas=anova_rm(ASdiff); % pas>0.1, so no effect of sense-leading for 20/70 only
+
+
+% c) rm_anova2
+% stats = rm_anova2(Y,S,F1,F2,FACTNAMES)
+%      Y          dependent variable (numeric) in a column vector
+%      S          grouping variable for SUBJECT
+%      F1         grouping variable for factor #1
+%      F2         grouping variable for factor #2
+%      FACTNAMES  a cell array w/ two char arrays: {'factor1', 'factor2'}
+nsub=22;
+Y=reshape(rtsrmed(3:end,[4 5 6 8 9 10]),[nsub*6 1]);
+S=repmat([1:nsub]',[6 1]);
+F1=[ones(nsub,1); ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+F2=[1*ones(nsub,1); 2*ones(nsub,1); 3*ones(nsub,1); 3*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 500, 70, 20
+NAMES={'Sense leading', 'Asyncrhony'};
+stats = rm_anova2(Y,S,F1,F2,NAMES)
+% Yes, interaction significant (p=0.0013) as well as Asychnrony (p<0.0001), and sense-leading (p=0.037)
+% This permits to look at asynchrony with rm-1-way-anova for sense-leading, 
+% AND
+% sense-leading with rm-1-way-anova for asychrony
+
+% Sense-leading plays a role for 500 only
+p=anova_rm(rtsrmed(3:end,[4 10]),'off'); % p=0.01
+p=anova_rm(rtsrmed(3:end,[5 9]),'off'); % p=0.68
+p=anova_rm(rtsrmed(3:end,[6 8]),'off'); % p=0.16
+
+% Asynchrony affects RT, for each sense-leading separately
+p=anova_rm(rtsrmed(3:end,[4 5 6]),'off'); % p<0.0001
+p=anova_rm(rtsrmed(3:end,[8 9 10]),'off'); % p<0.0001
+
+% % %  % without 500
+nsub=22;
+Y=reshape(rtsrmed(3:end,[5 6 8 9]),[nsub*4 1]);
+S=repmat([1:nsub]',[4 1]);
+F1=[ones(nsub,1); ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1)]; % A leading; T leading
+F2=[1*ones(nsub,1); 2*ones(nsub,1); 2*ones(nsub,1); 1*ones(nsub,1)]; % 500, 70, 20
+NAMES={'Sense leading', 'Asyncrhony'};
+stats = rm_anova2(Y,S,F1,F2,NAMES)
+% No interaction; Asynchrony p<0.0001
+
 
 %%   Race model
 
