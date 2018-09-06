@@ -1,4 +1,4 @@
-function tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings)
+function tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
 % function tfr_subchannel_3cond_plot(tmp,tmpu,tmpm,chansel,zlim,figinds,figstrings)
 
 if size(zlim)~=[4 2]
@@ -28,11 +28,16 @@ end
 % tmpm1.mask=logical(ceil(tmpm1.mask));
 
 cfg=[];
-cfg.parameter='plvavgabs';
+if adda==2
+  cfg.parameter='plvavgabs';
+elseif adda==3
+  cfg.parameter='plvabs';
+end
 cfg.layout='elec1010.lay';
 cfg.maskparameter='mask';
 cfg.maskalpha=0.5;
-cfg.xlim=[-.6 1.6];
+cfg.maskstyle='outline';
+cfg.xlim=[-.6 1.8];
 % cfg.fontsize=10;
 
 figure(figinds(1));
