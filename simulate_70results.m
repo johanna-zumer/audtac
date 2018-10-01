@@ -47,7 +47,9 @@ freqApT_TA70=ft_freqanalysis(cfg,dataApT_TA70);
 figure;
 subplot(3,2,1);plot(tlockMS_AT70.time,tlockMS_AT70.avg,'b');hold on;plot(tlockApT_AT70.time,tlockApT_AT70.avg,'g');ylim([-2 2])
 ylabel('ERP')
+title('AT70')
 subplot(3,2,2);plot(tlockMS_TA70.time,tlockMS_TA70.avg,'b');hold on;plot(tlockApT_TA70.time,tlockApT_TA70.avg,'g');ylim([-2 2])
+title('TA70')
 
 subplot(3,2,3);plot(freqMS_AT70.time,abs(squeeze(getplv(freqMS_AT70.fourierspctrm))),'b');hold on;plot(freqApT_AT70.time,abs(squeeze(getplv(freqApT_AT70.fourierspctrm))),'g');ylim([0 1])
 ylabel('ITC')
@@ -55,6 +57,7 @@ subplot(3,2,4);plot(freqMS_AT70.time,abs(squeeze(getplv(freqMS_TA70.fourierspctr
 
 subplot(3,2,5);plot(freqMS_AT70.time,squeeze(mean(abs(freqMS_AT70.fourierspctrm),1)),'b');hold on;plot(freqApT_AT70.time,squeeze(mean(abs(freqApT_AT70.fourierspctrm),1)),'g');ylim([0 3])
 ylabel('TFP')
+legend({'AT+N' 'A+T'})
 subplot(3,2,6);plot(freqMS_AT70.time,squeeze(mean(abs(freqMS_TA70.fourierspctrm),1)),'b');hold on;plot(freqApT_AT70.time,squeeze(mean(abs(freqApT_TA70.fourierspctrm),1)),'g');ylim([0 3])
 
 
