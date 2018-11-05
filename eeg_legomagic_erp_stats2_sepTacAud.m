@@ -92,7 +92,7 @@ load([edir 'iikeep.mat'])
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
 %%
-usetr=1; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
+usetr=3; % = 0 for use new random sampling for that iter;  = 1 use existing trial sampling if that iter has already been run;  = 2 if 'smart sampling' (including non-included trials of that existing iter)
 ttuse=[3];
 tacaloneproc=0;
 phaset0=0; % compute phase at time 0
@@ -104,7 +104,7 @@ plothist=0;
 
 
 % for sleep=[1]
-sleep=1;
+sleep=0;
 if sleep
   iiuse=setdiff(iiBuse,3:7);
   %     iiuse=setdiff(iiBuse,[3:7 8]);
@@ -6665,7 +6665,8 @@ for ll=soalist
     %     elseif ll==6
     %       cfg.xlim=[.1 .44];
     %     end
-    sigchannels=tmpd5.label(find(ceil(mean(tmpd5.mask(:,dsearchn(tmpd5.time',cfg.xlim(1)):dsearchn(tmpd5.time',cfg.xlim(2))),2))));
+%     sigchannels=tmpd5.label(find(ceil(mean(tmpd5.mask(:,dsearchn(tmpd5.time',cfg.xlim(1)):dsearchn(tmpd5.time',cfg.xlim(2))),2))));
+    sigchannels=tmpd5.label(find(ceil(mean(statt_mc{ll,tt,ss}.mask,2))));
     cfg.highlightchannel=sigchannels;
     figure(100+ll);
     ft_topoplotER(cfg,tmpu1);
@@ -6737,7 +6738,7 @@ for ll=soalist
   cfg.parameter='avg';
   cfg.layout='elec1010.lay';
   cfg.zlim=[-3 3];
-  cfg.xlim=[stattimwin(1)+.175 stattimwin(1)+.225];
+  cfg.xlim=[stattimwin(1)+.18 stattimwin(1)+.22];
   cfg.highlight          = 'on';
   cfg.highlightchannel   =  chanplot{1};
   cfg.highlightsymbol    = '*';
@@ -6748,7 +6749,7 @@ for ll=soalist
   print(120+ll,[fdir 'erp_topoDiff_200ms_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(120+ll,[fdir 'erp_topoDiff_200ms_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
   
-  cfg.xlim=[stattimwin(1)+.1 stattimwin(1)+.15];
+  cfg.xlim=[stattimwin(1)+.105 stattimwin(1)+.145];
   cfg.zlim=[-3 3];
   cfg.highlightchannel   =  chanplot{3};
   figure(130+ll);
@@ -6756,15 +6757,15 @@ for ll=soalist
   print(130+ll,[fdir 'erp_topoDiff_125ms_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   print(130+ll,[fdir 'erp_topoDiff_125ms_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
 
-  cfg.xlim=[stattimwin(1)+.08 stattimwin(1)+.12];
-  cfg.zlim=[-3 3];
-  cfg.highlightchannel   =  chanplot{1};
-  figure(140+ll);
-  ft_topoplotER(cfg,tmpd5);
-  print(140+ll,[fdir 'erp_topoDiff_100ms_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-  print(140+ll,[fdir 'erp_topoDiff_100ms_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+%   cfg.xlim=[stattimwin(1)+.08 stattimwin(1)+.12];
+%   cfg.zlim=[-3 3];
+%   cfg.highlightchannel   =  chanplot{1};
+%   figure(140+ll);
+%   ft_topoplotER(cfg,tmpd5);
+%   print(140+ll,[fdir 'erp_topoDiff_100ms_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+%   print(140+ll,[fdir 'erp_topoDiff_100ms_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
 
-  cfg.xlim=[stattimwin(1)+.375 stattimwin(1)+.425];
+  cfg.xlim=[stattimwin(1)+.38 stattimwin(1)+.42];
   cfg.zlim=[-3 3];
   cfg.highlightchannel   =  chanplot{4};
   figure(150+ll);
@@ -6787,21 +6788,21 @@ chpl{4}=match_str(grind_TPA_MSPN{1,3,10}.label,chanplot{4});
 for ll=soalist
   stattimwin=[statt_mc{ll,3,10}.time(1) statt_mc{ll,3,10}.time(end)];
 %     erpU125(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{3},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.1):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.15)),2),3);
-  erpU100(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.12)),2),3);
+%   erpU100(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.12)),2),3);
   erpU125(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{3},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.105):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.145)),2),3);
-  erpU200(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.175):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.225)),2),3);
+  erpU200(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.18):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.22)),2),3);
   erpU400(ll,:)=nanmean(nanmean(grind_tacPaud_save{ll,3,10}.individual(:,chpl{4},dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.38):dsearchn(grind_tacPaud_save{ll,3,10}.time',stattimwin(1)+.42)),2),3);
   
 %     erpM125(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{3},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.1):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.15)),2),3);
-  erpM100(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.12)),2),3);
+%   erpM100(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.12)),2),3);
   erpM125(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{3},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.105):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.145)),2),3);
-  erpM200(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.175):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.225)),2),3);
+  erpM200(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{1},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.18):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.22)),2),3);
   erpM400(ll,:)=nanmean(nanmean(grind_tacMSpN_save{ll,3,10}.individual(:,chpl{4},dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.38):dsearchn(grind_tacMSpN_save{ll,3,10}.time',stattimwin(1)+.42)),2),3);
   
 %     erpD125(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{3},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.1):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.15)),2),3);
-  erpD100(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{1},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.12)),2),3);
+%   erpD100(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{1},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.08):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.12)),2),3);
   erpD125(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{3},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.105):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.145)),2),3);
-  erpD200(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{1},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.175):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.225)),2),3);
+  erpD200(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{1},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.18):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.22)),2),3);
   erpD400(ll,:)=nanmean(nanmean(grind_TPA_MSPN{ll,3,10}.individual(:,chpl{4},dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.38):dsearchn(grind_TPA_MSPN{ll,3,10}.time',stattimwin(1)+.42)),2),3);
 end
 
