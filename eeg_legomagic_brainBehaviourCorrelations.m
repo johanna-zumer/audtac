@@ -95,6 +95,8 @@ else
   iiuse=iiSuse;
 end
 
+iiuse=[10:18 20:32]; % added Sept 2018; use all possible
+
 % rtsrall=nan(1,10);
 % diffms=nan(1,max(iiuse));
 % pcb=nan(1,max(iiuse));
@@ -104,14 +106,20 @@ bbind=1;
 for ii=iiuse
   load([sub{ii} '_audtac.mat'],'r*');
   
-  for tt=2:3
+%   for tt=2:3
+  for tt=3
     for ll=fliplr(soalist)
       rt{ll,tt,ii}=rrts(find(rsoareal(tt-1,:)==condcode(ll)));
+      numnan(1,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
       % added 12 July, 2018
 %       rt{ll,tt,ii}(1)=nan; % remove first trial of block, not of stim cond
       rt{ll,tt,ii}(find(rt{ll,tt,ii}<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
+      numnan(2,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
       rt{ll,tt,ii}(find(rt{ll,tt,ii}>1))=nan; % asleep?   % Throwing out trials greater than 1s
+      numnan(3,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
+      numtot(ll,bbind)=length(rt{ll,tt,ii});
       % end add
+      
 
       % save out some per-subject metrics of effect
       % 1) actual RT
@@ -218,12 +226,37 @@ for ii=iiuse
   bbind=bbind+1;
   clear rtime_touch
 end % ii
-save([ddir 'rt_allsubj.mat'],'rt*','fg*','G*');
+% save([ddir 'rt_allsubj.mat'],'rt*','fg*','G*');
+save([ddir 'rt_allsubj22.mat'],'rt*','fg*','G*','num*');
 return
+
+% added Sept 2018; using rt*22.mat
+tt=3;
+for ll=soalist(1:7)
+  if ll<6
+    [h,pval(ll),ci{ll},stats{ll}]=ttest( min(squeeze(rt_med(11,tt,:)),squeeze(rt_med(12,tt,:))-soades(ll)) , squeeze(rt_med(ll,tt,:)))
+  else
+    [h,pval(ll),ci{ll},stats{ll}]=ttest( min(squeeze(rt_med(11,tt,:))+soades(ll),squeeze(rt_med(12,tt,:))) , squeeze(rt_med(ll,tt,:)));
+  end
+end
+
+% stats{9}.sd/sqrt(22)  for reporting SEM in paper
+
+% percent no response
+ll=9;100*[mean(squeeze(numnan(1,ll,:))./numtot(ll,:)') std(squeeze(numnan(1,ll,:))./numtot(ll,:)')/sqrt(22)]
+% percent response <100ms 
+ll=12;100*[mean(squeeze(numnan(2,ll,:)-numnan(1,ll,:))./numtot(ll,:)') std(squeeze(numnan(2,ll,:)-numnan(1,ll,:))./numtot(ll,:)')/sqrt(22)]
+% percent response >1000ms 
+ll=1;100*[mean(squeeze(numnan(3,ll,:)-numnan(2,ll,:))./numtot(ll,:)') std(squeeze(numnan(3,ll,:)-numnan(2,ll,:))./numtot(ll,:)')/sqrt(22)]
+
+% total for all 3 reasons, collapsed over all conditions
+mean(reshape(squeeze(numnan(3,[1 3 4 5 6 7 9 11 12],:)),[1 9*22])./reshape(squeeze(numtot([1 3 4 5 6 7 9 11 12],:)),[1 9*22]))
+std(reshape(squeeze(numnan(3,[1 3 4 5 6 7 9 11 12],:)),[1 9*22])./reshape(squeeze(numtot([1 3 4 5 6 7 9 11 12],:)),[1 9*22]))/sqrt(22)
 
 
 %% 
-load([ddir 'rt_allsubj.mat'],'rt_med')
+% load([ddir 'rt_allsubj.mat'],'rt_med')
+load([ddir 'rt_allsubj22.mat'],'rt_med')
 tt=3;
 numsubj=size(rt_med,3);
 subuse=3:numsubj;
@@ -300,7 +333,8 @@ print(4,[fdir 'rt_med_Xlog_RTE.png'],'-dpng')
 
 
 %% Analyse RT
-load([ddir 'rt_allsubj.mat'],'rt_ms*');
+% load([ddir 'rt_allsubj.mat'],'rt_ms*');
+load([ddir 'rt_allsubj22.mat'],'rt_ms*');
 rtuse=squeeze(rt_msMminshiftuni(:,3,:));
 anova_rm(rtuse([3 4 5 6 7],:)')
 
