@@ -786,26 +786,46 @@ save([sub{ii} '_audtac.mat'],'*time*','*aud*','*numtac','soatimes','s*nul*','b*n
 return
 
 %%
-for ii=[105:128 130:132]
+subuse=[108:118 120:132];
+% for ii=[105:128 130:132]
+for ii=subuse
   load([sub{ii} '_audtac.mat']);
+  rpctexcli(ii,:)=rpctexcl;
   spctexcli(ii,:)=spctexcl;
   bpctexcli(ii,:)=bpctexcl;
   
   for ll=1:4
+    [raa,rbb]=sort(rsoareal(ll,:));
     [saa,sbb]=sort(ssoareal(ll,:));
     [baa,bbb]=sort(bsoareal(ll,:));
     %     tmp=[{ssoaeff(bb(find(aa==1)))'} {ssoaeff(bb(find(aa==3)))'} {ssoaeff(bb(find(aa==4)))'} {ssoaeff(bb(find(aa==5)))'} {ssoaeff(bb(find(aa==6)))'} {ssoaeff(bb(find(aa==7)))'} {ssoaeff(bb(find(aa==9)))'}]
     %     figure;distributionPlot(tmp);
     for ss=[1 3 4 5 6 7 9]
+      rsoavals{ll}{ii-100,ss}=rsoaeff(rbb(find(raa==ss)))';
       ssoavals{ll}{ii-100,ss}=ssoaeff(sbb(find(saa==ss)))';
       bsoavals{ll}{ii-100,ss}=bsoaeff(bbb(find(baa==ss)))';
     end
   end
   
 end
-spctexcli([105:128 130:132],:)
-bpctexcli([105:128 130:132],:)
+rpctexcli(subuse,2)
+spctexcli(subuse,2)
+bpctexcli(subuse,2)
 
+% mean(rpctexcli(subuse,2))
+%    16.8005
+% mean(spctexcli(subuse,2))
+%    16.4091
+% mean(bpctexcli(subuse,2))
+%    11.7978
+% std(rpctexcli(subuse,2))/sqrt(24)
+%     1.1423
+% std(spctexcli(subuse,2))/sqrt(24)
+%     1.1854
+% std(bpctexcli(subuse,2))/sqrt(24)
+%     0.9167
+
+    
 % yes, this distributionPlot extrapolates and estimates a histogram function, so it will be smooth at end cutoff points.
 figure;distributionPlot(ssoavals{1})
 figure;distributionPlot(ssoavals{2})
