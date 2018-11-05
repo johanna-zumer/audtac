@@ -109,7 +109,7 @@ for ii=[8:18 20:32]
   end
   thresh=31;
   figure(3);
-  freezeColors;
+%   freezeColors;
   subplot(4,7,subcnt);
   % yaxis is minutes of data
   bar(sleep0023(subcnt,:));
@@ -129,7 +129,7 @@ for ii=[8:18 20:32]
   
   thresh=27.5; % minutes
   figure(4);
-  freezeColors;
+%   freezeColors;
   subplot(4,7,subcnt);
   % yaxis is minutes of data
   bar(sleep0023(subcnt,:));
