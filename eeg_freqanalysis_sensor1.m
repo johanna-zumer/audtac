@@ -111,7 +111,7 @@ if sleep
   iiuse=iiBuse;
   %     iiuse=[32];
   iteruse=11;
-  trialkc=0;  % vary this from -1, 0, and 1
+  trialkc=-1;  % vary this from -1, 0, and 1
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:30);
@@ -3711,7 +3711,8 @@ print(4,[fdir 'TFP_TacVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
 print(4,[fdir 'TFP_TacVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
 
 % Auditory vs Null
-figure(5);imagesc(squeeze(sum(stattl_mcplv_AudVsNul{5,12}.mask,1)));axis xy
+% figure(5);imagesc(squeeze(sum(stattl_mcplv_AudVsNul{5,12}.mask,1)));axis xy
+figure(5);imagesc(squeeze(sum(stattl_mcplv_AudVsNul_itcdepT{5,12}.mask,1)));axis xy
 ax=gca;
 ax.XTick=ax.XTick+1;
 ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
@@ -3722,19 +3723,21 @@ colorbar;  caxis([0 63])
 print(5,[fdir 'PLF_AudVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
 print(5,[fdir 'PLF_AudVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
 
-figure(6);imagesc(squeeze(mean(stattl_mcplv_AudVsNul{5,12}.stat,1)));axis xy
+% figure(6);imagesc(squeeze(mean(stattl_mcplv_AudVsNul{5,12}.stat,1)));axis xy
+figure(6);imagesc(squeeze(mean(stattl_mcplv_AudVsNul_itcdepT{5,12}.stat,1)));axis xy
 ax=gca;
 ax.XTick=ax.XTick+1;
 ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
 ax.YTick=[4 8 12];
 ax.YTickLabel={'10' '18' '26'}
 title('T-value contrast: Aud. vs Null')
-colorbar;  caxis([-0.4 0.4])
+colorbar;  caxis([-4 4])
 print(6,[fdir 'PLF_AudVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
 print(6,[fdir 'PLF_AudVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
 
 % Tactile vs Null
-figure(7);imagesc(squeeze(sum(stattl_mcplv_TacVsNul{5,12}.mask,1)));axis xy
+% figure(7);imagesc(squeeze(sum(stattl_mcplv_TacVsNul{5,12}.mask,1)));axis xy
+figure(7);imagesc(squeeze(sum(stattl_mcplv_TacVsNul_itcdepT{5,12}.mask,1)));axis xy
 ax=gca;
 ax.XTick=ax.XTick+1;
 ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
@@ -3745,16 +3748,18 @@ colorbar;  caxis([0 63])
 print(7,[fdir 'PLF_TacVsNul_numchan_trialkc' num2str(trialkc) '.png'],'-dpng');
 print(7,[fdir 'PLF_TacVsNul_numchan_trialkc' num2str(trialkc) '.eps'],'-depsc');
 
-figure(8);imagesc(squeeze(mean(stattl_mcplv_TacVsNul{5,12}.stat,1)));axis xy
+figure(8);imagesc(squeeze(mean(stattl_mcplv_TacVsNul_itcdepT{5,12}.stat,1)));axis xy
 ax=gca;
 ax.XTick=ax.XTick+1;
 ax.XTickLabel={'0.1' '0.2' '0.3' '0.4' '0.5' '0.6' '0.7'};
 ax.YTick=[4 8 12];
 ax.YTickLabel={'10' '18' '26'}
 title('T-value contrast: Tac. vs Null')
-colorbar;  caxis([-0.4 0.4])
+colorbar;  caxis([-4 4])
 print(8,[fdir 'PLF_TacVsNul_meanstat_trialkc' num2str(trialkc) '.png'],'-dpng');
 print(8,[fdir 'PLF_TacVsNul_meanstat_trialkc' num2str(trialkc) '.eps'],'-depsc');
+
+% line plots
 
 
 %% MultSens contrast with Median-split
@@ -3771,7 +3776,6 @@ ylimhi=[30 45; 55 80];
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
 comb2flag=1;
 mcseed=13;  % montecarlo cfg.randomseed
-usetr=1; % 1 with 27, or 2 or 3 with 31 or 32
 resetusetr=0;
 soalist=[1 3 4 5 6 7 9];
 chanuse_sleep0={'all' '-F4'};
@@ -3779,26 +3783,23 @@ chanuse_sleep1={'all' '-AF7' '-AF3' '-Fp1'};
 
 statspowflag=1;
 statsplvflag=1;
+savegrindflag=1;
 itcdepsampflag=1;
 
 
 tt=3;
 sleep=1;
-% for sleep=[1]
+clearvars -except ll tt sub *dir ii*use sleep *flag figind soades* soalist chanuse* ylim* neigh* *basemax mcseed
 if sleep
-  chanuse=chanuse_sleep1;
-else
-  chanuse=chanuse_sleep0;
-end
-clearvars -except ll tt sub *dir ii*use sleep *flag figind soades* soalist chanuse* ylim* neigh* *basemax mcseed usetr
-if sleep
+  usetr=1; % 1 for sleep
   chanuse=chanuse_sleep1;
   subuseall=iiBuse;
   iteruse=11;
-  trialkc=0;
+  trialkc=-1;
   %       ssuse=12;
   sleepcond='Sleep N2';
 else
+  usetr=3; % 1 with 27, or 2 or 3 with 31 or 32
   chanuse=chanuse_sleep0;
   subuseall=setdiff(iiSuse,[]);
   iteruse=27;
@@ -3810,15 +3811,14 @@ end
 
 submin=subuseall(1)-1;
 subuseind=0;
-usetr=1;
 iteruse
 for ii=subuseall
   cd([edir sub{ii} ])
-  try
+%   try
     load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_iter' num2str(iteruse) '_trialkc' num2str(trialkc) '.mat'])
-  catch
-    load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
-  end
+%   catch
+%     load(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(1) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'])
+%   end
   subuseind=subuseind+1;
   
   for ss=10:12
@@ -3928,7 +3928,6 @@ sublab(subind_top)=1;
 sublab(subind_bot)=-1;
 
 cfg=[];
-cfg.keepindividual='yes';
 cfg.parameter={'powspctrm' 'plvspctrm' 'plvabs'};
 
 
@@ -3937,13 +3936,14 @@ for ss=10:12
     clear cellfull
     for ii=1:length(freqloall_TPA_MSPN_comb1{ll,ss}),cellfull(ii)=~isempty(freqloall_TPA_MSPN_comb1{ll,ss}{ii});end
     sublabuse{ll,ss}=sublab(cellfull);
+    
+    cfg.keepindividual='yes';
     grindlo_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{ll,ss}{cellfull});
     grindhi_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{ll,ss}{cellfull});
     if comb2flag
       grindlo_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{ll,ss}{cellfull});
       grindhi_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{ll,ss}{cellfull});
-    end
-    
+    end    
     grindlo_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{ll,ss}{cellfull});
     grindlo_tacMSpN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{ll,ss}{cellfull});
     grindhi_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{ll,ss}{cellfull});
@@ -3953,6 +3953,24 @@ for ss=10:12
       grindlo_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{ll,ss}{cellfull});
       grindhi_tacPaud_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{ll,ss}{cellfull});
       grindhi_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{ll,ss}{cellfull});
+    end
+    
+    cfg.keepindividual='no';
+    gravelo_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb1{ll,ss}{cellfull});
+    gravehi_TPA_MSPN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb1{ll,ss}{cellfull});
+    if comb2flag
+      gravelo_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_TPA_MSPN_comb2{ll,ss}{cellfull});
+      gravehi_TPA_MSPN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_TPA_MSPN_comb2{ll,ss}{cellfull});
+    end    
+    gravelo_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb1{ll,ss}{cellfull});
+    gravelo_tacMSpN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb1{ll,ss}{cellfull});
+    gravehi_tacPaud_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb1{ll,ss}{cellfull});
+    gravehi_tacMSpN_comb1{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb1{ll,ss}{cellfull});
+    if comb2flag
+      gravelo_tacPaud_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacPaud_comb2{ll,ss}{cellfull});
+      gravelo_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqloall_tacMSpN_comb2{ll,ss}{cellfull});
+      gravehi_tacPaud_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacPaud_comb2{ll,ss}{cellfull});
+      gravehi_tacMSpN_comb2{ll,ss}=ft_freqgrandaverage(cfg,freqhiall_tacMSpN_comb2{ll,ss}{cellfull});
     end
     
     freqloall_TPA_MSPN_comb1{ll,ss}=[];
@@ -3969,6 +3987,8 @@ for ss=10:12
     freqhiall_tacMSpN_comb2{ll,ss}=[];
   end % ll
 end % ss
+
+
 clear freq*all*comb*
 
 
@@ -3976,73 +3996,30 @@ for ss=10:12
   for ll=soalist
     %     usesub=find(squeeze(~isnan(subuse(ll,ss,:))));
     
-    grindlo_tacPaud_top{ll,ss,1}=grindlo_tacPaud_comb1{ll,ss};
-    grindlo_tacPaud_top{ll,ss,1}.powspctrm=grindlo_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindlo_tacPaud_top{ll,ss,1}.plvspctrm=grindlo_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindlo_tacPaud_top{ll,ss,1}.plvabs=grindlo_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-    grindlo_tacMSpN_top{ll,ss,1}=grindlo_tacMSpN_comb1{ll,ss};
-    grindlo_tacMSpN_top{ll,ss,1}.powspctrm=grindlo_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindlo_tacMSpN_top{ll,ss,1}.plvspctrm=grindlo_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindlo_tacMSpN_top{ll,ss,1}.plvabs=grindlo_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacPaud_top{ll,ss,1}=grindhi_tacPaud_comb1{ll,ss};
-    grindhi_tacPaud_top{ll,ss,1}.powspctrm=grindhi_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacPaud_top{ll,ss,1}.plvspctrm=grindhi_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacPaud_top{ll,ss,1}.plvabs=grindhi_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacMSpN_top{ll,ss,1}=grindhi_tacMSpN_comb1{ll,ss};
-    grindhi_tacMSpN_top{ll,ss,1}.powspctrm=grindhi_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacMSpN_top{ll,ss,1}.plvspctrm=grindhi_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-    grindhi_tacMSpN_top{ll,ss,1}.plvabs=grindhi_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+    % Make grind and grave for top/bottom subselections    
+    %[grindout,graveout]=grindgravetopbot(grindorig,sublist,subval)
     
-    grindlo_tacPaud_bot{ll,ss,1}=grindlo_tacPaud_comb1{ll,ss};
-    grindlo_tacPaud_bot{ll,ss,1}.powspctrm=grindlo_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindlo_tacPaud_bot{ll,ss,1}.plvspctrm=grindlo_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindlo_tacPaud_bot{ll,ss,1}.plvabs=grindlo_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-    grindlo_tacMSpN_bot{ll,ss,1}=grindlo_tacMSpN_comb1{ll,ss};
-    grindlo_tacMSpN_bot{ll,ss,1}.powspctrm=grindlo_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindlo_tacMSpN_bot{ll,ss,1}.plvspctrm=grindlo_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindlo_tacMSpN_bot{ll,ss,1}.plvabs=grindlo_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacPaud_bot{ll,ss,1}=grindhi_tacPaud_comb1{ll,ss};
-    grindhi_tacPaud_bot{ll,ss,1}.powspctrm=grindhi_tacPaud_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacPaud_bot{ll,ss,1}.plvspctrm=grindhi_tacPaud_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacPaud_bot{ll,ss,1}.plvabs=grindhi_tacPaud_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacMSpN_bot{ll,ss,1}=grindhi_tacMSpN_comb1{ll,ss};
-    grindhi_tacMSpN_bot{ll,ss,1}.powspctrm=grindhi_tacMSpN_comb1{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacMSpN_bot{ll,ss,1}.plvspctrm=grindhi_tacMSpN_comb1{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-    grindhi_tacMSpN_bot{ll,ss,1}.plvabs=grindhi_tacMSpN_comb1{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+    [grindlo_tacPaud_top{ll,ss,1},gravelo_tacPaud_top{ll,ss,1}]=grindgravetopbot(grindlo_tacPaud_comb1{ll,ss},sublabuse{ll,ss},1);
+    [grindlo_tacMSpN_top{ll,ss,1},gravelo_tacMSpN_top{ll,ss,1}]=grindgravetopbot(grindlo_tacMSpN_comb1{ll,ss},sublabuse{ll,ss},1);
+    [grindhi_tacPaud_top{ll,ss,1},gravehi_tacPaud_top{ll,ss,1}]=grindgravetopbot(grindhi_tacPaud_comb1{ll,ss},sublabuse{ll,ss},1);
+    [grindhi_tacMSpN_top{ll,ss,1},gravehi_tacMSpN_top{ll,ss,1}]=grindgravetopbot(grindhi_tacMSpN_comb1{ll,ss},sublabuse{ll,ss},1);
+    
+    [grindlo_tacPaud_bot{ll,ss,1},gravelo_tacPaud_bot{ll,ss,1}]=grindgravetopbot(grindlo_tacPaud_comb1{ll,ss},sublabuse{ll,ss},-1);
+    [grindlo_tacMSpN_bot{ll,ss,1},gravelo_tacMSpN_bot{ll,ss,1}]=grindgravetopbot(grindlo_tacMSpN_comb1{ll,ss},sublabuse{ll,ss},-1);
+    [grindhi_tacPaud_bot{ll,ss,1},gravehi_tacPaud_bot{ll,ss,1}]=grindgravetopbot(grindhi_tacPaud_comb1{ll,ss},sublabuse{ll,ss},-1);
+    [grindhi_tacMSpN_bot{ll,ss,1},gravehi_tacMSpN_bot{ll,ss,1}]=grindgravetopbot(grindhi_tacMSpN_comb1{ll,ss},sublabuse{ll,ss},-1);
+    
     if comb2flag
-      grindlo_tacPaud_top{ll,ss,2}=grindlo_tacPaud_comb2{ll,ss};
-      grindlo_tacPaud_top{ll,ss,2}.powspctrm=grindlo_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindlo_tacPaud_top{ll,ss,2}.plvspctrm=grindlo_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindlo_tacPaud_top{ll,ss,2}.plvabs=grindlo_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-      grindlo_tacMSpN_top{ll,ss,2}=grindlo_tacMSpN_comb2{ll,ss};
-      grindlo_tacMSpN_top{ll,ss,2}.powspctrm=grindlo_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindlo_tacMSpN_top{ll,ss,2}.plvspctrm=grindlo_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindlo_tacMSpN_top{ll,ss,2}.plvabs=grindlo_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacPaud_top{ll,ss,2}=grindhi_tacPaud_comb2{ll,ss};
-      grindhi_tacPaud_top{ll,ss,2}.powspctrm=grindhi_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacPaud_top{ll,ss,2}.plvspctrm=grindhi_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacPaud_top{ll,ss,2}.plvabs=grindhi_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacMSpN_top{ll,ss,2}=grindhi_tacMSpN_comb2{ll,ss};
-      grindhi_tacMSpN_top{ll,ss,2}.powspctrm=grindhi_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacMSpN_top{ll,ss,2}.plvspctrm=grindhi_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==1,:,:,:);
-      grindhi_tacMSpN_top{ll,ss,2}.plvabs=grindhi_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==1,:,:,:);
+      [grindlo_tacPaud_top{ll,ss,2},gravelo_tacPaud_top{ll,ss,2}]=grindgravetopbot(grindlo_tacPaud_comb2{ll,ss},sublabuse{ll,ss},1);
+      [grindlo_tacMSpN_top{ll,ss,2},gravelo_tacMSpN_top{ll,ss,2}]=grindgravetopbot(grindlo_tacMSpN_comb2{ll,ss},sublabuse{ll,ss},1);
+      [grindhi_tacPaud_top{ll,ss,2},gravehi_tacPaud_top{ll,ss,2}]=grindgravetopbot(grindhi_tacPaud_comb2{ll,ss},sublabuse{ll,ss},1);
+      [grindhi_tacMSpN_top{ll,ss,2},gravehi_tacMSpN_top{ll,ss,2}]=grindgravetopbot(grindhi_tacMSpN_comb2{ll,ss},sublabuse{ll,ss},1);
       
-      grindlo_tacPaud_bot{ll,ss,2}=grindlo_tacPaud_comb2{ll,ss};
-      grindlo_tacPaud_bot{ll,ss,2}.powspctrm=grindlo_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindlo_tacPaud_bot{ll,ss,2}.plvspctrm=grindlo_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindlo_tacPaud_bot{ll,ss,2}.plvabs=grindlo_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-      grindlo_tacMSpN_bot{ll,ss,2}=grindlo_tacMSpN_comb2{ll,ss};
-      grindlo_tacMSpN_bot{ll,ss,2}.powspctrm=grindlo_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindlo_tacMSpN_bot{ll,ss,2}.plvspctrm=grindlo_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindlo_tacMSpN_bot{ll,ss,2}.plvabs=grindlo_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacPaud_bot{ll,ss,2}=grindhi_tacPaud_comb2{ll,ss};
-      grindhi_tacPaud_bot{ll,ss,2}.powspctrm=grindhi_tacPaud_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacPaud_bot{ll,ss,2}.plvspctrm=grindhi_tacPaud_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacPaud_bot{ll,ss,2}.plvabs=grindhi_tacPaud_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacMSpN_bot{ll,ss,2}=grindhi_tacMSpN_comb2{ll,ss};
-      grindhi_tacMSpN_bot{ll,ss,2}.powspctrm=grindhi_tacMSpN_comb2{ll,ss}.powspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacMSpN_bot{ll,ss,2}.plvspctrm=grindhi_tacMSpN_comb2{ll,ss}.plvspctrm(sublabuse{ll,ss}==-1,:,:,:);
-      grindhi_tacMSpN_bot{ll,ss,2}.plvabs=grindhi_tacMSpN_comb2{ll,ss}.plvabs(sublabuse{ll,ss}==-1,:,:,:);
+      [grindlo_tacPaud_bot{ll,ss,2},gravelo_tacPaud_bot{ll,ss,2}]=grindgravetopbot(grindlo_tacPaud_comb2{ll,ss},sublabuse{ll,ss},-1);
+      [grindlo_tacMSpN_bot{ll,ss,2},gravelo_tacMSpN_bot{ll,ss,2}]=grindgravetopbot(grindlo_tacMSpN_comb2{ll,ss},sublabuse{ll,ss},-1);
+      [grindhi_tacPaud_bot{ll,ss,2},gravehi_tacPaud_bot{ll,ss,2}]=grindgravetopbot(grindhi_tacPaud_comb2{ll,ss},sublabuse{ll,ss},-1);
+      [grindhi_tacMSpN_bot{ll,ss,2},gravehi_tacMSpN_bot{ll,ss,2}]=grindgravetopbot(grindhi_tacMSpN_comb2{ll,ss},sublabuse{ll,ss},-1);
+      
     end
     
     % begin stats
@@ -4184,17 +4161,125 @@ end % ss
 
 if itcdepsampflag
   try
-    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','-append');
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','grave*','-append');
   catch
-    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*');
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '_itc.mat'],'stat*','grave*');
   end
 else
   try
-    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','-append');
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','grave*','-append');
   catch
-    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*');
+    save([edir 'stats_TFR_MScon_sleep' num2str(sleep) '_trialkc' num2str(trialkc) '.mat'],'stat*','grave*');
   end
 end
+
+%% 
+% figures to assess above
+load stats_TFR_MScon_sleep1_trialkc-1_itc % takes a long time!
+
+soalist=[1 3 4 5 6 7 9];
+chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
+chpl{1}=match_str(stattl_mcplv_TpAMSpN_bot_itcdepT{7,12,1}.label,chanplot{1});
+fb{1}=1:2;fb{2}=3:5;fb{3}=6:10;fb{4}=1:10;
+fname{1}='theta';fname{2}='alpha';fname{3}='beta';fname{4}='gamma';
+
+for ll=soalist
+  for ff=1:3
+    figure(ll+10*ff);plot(squeeze(mean(mean(stattl_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'b');ylim([-1.5 1.5])
+    hold on;
+    plot(squeeze(mean(mean(stattl_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'k');ylim([-1.5 1.5])
+    plot(squeeze(mean(mean(stattl_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'r');ylim([-1.5 1.5])
+    sigpoints=find(squeeze(min(min(stattl_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'b*');
+    end
+    sigpoints=find(squeeze(min(min(stattl_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'k*');
+    end
+    sigpoints=find(squeeze(min(min(stattl_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'r*');
+    end
+    legend({'Bottom' 'Top' 'TvB'})
+    title(fname{ff})
+    print(ll+10*ff,[fdir 'statl_plvitc_' fname{ff} '_' num2str(ll) '.eps'],'-painters','-depsc');
+  end
+end
+
+for ll=soalist
+  for ff=1:3
+    figure(ll+10*ff+30);plot(squeeze(mean(mean(stattl_mc_TpAMSpN_bot{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'b');
+    hold on;
+    plot(squeeze(mean(mean(stattl_mc_TpAMSpN_top{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'k');
+    plot(squeeze(mean(mean(stattl_mc_TpAMSpN_TvB{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'r');
+    sigpoints=find(squeeze(min(min(stattl_mc_TpAMSpN_bot{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mc_TpAMSpN_bot{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'b*');
+    end
+    sigpoints=find(squeeze(min(min(stattl_mc_TpAMSpN_top{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mc_TpAMSpN_top{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'k*');
+    end
+    sigpoints=find(squeeze(min(min(stattl_mc_TpAMSpN_TvB{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(stattl_mc_TpAMSpN_TvB{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'r*');
+    end
+    ylim([-2 2])
+    legend({'Bottom' 'Top' 'TvB'})
+    title(fname{ff})
+    print(ll+10*ff+30,[fdir 'statl_tfp_' fname{ff} '_' num2str(ll) '.eps'],'-painters','-depsc');
+  end
+end
+
+ff=4; % gamma
+for ll=soalist
+    figure(ll+10*ff+60);plot(squeeze(mean(mean(statth_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'b');
+    hold on;
+    plot(squeeze(mean(mean(statth_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'k');
+    plot(squeeze(mean(mean(statth_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'r');
+    sigpoints=find(squeeze(min(min(statth_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mcplv_TpAMSpN_bot_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'b*');
+    end
+    sigpoints=find(squeeze(min(min(statth_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mcplv_TpAMSpN_top_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'k*');
+    end
+    sigpoints=find(squeeze(min(min(statth_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mcplv_TpAMSpN_TvB_itcdepT{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'r*');
+    end
+    ylim([-1.5 1.5])
+    legend({'Bottom' 'Top' 'TvB'})
+    title(fname{ff})
+    print(ll+10*ff+60,[fdir 'stath_plvitc_' fname{ff} '_' num2str(ll) '.eps'],'-painters','-depsc');
+end
+for ll=soalist
+    figure(ll+10*ff+70);plot(squeeze(mean(mean(statth_mc_TpAMSpN_bot{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'b');
+    hold on;
+    plot(squeeze(mean(mean(statth_mc_TpAMSpN_top{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'k');
+    plot(squeeze(mean(mean(statth_mc_TpAMSpN_TvB{ll,12,1}.stat(chpl{1},fb{ff},:),1),2)),'r');
+    sigpoints=find(squeeze(min(min(statth_mc_TpAMSpN_bot{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mc_TpAMSpN_bot{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'b*');
+    end
+    sigpoints=find(squeeze(min(min(statth_mc_TpAMSpN_top{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mc_TpAMSpN_top{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'k*');
+    end
+    sigpoints=find(squeeze(min(min(statth_mc_TpAMSpN_TvB{ll,12,1}.prob(:,fb{ff},:),[],1),[],2))<.05);
+    if ~isempty(sigpoints)
+      plot(sigpoints,squeeze(mean(mean(statth_mc_TpAMSpN_TvB{ll,12,1}.stat(chpl{1},fb{ff},sigpoints),1),2)),'r*');
+    end
+    ylim([-2 2])
+    legend({'Bottom' 'Top' 'TvB'})
+    title(fname{ff})
+    print(ll+10*ff+70,[fdir 'stath_tfp_' fname{ff} '_' num2str(ll) '.eps'],'-painters','-depsc');
+end
+
+
+
 
 %%  Main stats
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -4221,11 +4306,18 @@ synchasynch=0;
 mcseed=13;  % montecarlo cfg.randomseed
 grindflag=1;
 
-sleep=0;
+sleep=1;
 if sleep
+  trialkc=-1;
   usetr=1;
+  subuseall=iiBuse;
+  iter=11;  
 else
+  trialkc=-1;
   usetr=3; % 1 with 27, or 2 or 3 with 31 or 32
+  subuseall=setdiff(iiSuse,[])
+  %     iter=27;
+  iter=31;
 end
 resetusetr=0;
 
@@ -4248,22 +4340,10 @@ figind=1;
 
 for ll=soalist
   % for ll=[9];
-  clearvars -except ll tt sub *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed *tr
+  clearvars -except ll tt sub* *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed *tr trialkc iter
   
   if resetusetr
     usetr=2;
-  end
-  
-  if sleep
-    subuseall=iiBuse;
-    iter=11;
-    
-    trialkc=0;
-  else
-    subuseall=setdiff(iiSuse,[])
-    %     iter=27;
-    iter=31;
-    trialkc=-1;
   end
   
   submin=subuseall(1)-1;
@@ -6988,13 +7068,17 @@ colorblindA  =[0 158 115]/256;
 colorblindM  =[0 0 0]/256;
 colorblindN  =[128 128 128]/256;
 
+sleep=1;
+trialkc=-1;
 
 llind=0;
 for ll=soalist
   llind=llind+1;
-  % for ll=[3 4 5 6 7 9];
-  %   load(['grindTFR_cond'  num2str(ll) '_sleep0_iter31_trialkc-1_usetr3_mcseed13_itc.mat']);
-  load(['statsgrave_TFR_cond' num2str(ll) '3100_iter31_trialkc-1_usetr3_mcseed13_itc.mat'])
+  if sleep==1
+    load(['statsgrave_TFR_cond' num2str(ll) '3121_iter11_trialkc' num2str(trialkc) '_usetr1_mcseed13_itc.mat'])
+  elseif sleep==0
+    load(['statsgrave_TFR_cond' num2str(ll) '3100_iter31_trialkc-1_usetr3_mcseed13_itc.mat'])
+  end
   
   chpl{1}=match_str(gravelo_TPA_MSPN_comb1.label,chanplot{1});
   chpl{2}=match_str(gravelo_TPA_MSPN_comb1.label,chanplot{2});
@@ -7018,7 +7102,7 @@ for ll=soalist
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
     pk.Color=colorblindMpN;
     hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
-    ylim([-1 2.5])
+    ylim([-3.5 3.5])
     xlim([-0.6 1.8]);
     
     figure(2)
@@ -7029,11 +7113,11 @@ for ll=soalist
     %     subplot(2,7,(cp-1)*7+llind);
     subplot(7,2,(llind-1)*2+cp);
     pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
-    pk.Color=coloruse(5,:);
+    pk.Color=colorblindD;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
-    pk.Color=coloruse(1,:);
+    pk.Color=colorblindApT;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
-    pk.Color=coloruse(10,:);
+    pk.Color=colorblindMpN;
     hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
     ylim([-3 3])
     xlim([-0.6 1.8]);
@@ -7046,11 +7130,11 @@ for ll=soalist
     %     subplot(2,7,(cp-1)*7+llind);
     subplot(7,2,(llind-1)*2+cp);
     pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
-    pk.Color=coloruse(5,:);
+    pk.Color=colorblindD;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
-    pk.Color=coloruse(1,:);
+    pk.Color=colorblindApT;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
-    pk.Color=coloruse(10,:);
+    pk.Color=colorblindMpN;
     hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
     ylim([-0.7 0.7])
     xlim([-0.6 1.8]);
@@ -7063,11 +7147,11 @@ for ll=soalist
     %     subplot(2,7,(cp-1)*7+llind);
     subplot(7,2,(llind-1)*2+cp);
     pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_TPA_MSPN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1)),'m')
-    pk.Color=coloruse(5,:);
+    pk.Color=colorblindD;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'k')
-    pk.Color=coloruse(1,:);
+    pk.Color=colorblindApT;
     hold on;pk=plot(timeuse,squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{cp},frequse,21:end-20),2),1))-base,'g')
-    pk.Color=coloruse(10,:);
+    pk.Color=colorblindMpN;
     hold on;plot(stattimeuse,squeeze(nanmean(nanmean(stattl_mc_comb1.stat(chpl{cp},frequse,stattimese(1):stattimese(2)),2),1)),'b')
     ylim([-2.5 2.5])
     xlim([-0.6 1.8]);
@@ -7394,9 +7478,9 @@ print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-for ll=soalist
-% for ll=[3 7]
-  % for ll=9
+% for ll=soalist
+for ll=[1 3 4 5 6]
+% for ll=3
   close all
   clear grave* stat* tmp*
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
@@ -7565,7 +7649,7 @@ for ll=soalist
     if peakfindflag
       if ll==3
         [mx,mindD3]=max(nanmean(powfb{3,1}.avg(chpl{1},:),1));
-        timeTacThetaTFR_AT70=powfb{3,1}.time(mindD3);
+        timeTacThetaTFR_AT70=powfb{3,1}.time(mindD3); % 300 ms
       elseif ll==7
         [mx,mindD3]=max(nanmean(powfb{3,1}.avg(chpl{1},:),1));
         timeTacThetaTFR_TA70=powfb{3,1}.time(mindD3);
@@ -7573,65 +7657,20 @@ for ll=soalist
       
       if exist('timeTacThetaTFR_AT70') && exist('timeTacThetaTFR_TA70')
         timeTacThetaTFR_Diff=mean([timeTacThetaTFR_AT70 timeTacThetaTFR_TA70]);
-        timeTacThetaTFR_Uni=mean([timeTacThetaTfr timeAudThetaTfr]);
+%         timeTacThetaTFR_Uni=mean([timeTacThetaTfr timeAudThetaTfr]);
         for pp=1:3,
           peakthetaTFR_Diff(pp,ll)=nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff)),1);
-          peakthetaTFR_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Uni)),1);
+          peakthetaTFR_Diff_range(pp,ll)=nanmean(nanmean(powfb{pp,1}.avg(chpl{1},[dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff-.02):dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff+.02)]),1),2);
+%           peakthetaTFR_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Uni)),1);
         end
       end
       
       % posterior alpha/beta ERS rebound
       for pp=1:3,
-        peakAlphaTFR_Diff(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-40:end-10),1),2);
-        peakalphaTFR_Tac(pp,ll) =nanmean(powfb{pp,2}.avg(chpl{2},dsearchn(powfb{pp,2}.time',timeTacAlpbet)),1);
+        peakAlphaTFR_Diff(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-40:end-10),1),2); % 900-1200ms
+        peakAlphaTFR_Diff_short(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-27:end-23),1),2); % 1030-1070ms
+%         peakalphaTFR_Tac(pp,ll) =nanmean(powfb{pp,2}.avg(chpl{2},dsearchn(powfb{pp,2}.time',timeTacAlpbet)),1);
       end
-      
-%       stend=dsearchn(gravelo_tacPaud_comb1.time',[max(0,soades(ll)) max(0,soades(ll))+.5]');
-%       timepeak=stend(1):stend(2);
-%       stendL=dsearchn(gravelo_tacPaud_comb1.time',[max(0,soades(ll))+.5 max(0,soades(ll))+1.2]');
-%       timepeakL=stendL(1):stendL(2);
-      
-%       % theta Tfr
-%       [mx,mindD]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
-%       
-%       [mx,mindU]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
-%       timepeakoutU(ll)=gravelo_tacPaud_comb1.time(timepeak(mindU));
-%       [mx,mindM]=max(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak),2),1)));
-%       timepeakoutM(ll)=gravelo_tacMSpN_comb1.time(timepeak(mindM));
-%       grpeaktheta(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(mindU)),2),1));
-%       grpeaktheta(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(mindM)),2),1));
-%       grpeaktheta(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{1},1:2,timepeak(21)),2),1));
-%       grpeaktheta(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(mindU)),2),1));
-%       grpeaktheta(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(mindM)),2),1));
-%       grpeaktheta(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{1},1:2,timepeak(21)),2),1));
-%       
-%       % alpha ERD
-%       [mx,mindU]=min(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak),2),1)));
-%       timeAERDoutU(ll)=gravelo_tacPaud_comb1.time(timepeak(mindU));
-%       [mx,mindM]=min(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak),2),1)));
-%       timeAERDoutM(ll)=gravelo_tacMSpN_comb1.time(timepeak(mindM));
-%       grpeakAERD(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(mindU)),2),1));
-%       grpeakAERD(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(mindM)),2),1));
-%       grpeakAERD(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeak(21)),2),1));
-%       grpeakAERD(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(mindU)),2),1));
-%       grpeakAERD(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(mindM)),2),1));
-%       grpeakAERD(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeak(21)),2),1));
-%       
-%       % alpha ERS rebound
-%       [mx,mindU]=max(squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL),2),1)));
-%       timeAERSoutU(ll)=gravelo_tacPaud_comb1.time(timepeakL(mindU));
-%       [mx,mindM]=max(squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL),2),1)));
-%       timeAERSoutM(ll)=gravelo_tacMSpN_comb1.time(timepeakL(mindM));
-%       grpeakAERS(ll,1)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(mindU)),2),1));
-%       grpeakAERS(ll,2)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(mindM)),2),1));
-%       grpeakAERS(ll,3)=squeeze(nanmean(nanmean(gravelo_tacPaud_comb1.powspctrm(chpl{2},3:9,timepeakL(21)),2),1));
-%       grpeakAERS(ll,4)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(mindU)),2),1));
-%       grpeakAERS(ll,5)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(mindM)),2),1));
-%       grpeakAERS(ll,6)=squeeze(nanmean(nanmean(gravelo_tacMSpN_comb1.powspctrm(chpl{2},3:9,timepeakL(21)),2),1));
-%       
-%       save(['grpeak_sleep' num2str(sleep) '_trialkc' num2str(trialkc)  '.mat'],'grpeak*','time*out*');
-      
-      
       
     end %peak
     
@@ -7773,9 +7812,10 @@ for ll=soalist
     
     
     if peakfindflag
-      timeThetaPLV_Uni=mean([timeTacThetaPlv timeAudThetaPlv]);
+      timeThetaPLV_Uni=mean([timeTacThetaPlv timeAudThetaPlv]); %135 ms
       for pp=1:3,
         peakthetaPLV_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni)),1);
+        peakthetaPLV_Uni_range(pp,ll) =nanmean(nanmean(powfb{pp,1}.avg(chpl{1},[dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni-.02):dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni+.02)]),1),2);
       end
     end % peak
   
@@ -7784,14 +7824,22 @@ for ll=soalist
   
   
 end
+save('peakTFvalues.mat','peak*','time*');
 
 %% plot peak bars
+
+load('peakTFvalues.mat');
 
 data=peakthetaTFR_Diff(:,soalist)';
 starind=[1 2 3 6];
 yminmax=[-.2 1.3];
 figind=56;
 figname=[fdir 'tfr_condDiff_theta.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
+data=peakthetaTFR_Diff_range(:,soalist)';
+figind=59;
+figname=[fdir 'tfr_condDiff_thetarange.eps'];
 plotlegsummarybars(data,figind,figname,starind,yminmax)
 
 data=peakAlphaTFR_Diff(:,soalist)';
@@ -7801,12 +7849,24 @@ figind=57;
 figname=[fdir 'tfr_condDiff_alpha.eps'];
 plotlegsummarybars(data,figind,figname,starind,yminmax)
 
+data=peakAlphaTFR_Diff_short(:,soalist)';
+figind=60;
+yminmax=[-1.2 2.4];
+figname=[fdir 'tfr_condDiff_alphashort.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
 data=peakthetaPLV_Uni(:,soalist)';
 starind=[2 6];
 yminmax=[-.07 .37];
 figind=58;
 figname=[fdir 'plv_condDiff_theta.eps'];
 plotlegsummarybars(data,figind,figname,starind,yminmax)
+
+data=peakthetaPLV_Uni_range(:,soalist)';
+figind=61;
+figname=[fdir 'plv_condDiff_thetarange.eps'];
+plotlegsummarybars(data,figind,figname,starind,yminmax)
+
 
 % figure(56); % preferred
 % subplot(2,1,1);ph=bar(peakthetaTFR_Diff(1:2,soalist)');ylim([-0.2 1.3])
@@ -7949,17 +8009,17 @@ for ll=3
   clear grave* stat* tmp*
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
   %   baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
-%   stattimwin=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
-
-
-cfg=[];
-cfg.avgoverfreq='yes';
-cfg.frequency=[4 6.5];
-grdiff_theta=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-cfg.frequency=[8 20];
-grdiff_alpha=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-
-
+  %   stattimwin=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
+  
+  
+  cfg=[];
+  cfg.avgoverfreq='yes';
+  cfg.frequency=[4 6.5];
+  grdiff_theta=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+  cfg.frequency=[8 20];
+  grdiff_alpha=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+  
+  
   cfg=[];
   cfg.layout='elec1010.lay';
   cfg.highlight          = 'on';
@@ -7968,23 +8028,26 @@ grdiff_alpha=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
   cfg.comment='no';
   
   cfg.parameter='powspctrm';
-  cfg.xlim=[timeTacThetaTFR_Diff-.1 timeTacThetaTFR_Diff+.1];
-  cfg.zlim=[-1 1];
+%   cfg.xlim=[timeTacThetaTFR_Diff-.1 timeTacThetaTFR_Diff+.1];
+  cfg.xlim=[timeTacThetaTFR_Diff-.02 timeTacThetaTFR_Diff+.02];
+  cfg.zlim=[-1.1 1.1];
   cfg.highlightchannel   =  chanplot{1};
   figure(120+ll);
   ft_topoplotTFR(cfg,grdiff_theta);
   print(120+ll,[fdir 'TFP_topoDiff_Theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
   
   cfg.parameter='powspctrm';
-  cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-40 end-10]);
-  cfg.zlim=[-1.7 1.7];
+%   cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-40 end-10]);
+  cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-27 end-23]);
+  cfg.zlim=[-2.5 2.5];
   cfg.highlightchannel   =  chanplot{2};
   figure(130+ll);
   ft_topoplotTFR(cfg,grdiff_alpha);
   print(130+ll,[fdir 'TFP_topoDiff_Alpha_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
 
   cfg.parameter='plvabs';
-  cfg.xlim=[timeThetaPLV_Uni-.03 timeThetaPLV_Uni+.03];
+%   cfg.xlim=[timeThetaPLV_Uni-.03 timeThetaPLV_Uni+.03];
+  cfg.xlim=[timeThetaPLV_Uni-.02 timeThetaPLV_Uni+.02];
   cfg.zlim=[-.2 .2];
   cfg.highlightchannel   =  chanplot{1};
   figure(140+ll);
@@ -8040,6 +8103,8 @@ pre30plot=0; % awkward.... leave for 0 for new iter27.
 commentson=0; % sometimes we want comments on, to see xlim & ylim used; for final figures turn off.
 plotplvflag=1;
 plottfrflag=1;
+combval=1;
+adda=3;
 
 % for all ll, print at least a TFR even if nothing significant.
 % for ll=soalist
@@ -8057,22 +8122,22 @@ for ll=[1]
     end
   end
   
-  for combval=1
+%   for combval=1
     close all
     clear adda
     % power
     if plottfrflag
-      if fftaddflag
-        cfg=[];
-        cfg.latency=[stattl_mc_fftadd.time(1) stattl_mc_fftadd.time(end)];
-        tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_fftadd);
-        tmp.mask=stattl_mc_fftadd.mask;
-        tmps=ft_selectdata(cfg,gravelo_tacMSpN_fftadd);
-        tmps.mask=stattl_mc_fftadd.mask;
-        tmpu=ft_selectdata(cfg,gravelo_tacPaud_fftadd);
-        tmpu.mask=stattl_mc_fftadd.mask;
-      else
-        if combval==1
+%       if fftaddflag
+%         cfg=[];
+%         cfg.latency=[stattl_mc_fftadd.time(1) stattl_mc_fftadd.time(end)];
+%         tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_fftadd);
+%         tmp.mask=stattl_mc_fftadd.mask;
+%         tmps=ft_selectdata(cfg,gravelo_tacMSpN_fftadd);
+%         tmps.mask=stattl_mc_fftadd.mask;
+%         tmpu=ft_selectdata(cfg,gravelo_tacPaud_fftadd);
+%         tmpu.mask=stattl_mc_fftadd.mask;
+%       else
+%         if combval==1
           cfg=[];
           cfg.latency=[stattl_mc_comb1.time(1) stattl_mc_comb1.time(end)];
           tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
@@ -8092,16 +8157,16 @@ for ll=[1]
           tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
           tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
           tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1.time(end)))=stattl_mc_comb1.mask;
-        elseif combval==2
-          cfg=[];
-          cfg.latency=[stattl_mc_comb2.time(1) stattl_mc_comb2.time(end)];
-          tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-          tmp.mask=stattl_mc_comb2.mask;
-          tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-          tmps.mask=stattl_mc_comb2.mask;
-          tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-          tmpu.mask=stattl_mc_comb2.mask;
-        end
+%         elseif combval==2
+%           cfg=[];
+%           cfg.latency=[stattl_mc_comb2.time(1) stattl_mc_comb2.time(end)];
+%           tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+%           tmp.mask=stattl_mc_comb2.mask;
+%           tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+%           tmps.mask=stattl_mc_comb2.mask;
+%           tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+%           tmpu.mask=stattl_mc_comb2.mask;
+%         end
         %         cfg=[];
         %         tmpn=ft_selectdata(cfg,gravelo_tNulAlone_comb );
         %         tmpt=ft_selectdata(cfg,gravelo_tTacAlone_comb );
@@ -8112,7 +8177,7 @@ for ll=[1]
         %       gravelo_tTacAlone_comb.mask=logical(ones(size(gravelo_tTacAlone_comb.powspctrm)));
         %       gravelo_tAudAlone_comb.mask=logical(ones(size(gravelo_tAudAlone_comb.powspctrm)));
         %       gravelo_tMSAlone_comb.mask= logical(ones(size(gravelo_tMSAlone_comb.powspctrm)));
-      end
+%       end
       
       %     if 0
       %       cfg=[];
@@ -8195,6 +8260,8 @@ for ll=[1]
         end
         pow{pp}=ft_selectdata(cfg,pow{pp});
       end
+      
+      %%
       
       chansel=chanplot{1};
       figinds=10*ll;
@@ -8484,6 +8551,8 @@ for ll=[1]
               cfg.zlim=[-4 4];
             elseif sleep==0 && ll==5 && iter==31 % blend with beta
               cfg.zlim=[-4 4];
+            elseif sleep==1
+              cfg.zlim=[-3 3];
             else
               cfg.zlim=[-9 9];
             end
@@ -8627,55 +8696,88 @@ for ll=[1]
       end
       
     end % plottfrflag
-    
-    
-    
+
+%%        Useful, across all asynch regardless of significance
+
+figure;imagesc(squeeze(mean(stattl_mc_comb1.stat(match_str(stattl_mc_comb1.label,chanplot{1}),:,:),1)));axis xy;caxis([-2.5 2.5])
+figure;imagesc(squeeze(mean(stattl_mc_comb1plvabsDepT.stat(match_str(stattl_mc_comb1plvabsDepT.label,chanplot{1}),:,:),1)));axis xy;caxis([-2.5 2.5])
+cfg=[];
+cfg.ylim=[4 6.5];
+cfg.parameter='stat';
+cfg.layout='elec1010.lay';
+cfg.maskalpha=0.5000;
+cfg.highlight='on';
+% cfg.baseline=[-0.6500 -0.5700];
+cfg.comment='no';
+cfg.xlim=[0.15 0.3];
+cfg.zlim=[-3.5 3.5];
+figure;
+ft_topoplotTFR(cfg,stattl_mc_comb1)
+cfg.zlim=[-1.5 1.5];
+figure
+ft_topoplotTFR(cfg,stattl_mc_comb1plvabsDepT)
+% % High
+% cfg=[];
+% cfg.ylim=[30 70];
+% cfg.parameter='stat';
+% cfg.layout='elec1010.lay';
+% cfg.maskalpha=0.5000;
+% cfg.highlight='on';
+% % cfg.baseline=[-0.6500 -0.5700];
+% cfg.comment='no';
+% cfg.xlim=[0.7400 1.3000];
+% cfg.zlim=[-3.5 3.5];
+% ft_topoplotTFR(cfg,statth_mc_comb1)
+% cfg.zlim=[-1.5 1.5];
+% ft_topoplotTFR(cfg,statth_mc_comb1plvabsDepT)
+
+%%
     
     if plotplvflag
       %    %  % %%%%%%% PLV   %%%%%%%%
-      for adda=3
-        if combval==1
-          if adda==1
-            cfg=[];
-            cfg.latency=[stattl_mc_comb1plvadi.time(1) stattl_mc_comb1plvadi.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-            tmp.mask=stattl_mc_comb1plvadi.mask;
-            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-            tmps.mask=stattl_mc_comb1plvadi.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-            tmpu.mask=stattl_mc_comb1plvadi.mask;
-            
-            cfg=[];
-            tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-            tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-            tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-            tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-            tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-            tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
-          elseif adda==2
-            cfg=[];
-            cfg.latency=[stattl_mc_comb1plvdai.time(1) stattl_mc_comb1plvdai.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-            tmp.mask=stattl_mc_comb1plvdai.mask;
-            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-            tmps.mask=stattl_mc_comb1plvdai.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-            tmpu.mask=stattl_mc_comb1plvdai.mask;
-            
-            cfg=[];
-            tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-            tmpA.mask=logical(ones(size(tmpA.powspctrm)));
-            tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-            tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
-            tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
-            tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-            tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
-            tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
-            tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
-          elseif adda==3
+%       for adda=3
+%         if combval=1
+%           if adda==1
+%             cfg=[];
+%             cfg.latency=[stattl_mc_comb1plvadi.time(1) stattl_mc_comb1plvadi.time(end)];
+%             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+%             tmp.mask=stattl_mc_comb1plvadi.mask;
+%             tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+%             tmps.mask=stattl_mc_comb1plvadi.mask;
+%             tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+%             tmpu.mask=stattl_mc_comb1plvadi.mask;
+%             
+%             cfg=[];
+%             tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+%             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+%             tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
+%             tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+%             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+%             tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
+%             tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+%             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+%             tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvadi.time(end)))=stattl_mc_comb1plvadi.mask;
+%           elseif adda==2
+%             cfg=[];
+%             cfg.latency=[stattl_mc_comb1plvdai.time(1) stattl_mc_comb1plvdai.time(end)];
+%             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+%             tmp.mask=stattl_mc_comb1plvdai.mask;
+%             tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+%             tmps.mask=stattl_mc_comb1plvdai.mask;
+%             tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+%             tmpu.mask=stattl_mc_comb1plvdai.mask;
+%             
+%             cfg=[];
+%             tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
+%             tmpA.mask=logical(ones(size(tmpA.powspctrm)));
+%             tmpA.mask(:,:,dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+%             tmpsA=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
+%             tmpsA.mask=logical(ones(size(tmpsA.powspctrm)));
+%             tmpsA.mask(:,:,dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpsA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+%             tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
+%             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
+%             tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvdai.time(end)))=stattl_mc_comb1plvdai.mask;
+%           elseif adda==3
             cfg=[];
             cfg.latency=[stattl_mc_comb1plvabsDepT.time(1) stattl_mc_comb1plvabsDepT.time(end)];
             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
@@ -8695,37 +8797,37 @@ for ll=[1]
             tmpuA=ft_selectdata(cfg,gravelo_tacPaud_comb1);
             tmpuA.mask=logical(ones(size(tmpuA.powspctrm)));
             tmpuA.mask(:,:,dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(1)):dsearchn(tmpuA.time',stattl_mc_comb1plvabsDepT.time(end)))=stattl_mc_comb1plvabsDepT.mask;
-          end
-        elseif combval==2
-          if adda==1
-            cfg=[];
-            cfg.latency=[stattl_mc_comb2plvadi.time(1) stattl_mc_comb2plvadi.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-            tmp.mask=stattl_mc_comb2plvadi.mask;
-            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-            tmps.mask=stattl_mc_comb2plvadi.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-            tmpu.mask=stattl_mc_comb2plvadi.mask;
-          elseif adda==2
-            cfg=[];
-            cfg.latency=[stattl_mc_comb2plvdai.time(1) stattl_mc_comb2plvdai.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-            tmp.mask=stattl_mc_comb2plvdai.mask;
-            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-            tmps.mask=stattl_mc_comb2plvdai.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-            tmpu.mask=stattl_mc_comb2plvdai.mask;
-          elseif adda==3
-            cfg=[];
-            cfg.latency=[stattl_mc_comb2plvabsDepT.time(1) stattl_mc_comb2plvabsDepT.time(end)];
-            tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
-            tmp.mask=stattl_mc_comb2plvabsDepT.mask;
-            tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
-            tmps.mask=stattl_mc_comb2plvabsDepT.mask;
-            tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
-            tmpu.mask=stattl_mc_comb2plvabsDepT.mask;
-          end
-        end
+%           end
+%         elseif combval==2
+%           if adda==1
+%             cfg=[];
+%             cfg.latency=[stattl_mc_comb2plvadi.time(1) stattl_mc_comb2plvadi.time(end)];
+%             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+%             tmp.mask=stattl_mc_comb2plvadi.mask;
+%             tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+%             tmps.mask=stattl_mc_comb2plvadi.mask;
+%             tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+%             tmpu.mask=stattl_mc_comb2plvadi.mask;
+%           elseif adda==2
+%             cfg=[];
+%             cfg.latency=[stattl_mc_comb2plvdai.time(1) stattl_mc_comb2plvdai.time(end)];
+%             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+%             tmp.mask=stattl_mc_comb2plvdai.mask;
+%             tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+%             tmps.mask=stattl_mc_comb2plvdai.mask;
+%             tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+%             tmpu.mask=stattl_mc_comb2plvdai.mask;
+%           elseif adda==3
+%             cfg=[];
+%             cfg.latency=[stattl_mc_comb2plvabsDepT.time(1) stattl_mc_comb2plvabsDepT.time(end)];
+%             tmp=ft_selectdata(cfg,gravelo_TPA_MSPN_comb2);
+%             tmp.mask=stattl_mc_comb2plvabsDepT.mask;
+%             tmps=ft_selectdata(cfg,gravelo_tacMSpN_comb2);
+%             tmps.mask=stattl_mc_comb2plvabsDepT.mask;
+%             tmpu=ft_selectdata(cfg,gravelo_tacPaud_comb2);
+%             tmpu.mask=stattl_mc_comb2plvabsDepT.mask;
+%           end
+%         end
         
         tmp.plvavgangwrap=wrapToPi(tmp.plvavgang);
         tmps.plvavgangwrap=wrapToPi(tmps.plvavgang);
@@ -8838,6 +8940,7 @@ for ll=[1]
           pow{pp}=ft_selectdata(cfg,pow{pp});
         end
         
+        %%
         
         %       disp('starting PLF plotting')
         %       keyboard
@@ -8897,6 +9000,10 @@ for ll=[1]
             cfg.baseline=[-0.35 -0.27];  % NaN in original baseline window
           elseif sleep==1 && ll==5 && trialkc==0
             cfg.ylim=[4 8.5];
+          elseif sleep==1 && ll==4 && trialkc==-1
+            cfg.ylim=[4 6.5];
+          elseif sleep==1 && ll==5 && trialkc==-1
+            cfg.ylim=[4 6.5];
           else
             disp('get ylim right per ll theta plv')
             tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -8904,6 +9011,12 @@ for ll=[1]
           end
           masktime=find(squeeze(any(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),:),2),1)));
           cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+          %%
+          if pptdemo
+            cfg=[];
+            cfg.ylim=[4 6.5];
+            cfg.xlim=[.24 .49]+soades(ll);  % AT20 .24-.64;  AT0 0-.49;
+          end
           if adda==2
             cfg.parameter='plvavgabs';
           else adda==3
@@ -8913,9 +9026,13 @@ for ll=[1]
           cfg.maskalpha=0.5;
           cfg.zlim=[-.25 .25];
           cfg.highlight='on';
-          cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+          if pptdemo
+            load thetaITCchan.mat
+            cfg.highlightchannel=thetaITCchan;
+          else
+            cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2))),2),3))));
+          end
           cfg.baseline=baseline2;
-          cfg.zlim=[-.25 .25];
           if commentson
             cfg.comment='auto';
           else
@@ -8923,27 +9040,38 @@ for ll=[1]
           end
           cfg.highlightsize=25;
           cfg.highlightsymbol='.';
+          cfg.zlim=[-.25 .25];
           figure(100*ll+8);
           ft_topoplotTFR(cfg,tmpuA);
           print(100*ll+8,[fdir 'plvabslo_topoU_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
           figure(100*ll+3);
           ft_topoplotTFR(cfg,tmpsA);
           print(100*ll+3,[fdir 'plvabslo_topoM_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
-          cfg.zlim=[-.15 .15];
+          if sleep
+            cfg.zlim=[-.06 .06];
+          else
+            cfg.zlim=[-.15 .15];
+          end
           figure(100*ll+4);
           ft_topoplotTFR(cfg,tmpA);
           print(100*ll+4,[fdir 'plvabslo_topoDiff_theta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
           
-          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-            chansel=cfg.highlightchannel;
-            zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-            zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+          if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}))) || pptdemo
+            if pptdemo
+              load thetaITCchan.mat
+              chansel=thetaITCchan;
+            else
+              chansel=cfg.highlightchannel;
+            end
+%             zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+            zlim=[0 0.2; -.06 .06; -20 400; -10 300];
             figinds=[100*ll+20+1;  100*ll+30+1];
             figstrings{1}=[fdir 'plvabslo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
             figstrings{2}=[fdir 'plvanglo_all_Xtheta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
             tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
           end
           
+          %%
           cfg.parameter='plvavgangwrap';
           if sleep==0 && ll==3 && pre30plot==1
             cfg.xlim=[0.19 0.19];
@@ -9175,6 +9303,8 @@ for ll=[1]
             cfg.ylim=[14 18];
           elseif sleep==1 && ll==6 && trialkc==0
             cfg.ylim=[12 18];
+          elseif sleep==1 && ll==7 && trialkc==0
+            cfg.ylim=[12 18]; % p=0.056
           else
             disp('get ylim right per ll beta plv')
             tmp.freq(find(mean(mean(tmp.mask,1),3)))
@@ -9186,6 +9316,12 @@ for ll=[1]
               masktime=masktime(1:10);   % early beta blob only
             end
             cfg.xlim=[tmp.time(masktime(1)) tmp.time(masktime(end))];
+            %%
+            if pptdemo
+              cfg=[];
+              cfg.ylim=[12 18];
+              cfg.xlim=[.15 .3]+soades(ll);
+            end
             if adda==2
               cfg.parameter='plvavgabs';
             else adda==3
@@ -9195,9 +9331,15 @@ for ll=[1]
             cfg.maskalpha=0.5;
             %     cfg.zlim='maxabs';
             cfg.highlight='on';
-            cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
-            cfg.baseline=baseline2;
-            cfg.zlim=[-.15 .15];
+            if pptdemo
+              load betaITCtrialkc0.mat
+              cfg.highlightchannel=betaITCtrialkc0_intersect;
+              commentson=1;
+            else
+              cfg.highlightchannel=tmp.label(find(ceil(mean(mean(tmp.mask(:,dsearchn(tmp.freq',cfg.ylim(1)):dsearchn(tmp.freq',cfg.ylim(end)),dsearchn(tmp.time',cfg.xlim(1)):dsearchn(tmp.time',cfg.xlim(2)) ),2),3))));
+            end
+%             cfg.baseline=baseline2;
+            cfg.zlim=[.1 .2];
             if commentson
               cfg.comment='auto';
             else
@@ -9216,15 +9358,23 @@ for ll=[1]
             ft_topoplotTFR(cfg,tmpA);
             print(100*ll+7,[fdir 'plvabslo_topoDiff_beta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-depsc2')
             
-            if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2})))
-              chansel=cfg.highlightchannel;
-              zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
-              zlim=[0 0.6; -.25 .25; -20 400; -10 300];
+            if ~isempty(setdiff(cfg.highlightchannel,union(chanplot{1},chanplot{2}))) || pptdemo
+              if pptdemo
+                load betaITCtrialkc0.mat
+                chansel=betaITCtrialkc0_intersect;
+              else
+                chansel=cfg.highlightchannel;
+              end
+%               zlim=[-.3 .3; 0 0.35; -30 30; -60 60];
+              zlim=[.1 .2; -.1 .1; -20 400; -10 300];
               figinds=[100*ll+40+1;  100*ll+50+1];
               figstrings{1}=[fdir 'plvabslo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
               figstrings{2}=[fdir 'plvanglo_final_Xbeta_combval' num2str(combval) '_adda' num2str(adda) '_' num2str(ll) num2str(tt) num2str(ss) '.eps'];
               tfr_subchannel_3cond_plot(pow,chansel,zlim,figinds,figstrings,adda)
+%               betaITCtrialkc0AT20=chansel;
+              % save betaITCtrialkc0AT20.mat betaITCtrialkc0AT20
             end
+            %%
             
             cfg.parameter='plvavgangwrap';
             if sleep==0 && ll==6 && combval==1 && adda==2 && pre30plot==1
@@ -9265,11 +9415,11 @@ for ll=[1]
           end % skippplot
         end
         
-      end % adda
+%       end % adda
       
     end % plotplvflag
     
-  end % combval
+%   end % combval
   
   % %
   
