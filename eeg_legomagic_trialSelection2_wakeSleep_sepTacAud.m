@@ -1131,7 +1131,38 @@ if ~isempty(stageuse)
             %
             %             end
             
+            %Also shift offset for featstruct
+            nameshift={'down' 'up' 'negmax' 'negmax_tp' 'posmax' 'posmax_tp' 'upstart' 'upend' 'uponset'};
+            spnames={'starttime' 'endtime'};
+            for nt=1:length(tlock_aud{ll+40,tt,ss}.delta)
+              for nk=1:length(tlock_aud{ll+40,tt,ss}.delta{nt})
+                for ns=1:length(nameshift)
+                  tlock_aud{ll+40,tt,ss}.delta{nt}(nk).(nameshift{ns})=tlock_aud{ll+40,tt,ss}.delta{nt}(nk).(nameshift{ns})+soades(ll);
+                end
+              end              
+              for nk=1:length(tlock_aud{ll+40,tt,ss}.kc{nt})
+                for ns=1:length(nameshift)
+                  tlock_aud{ll+40,tt,ss}.kc{nt}(nk).(nameshift{ns})=tlock_aud{ll+40,tt,ss}.kc{nt}(nk).(nameshift{ns})+soades(ll);
+                end
+              end              
+              for nk=1:length(tlock_aud{ll+40,tt,ss}.sw{nt})
+                for ns=1:length(nameshift)
+                  tlock_aud{ll+40,tt,ss}.sw{nt}(nk).(nameshift{ns})=tlock_aud{ll+40,tt,ss}.sw{nt}(nk).(nameshift{ns})+soades(ll);
+                end
+              end              
+              for nk=1:length(tlock_aud{ll+40,tt,ss}.sp_fast{nt})
+                for ns=1:length(spnames)
+                  tlock_aud{ll+40,tt,ss}.sp_fast{nt}(nk).(spnames{ns})=tlock_aud{ll+40,tt,ss}.sp_fast{nt}(nk).(spnames{ns})+soades(ll);
+                end
+              end              
+              for nk=1:length(tlock_aud{ll+40,tt,ss}.sp_slow{nt})
+                for ns=1:length(spnames)
+                  tlock_aud{ll+40,tt,ss}.sp_slow{nt}(nk).(spnames{ns})=tlock_aud{ll+40,tt,ss}.sp_slow{nt}(nk).(spnames{ns})+soades(ll);
+                end
+              end              
+            end
           end
+          
         end
       end
       
