@@ -276,10 +276,10 @@ elseif featfull==0
   
   
   
-  prestim=5;  % seconds to evaluate overall
-  poststim=5;
-  prenar=1; % more narrow focus
-  postnar=1;
+  prestim=4;  % seconds to evaluate overall;  % changed from 5 to 4 Oct 2018
+  poststim=4;
+  prenar=1.2; % more narrow focus
+  postnar=1.2; % changed from 1.0 to 1.2 on 22 Oct, 2018
 end
 
 
@@ -299,20 +299,20 @@ cfg.time=time;
 cfgtr=ft_definetrial(cfg);
 
 if sleep
-  bsoarealextra=[bsoareal(1,[1 end])];
+%   bsoarealextra=[bsoareal(1,[1 end])];
   soause=setdiff(1:size(bsoareal,2),cfgtr.trlselexcl); % sometimes first or last trial may be excluded if too close to dataset boundary as function of prestim/poststim length
-  cfgtr.trl(:,7)=bsoareal(1,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,8)=bsoareal(2,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,9)=bsoareal(3,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,10)=bsoareal(4,:); % <---- which index 1,2,3,4 to use????
+  cfgtr.trl(:,7)=bsoareal(1,:); % 
+  cfgtr.trl(:,8)=bsoareal(2,:); % <---- Final decision to use this (awake paper)
+  cfgtr.trl(:,9)=bsoareal(3,:); % 
+  cfgtr.trl(:,10)=bsoareal(4,:); % 
   cfgtr.trl(:,13)=bsoaeff;
 else
-  ssoarealextra=[ssoareal(1,[1 end])];
+%   ssoarealextra=[ssoareal(1,[1 end])];
   soause=setdiff(1:size(ssoareal,2),cfgtr.trlselexcl);
-  cfgtr.trl(:,7)=ssoareal(1,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,8)=ssoareal(2,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,9)=ssoareal(3,:); % <---- which index 1,2,3,4 to use????
-  cfgtr.trl(:,10)=ssoareal(4,:); % <---- which index 1,2,3,4 to use????
+  cfgtr.trl(:,7)=ssoareal(1,:); % 
+  cfgtr.trl(:,8)=ssoareal(2,:); % <---- Final decision to use this (awake paper)
+  cfgtr.trl(:,9)=ssoareal(3,:); % 
+  cfgtr.trl(:,10)=ssoareal(4,:); %
   cfgtr.trl(:,13)=ssoaeff;
 end
 cfgtr.trl(:,11)=cfgtr.trl(:,6)>0 | cfgtr.trl(:,6)==-2; % tactile trials
@@ -574,7 +574,8 @@ end
 artnames=fieldnames(artfctdef);
 samp.tmp=[];
 bigwavefeats={'down' 'up' 'negmax' 'negmax_tp' 'posmax' 'posmax_tp' 'upstart' 'upend' 'uponset'};
-spindlefeats={'amplitude' 'duration' 'maximum'};
+% spindlefeats={'amplitude' 'duration' 'maximum'};
+spindlefeats={'artifact' 'amplitude' 'duration'};
 
 % 12-19: percentage of samples(time) during pre-stim (prestim) involved in this feature
 % 22-29: percentage of samples(time) during post-stim (poststim) involved in this feature
@@ -675,8 +676,40 @@ for aa=1:length(artnames)
         raw_aud.(artnames{aa})=repmat({[]},1,size(raw_aud.trialinfo,1));
         raw_nul.(artnames{aa})=repmat({[]},1,size(raw_nul.trialinfo,1));
         for kk=1:length(artfctdef.(artnames{aa}).negmax)
-          if ~isempty( find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_tac.sampleinfo(:,2)))
-            ind=find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_tac.sampleinfo(:,2));
+%           if ~isempty( find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_tac.sampleinfo(:,2)))
+          if ~isempty( find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_tac.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_tac.sampleinfo(:,2)))
+%             ind=find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_tac.sampleinfo(:,2));
+            ind=find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_tac.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_tac.sampleinfo(:,2));
+
+            % assign Kc to only one trial: added Oct 2018
+            if length(ind)>1
+              Kcdown=[artfctdef.(artnames{aa}).struct(kk).down-mean(raw_tac.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));
+              Kcupend=[artfctdef.(artnames{aa}).struct(kk).upend-mean(raw_tac.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));              
+              if length(ind)>1 && Kcdown(1)>1.2
+                ind=ind(2:end);
+                Kcdown=Kcdown(2:end);
+                Kcupend=Kcupend(2:end);
+              end
+              if length(ind)>1 && Kcupend(end)<-0.7
+                ind=ind(1:end-1);
+                Kcdown=Kcdown(1:end-1);
+                Kcupend=Kcupend(1:end-1);
+              end
+              if length(ind)==2 && Kcdown(1)>-0.4 && Kcupend(2)<0
+                ind=ind(1);
+                Kcdown=Kcdown(1);
+                Kcupend=Kcupend(1);
+              elseif length(ind)==2 && Kcdown(1)>.7 && Kcdown(2)<.2 % ignore first if it's far in post-stim and second is *during* stim onset
+                ind=ind(2);
+                Kcdown=Kcdown(2);
+                Kcupend=Kcupend(2);
+              elseif length(ind)==1
+                % carry on
+              else % carry on
+%                 disp('help!')
+%                 keyboard
+              end
+            end
             for nn=1:length(ind)
               %               keyboard % set boundary as 250ms after onset of first stim,
               %               which will be definded using stimcode -2:9
@@ -699,14 +732,62 @@ for aa=1:length(artnames)
                 tacusepost(ind(nn))=tacusepost(ind(nn))+1;
               end
               % and save out whole structure/information about BigWave; might be more than one BigWave per trial
+              if ~isempty(raw_tac.(artnames{aa}){ind(nn)})
+                old_numKc=length(raw_tac.(artnames{aa}){ind(nn)});
+                if isfield(raw_tac.(artnames{aa}){ind(nn)}(old_numKc),'upend') && raw_tac.(artnames{aa}){ind(nn)}(old_numKc).upend<0
+                  raw_tac.(artnames{aa}){ind(nn)}(old_numKc)=[];
+                  old_numKc=old_numKc-1;
+                  new_numKc=1;
+                elseif isfield(raw_tac.(artnames{aa}){ind(nn)}(old_numKc),'upend') && Kcdown(nn)<1
+                  new_numKc=1;                  
+                elseif isfield(raw_tac.(artnames{aa}){ind(nn)}(old_numKc),'upend')
+                  new_numKc=0;
+                  disp('not including later post-stim Kc')
+                  continue
+                end
+              else
+                old_numKc=0;
+                new_numKc=1;
+              end
+              numKc=old_numKc+new_numKc;
               raw_tac.(artnames{aa}){ind(nn)}=[raw_tac.(artnames{aa}){ind(nn)}  artfctdef.(artnames{aa}).struct(kk)];
               for bg=1:length(bigwavefeats)
-                raw_tac.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})=raw_tac.time{ind(nn)}(raw_tac.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})-raw_tac.sampleinfo(ind(nn),1));
+                raw_tac.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})=raw_tac.time{ind(nn)}(raw_tac.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})-raw_tac.sampleinfo(ind(nn),1));
               end
             end
           end
-          if ~isempty( find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_aud.sampleinfo(:,2)))
-            ind=find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_aud.sampleinfo(:,2));
+%           if ~isempty( find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_aud.sampleinfo(:,2)))
+%             ind=find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_aud.sampleinfo(:,2));
+          if ~isempty( find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_aud.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_aud.sampleinfo(:,2)))
+            ind=find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_aud.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_aud.sampleinfo(:,2));
+            % assign Kc to only one trial: added Oct 2018
+            if length(ind)>1
+              Kcdown=[artfctdef.(artnames{aa}).struct(kk).down-mean(raw_aud.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));
+              Kcupend=[artfctdef.(artnames{aa}).struct(kk).upend-mean(raw_aud.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));
+              if length(ind)>1 && Kcdown(1)>1.2
+                ind=ind(2:end);
+                Kcdown=Kcdown(2:end);
+                Kcupend=Kcupend(2:end);
+              end
+              if length(ind)>1 && Kcupend(end)<-0.7
+                ind=ind(1:end-1);
+                Kcdown=Kcdown(1:end-1);
+                Kcupend=Kcupend(1:end-1);
+              end
+              if length(ind)==2 && Kcdown(1)>-0.4 && Kcupend(2)<0  % keep post-stim (evoked) and ignore prestim if it ends before time=0
+                ind=ind(1);
+                Kcdown=Kcdown(1);
+                Kcupend=Kcupend(1);
+              elseif length(ind)==2 && Kcdown(1)>.7 && Kcdown(2)<.2 % ignore first if it's far in post-stim and second is *during* stim onset
+                ind=ind(2);
+                Kcdown=Kcdown(2);
+                Kcupend=Kcupend(2);
+              elseif length(ind)==1  % carry on
+              else % carry on
+%                 disp('help!')
+%                 keyboard
+              end
+            end
             for nn=1:length(ind)
               if raw_aud.time{ind(nn)}(artfctdef.(artnames{aa}).negmax(kk)-raw_aud.sampleinfo(ind(nn),1)) < 0  % prestim
                 if audusepre(ind(nn))>9
@@ -728,14 +809,63 @@ for aa=1:length(artnames)
                 audusepost(ind(nn))=audusepost(ind(nn))+1;
               end
               % and save out whole structure/information about BigWave; might be more than one BigWave per trial
+              if ~isempty(raw_aud.(artnames{aa}){ind(nn)})
+                old_numKc=length(raw_aud.(artnames{aa}){ind(nn)});
+                if isfield(raw_aud.(artnames{aa}){ind(nn)}(old_numKc),'upend') && raw_aud.(artnames{aa}){ind(nn)}(old_numKc).upend<0
+                  raw_aud.(artnames{aa}){ind(nn)}(old_numKc)=[];
+                  old_numKc=old_numKc-1;
+                  new_numKc=1;
+                elseif isfield(raw_aud.(artnames{aa}){ind(nn)}(old_numKc),'upend') && Kcdown(nn)<1
+                  new_numKc=1;                  
+                elseif isfield(raw_aud.(artnames{aa}){ind(nn)}(old_numKc),'upend')
+                  new_numKc=0;
+                  disp('not including later post-stim Kc')
+                  continue
+                end
+              else
+                old_numKc=0;
+                new_numKc=1;
+              end
+              numKc=old_numKc+new_numKc;
               raw_aud.(artnames{aa}){ind(nn)}=[raw_aud.(artnames{aa}){ind(nn)}  artfctdef.(artnames{aa}).struct(kk)];
               for bg=1:length(bigwavefeats)
-                raw_aud.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})=raw_aud.time{ind(nn)}(raw_aud.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})-raw_aud.sampleinfo(ind(nn),1));
+                raw_aud.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})=raw_aud.time{ind(nn)}(raw_aud.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})-raw_aud.sampleinfo(ind(nn),1));
+              end
+            end % nn
+          end
+%           if ~isempty( find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_nul.sampleinfo(:,2)))
+%             ind=find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_nul.sampleinfo(:,2));
+          if ~isempty( find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_nul.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_nul.sampleinfo(:,2)))
+            ind=find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).struct(kk).down & artfctdef.(artnames{aa}).struct(kk).upend<raw_nul.sampleinfo(:,2) & artfctdef.(artnames{aa}).struct(kk).posmax<raw_nul.sampleinfo(:,2));
+            % try to assign Kc to only one trial: added Oct 2018
+            if length(ind)>1
+              Kcdown=[artfctdef.(artnames{aa}).struct(kk).down-mean(raw_nul.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));
+              Kcupend=[artfctdef.(artnames{aa}).struct(kk).upend-mean(raw_nul.sampleinfo(ind,1:2),2)]*diff(time{1}(1:2));
+              if length(ind)>1 && Kcdown(1)>1.2
+                ind=ind(2:end);
+                Kcdown=Kcdown(2:end);
+                Kcupend=Kcupend(2:end);
+              end
+              if length(ind)>1 && Kcupend(end)<-0.7
+                ind=ind(1:end-1);
+                Kcdown=Kcdown(1:end-1);
+                Kcupend=Kcupend(1:end-1);
+              end
+              if length(ind)==2 && Kcdown(1)>-0.4 && Kcupend(2)<0
+                ind=ind(1);
+                Kcdown=Kcdown(1);
+                Kcupend=Kcupend(1);
+              elseif length(ind)==2 && Kcdown(1)>.7 && Kcdown(2)<.2 % ignore first if it's far in post-stim and second is *during* stim onset
+                ind=ind(2);
+                Kcdown=Kcdown(2);
+                Kcupend=Kcupend(2);
+              elseif length(ind)==1
+                % carry on
+              else % carry on
+%                 disp('help!')
+%                 keyboard
               end
             end
-          end
-          if ~isempty( find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_nul.sampleinfo(:,2)))
-            ind=find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).negmax(kk) & artfctdef.(artnames{aa}).negmax(kk)<raw_nul.sampleinfo(:,2));
             for nn=1:length(ind)
               if raw_nul.time{ind(nn)}(artfctdef.(artnames{aa}).negmax(kk)-raw_nul.sampleinfo(ind(nn),1)) < 0  % prestim
                 if nulusepre(ind(nn))>9
@@ -757,9 +887,27 @@ for aa=1:length(artnames)
                 nulusepost(ind(nn))=nulusepost(ind(nn))+1;
               end
               % and save out whole structure/information about BigWave; might be more than one BigWave per trial
+              if ~isempty(raw_nul.(artnames{aa}){ind(nn)})
+                old_numKc=length(raw_nul.(artnames{aa}){ind(nn)});
+                if isfield(raw_nul.(artnames{aa}){ind(nn)}(old_numKc),'upend') && raw_nul.(artnames{aa}){ind(nn)}(old_numKc).upend<0
+                  raw_nul.(artnames{aa}){ind(nn)}(old_numKc)=[];
+                  old_numKc=old_numKc-1;
+                  new_numKc=1;
+                elseif isfield(raw_nul.(artnames{aa}){ind(nn)}(old_numKc),'upend') && Kcdown(nn)<1
+                  new_numKc=1;                  
+                elseif isfield(raw_nul.(artnames{aa}){ind(nn)}(old_numKc),'upend')
+                  new_numKc=0;
+                  disp('not including later post-stim Kc')
+                  continue
+                end
+              else
+                old_numKc=0;
+                new_numKc=1;
+              end
+              numKc=old_numKc+new_numKc;
               raw_nul.(artnames{aa}){ind(nn)}=[raw_nul.(artnames{aa}){ind(nn)}  artfctdef.(artnames{aa}).struct(kk)];
-              for bg=1:length(bigwavefeats)
-                raw_nul.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})=raw_nul.time{ind(nn)}(raw_nul.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})-raw_nul.sampleinfo(ind(nn),1));
+              for bg=1:length(bigwavefeats)  %changing sample index to peri-stimulus time
+                raw_nul.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})=raw_nul.time{ind(nn)}(raw_nul.(artnames{aa}){ind(nn)}(numKc).(bigwavefeats{bg})-raw_nul.sampleinfo(ind(nn),1));
               end
             end
           end
@@ -784,13 +932,18 @@ for aa=1:length(artnames)
           colampstartpost=230;
           coldurstartpost=240;
         end
+        raw_tac.(artnames{aa})=repmat({[]},1,size(raw_tac.trialinfo,1));
+        raw_aud.(artnames{aa})=repmat({[]},1,size(raw_aud.trialinfo,1));
+        raw_nul.(artnames{aa})=repmat({[]},1,size(raw_nul.trialinfo,1));
         if isfield(artfctdef.(artnames{aa}),'artifact') && ~isfield(artfctdef.(artnames{aa}),'amplitude')
           error('rerun *spindles.m to get amplitude and duration')
         end
         for kk=1:length(artfctdef.(artnames{aa}).amplitude)
           artmid=round(mean(artfctdef.(artnames{aa}).artifact(kk,:))); % must round as must be integer sample location
-          if ~isempty( find(raw_tac.sampleinfo(:,1)<artmid & artmid<raw_tac.sampleinfo(:,2)))
-            ind=find(raw_tac.sampleinfo(:,1)<artmid & artmid<raw_tac.sampleinfo(:,2));
+          %           if ~isempty( find(raw_tac.sampleinfo(:,1)<artmid & artmid<raw_tac.sampleinfo(:,2)))
+          %             ind=find(raw_tac.sampleinfo(:,1)<artmid & artmid<raw_tac.sampleinfo(:,2));
+          if ~isempty(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_tac.sampleinfo(:,2));
+            ind=find(raw_tac.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_tac.sampleinfo(:,2));
             for nn=1:length(ind)
               if raw_tac.time{ind(nn)}(artmid-raw_tac.sampleinfo(ind(nn),1)) < 0  % prestim
                 if tacusepre(ind(nn))>9
@@ -807,16 +960,35 @@ for aa=1:length(artnames)
                 raw_tac.trialinfo(ind(nn),coldurstartpost+tacusepost(ind(nn)))=artfctdef.(artnames{aa}).duration(kk)/1000;
                 tacusepost(ind(nn))=tacusepost(ind(nn))+1;
               end
-              keyboard; % add all similar to Kc added
-              % and save out whole structure/information about BigWave; might be more than one BigWave per trial
-              raw_tac.(artnames{aa}){ind(nn)}=[raw_tac.(artnames{aa}){ind(nn)}  artfctdef.(artnames{aa}).struct(kk)];
-              for bg=1:length(bigwavefeats)
-                raw_tac.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})=raw_tac.time{ind(nn)}(raw_tac.(artnames{aa}){ind(nn)}.(bigwavefeats{bg})-raw_tac.sampleinfo(ind(nn),1));
+              % and save out whole structure/information about Spindle; might be more than one Spindle per trial
+              if isfield(raw_tac.(artnames{aa}){ind(nn)},'endtime')
+                numSp=length(raw_tac.(artnames{aa}){ind(nn)});
+              else
+                numSp=0;
               end
-            end
+              if numSp && raw_tac.(artnames{aa}){ind(nn)}(numSp).endtime<-0.3
+                raw_tac.(artnames{aa}){ind(nn)}(numSp)=[];
+                numSp=numSp-1;
+              else
+                % nothing
+              end
+              numSp=numSp+1;
+              for bg=1:length(spindlefeats)
+                if bg==1
+                  raw_tac.(artnames{aa}){ind(nn)}(numSp).starttime=raw_tac.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,1)-raw_tac.sampleinfo(ind(nn),1));
+                  raw_tac.(artnames{aa}){ind(nn)}(numSp).endtime  =raw_tac.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,2)-raw_tac.sampleinfo(ind(nn),1));
+                elseif bg==2
+                  raw_tac.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk);
+                elseif bg==3
+                  raw_tac.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk)/1000;
+                end
+              end
+            end %nn
           end % if
-          if ~isempty( find(raw_aud.sampleinfo(:,1)<artmid & artmid<raw_aud.sampleinfo(:,2)))
-            ind=find(raw_aud.sampleinfo(:,1)<artmid & artmid<raw_aud.sampleinfo(:,2));
+%           if ~isempty( find(raw_aud.sampleinfo(:,1)<artmid & artmid<raw_aud.sampleinfo(:,2)))
+%             ind=find(raw_aud.sampleinfo(:,1)<artmid & artmid<raw_aud.sampleinfo(:,2));
+          if ~isempty(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_aud.sampleinfo(:,2));
+            ind=find(raw_aud.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_aud.sampleinfo(:,2));
             for nn=1:length(ind)
               if raw_aud.time{ind(nn)}(artmid-raw_aud.sampleinfo(ind(nn),1)) < 0  % prestim
                 if audusepre(ind(nn))>9
@@ -833,10 +1005,34 @@ for aa=1:length(artnames)
                 raw_aud.trialinfo(ind(nn),coldurstartpost+audusepost(ind(nn)))=artfctdef.(artnames{aa}).duration(kk)/1000;
                 audusepost(ind(nn))=audusepost(ind(nn))+1;
               end
-            end
+              if isfield(raw_aud.(artnames{aa}){ind(nn)},'endtime')
+                numSp=length(raw_aud.(artnames{aa}){ind(nn)});
+              else
+                numSp=0;
+              end
+              if numSp && raw_aud.(artnames{aa}){ind(nn)}(numSp).endtime<-0.3
+                raw_aud.(artnames{aa}){ind(nn)}(numSp)=[];
+                numSp=numSp-1;
+              else
+                % nothing
+              end
+              numSp=numSp+1;
+              for bg=1:length(spindlefeats)
+                if bg==1
+                  raw_aud.(artnames{aa}){ind(nn)}(numSp).starttime=raw_aud.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,1)-raw_aud.sampleinfo(ind(nn),1));
+                  raw_aud.(artnames{aa}){ind(nn)}(numSp).endtime  =raw_aud.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,2)-raw_aud.sampleinfo(ind(nn),1));
+                elseif bg==2
+                  raw_aud.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk);
+                elseif bg==3
+                  raw_aud.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk)/1000;
+                end
+              end
+            end %nn
           end % if
-          if ~isempty( find(raw_nul.sampleinfo(:,1)<artmid & artmid<raw_nul.sampleinfo(:,2)))
-            ind=find(raw_nul.sampleinfo(:,1)<artmid & artmid<raw_nul.sampleinfo(:,2));
+%           if ~isempty( find(raw_nul.sampleinfo(:,1)<artmid & artmid<raw_nul.sampleinfo(:,2)))
+%             ind=find(raw_nul.sampleinfo(:,1)<artmid & artmid<raw_nul.sampleinfo(:,2));
+          if ~isempty(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_nul.sampleinfo(:,2));
+            ind=find(raw_nul.sampleinfo(:,1)<artfctdef.(artnames{aa}).artifact(kk,1) & artfctdef.(artnames{aa}).artifact(kk,2)<raw_nul.sampleinfo(:,2));
             for nn=1:length(ind)
               if raw_nul.time{ind(nn)}(artmid-raw_nul.sampleinfo(ind(nn),1)) < 0  % prestim
                 if nulusepre(ind(nn))>9
@@ -853,7 +1049,29 @@ for aa=1:length(artnames)
                 raw_nul.trialinfo(ind(nn),coldurstartpost+nulusepost(ind(nn)))=artfctdef.(artnames{aa}).duration(kk)/1000;
                 nulusepost(ind(nn))=nulusepost(ind(nn))+1;
               end
-            end
+              if isfield(raw_nul.(artnames{aa}){ind(nn)},'endtime')
+                numSp=length(raw_nul.(artnames{aa}){ind(nn)});
+              else
+                numSp=0;
+              end
+              if numSp && raw_nul.(artnames{aa}){ind(nn)}(numSp).endtime<-0.3
+                raw_nul.(artnames{aa}){ind(nn)}(numSp)=[];
+                numSp=numSp-1;
+              else
+                % nothing
+              end
+              numSp=numSp+1;
+              for bg=1:length(spindlefeats)
+                if bg==1
+                  raw_nul.(artnames{aa}){ind(nn)}(numSp).starttime=raw_nul.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,1)-raw_nul.sampleinfo(ind(nn),1));
+                  raw_nul.(artnames{aa}){ind(nn)}(numSp).endtime  =raw_nul.time{ind(nn)}(artfctdef.(artnames{aa}).(spindlefeats{bg})(kk,2)-raw_nul.sampleinfo(ind(nn),1));
+                elseif bg==2
+                  raw_nul.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk);
+                elseif bg==3
+                  raw_nul.(artnames{aa}){ind(nn)}(numSp).(spindlefeats{bg})=artfctdef.(artnames{aa}).(spindlefeats{bg})(kk)/1000;
+                end
+              end
+            end % nn
           end % if
         end % kk
         
