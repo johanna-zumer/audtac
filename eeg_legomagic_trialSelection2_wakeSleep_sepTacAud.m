@@ -33,16 +33,16 @@ else
   end
 end
 
-% sub{100}='p01'; 
-sub{1}='e01'; 
-sub{2}='e02'; 
-sub{3}='e03'; 
-sub{4}='e04'; 
+% sub{100}='p01';
+sub{1}='e01';
+sub{2}='e02';
+sub{3}='e03';
+sub{4}='e04';
 %%%  above is pilot, below is real
-sub{5}='e05'; 
-sub{6}='e06'; 
-sub{7}='e07'; 
-sub{8}='e08'; 
+sub{5}='e05';
+sub{6}='e06';
+sub{7}='e07';
+sub{8}='e08';
 sub{9}='e09';
 sub{10}='e10';
 sub{11}='e11';
@@ -141,7 +141,12 @@ if usetr==1  % loads usetr0 for iter<=30
     load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr' num2str(0) '_trialkc' num2str(trialkc) '.mat'],'tr');
   catch ME
     disp(ME.message)
-    load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '.mat'],'tr');
+    try
+      load(['trialkeptFeature_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_usetr0_trialkc' num2str(trialkc) '.mat'],'tr');
+    catch ME
+      disp(ME.message)
+      load(['trialkept_tt' num2str(ttin) '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '.mat'],'tr');
+    end
   end
   stageuse=tr.stageuse;
 elseif usetr==2  % loads usetr0 but later will set tr.iter=iter+1 (end of this function)
@@ -203,9 +208,9 @@ if ~isempty(stageuse)
       end
       origtrialindex=find(cfgtrialstacorig);
       if usetr==1 && iter<31
-        if ~isempty(setdiff(find(cfgtrialstacorig),find(cfg.trials)))
-          tacllorig_excluded{soalist(ll),tt-2,stage+10}=dsearchn(origtrialindex,setdiff(find(cfgtrialstacorig),find(cfg.trials)));
-          origindex=setdiff(1:length(find(cfgtrialstacorig)),tacllorig_excluded{soalist(ll),tt-2,stage+10});
+        if ~isempty(setdiff(origtrialindex,find(cfg.trials)))
+          tacllorig_excluded{soalist(ll),tt-2,stage+10}=dsearchn(origtrialindex,setdiff(origtrialindex,find(cfg.trials)));
+          origindex=setdiff(1:length(origtrialindex),tacllorig_excluded{soalist(ll),tt-2,stage+10});
           if tacaud==0
             error('fix tr.tm here also')
           end
@@ -231,6 +236,11 @@ if ~isempty(stageuse)
           tlock_tac{soalist(ll),tt-2,stage+10}.sw={data_tac_ref.sw{find(cfg.trials)}};
           tlock_tac{soalist(ll),tt-2,stage+10}.sp_fast={data_tac_ref.sp_fast{find(cfg.trials)}};
           tlock_tac{soalist(ll),tt-2,stage+10}.sp_slow={data_tac_ref.sp_slow{find(cfg.trials)}};
+          tlock_tac{soalist(ll),tt-2,stage+10}.deltadimord='{rpt}';
+          tlock_tac{soalist(ll),tt-2,stage+10}.kcdimord='{rpt}';
+          tlock_tac{soalist(ll),tt-2,stage+10}.swdimord='{rpt}';
+          tlock_tac{soalist(ll),tt-2,stage+10}.sp_fastdimord='{rpt}';
+          tlock_tac{soalist(ll),tt-2,stage+10}.sp_slowdimord='{rpt}';
         end
         lastwarn('')
       end
@@ -281,6 +291,11 @@ if ~isempty(stageuse)
         tlock_tac{10,tt-2,stage+10}.sw={data_tac_ref.sw{find(cfg.trials)}};
         tlock_tac{10,tt-2,stage+10}.sp_fast={data_tac_ref.sp_fast{find(cfg.trials)}};
         tlock_tac{10,tt-2,stage+10}.sp_slow={data_tac_ref.sp_slow{find(cfg.trials)}};
+        tlock_tac{10,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_tac{10,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_tac{10,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_tac{10,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_tac{10,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -312,6 +327,11 @@ if ~isempty(stageuse)
         tlock_tac{100,tt-2,stage+10}.sw={data_tac_ref.sw{find(cfg.trials)}};
         tlock_tac{100,tt-2,stage+10}.sp_fast={data_tac_ref.sp_fast{find(cfg.trials)}};
         tlock_tac{100,tt-2,stage+10}.sp_slow={data_tac_ref.sp_slow{find(cfg.trials)}};
+        tlock_tac{100,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_tac{100,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_tac{100,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_tac{100,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_tac{100,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -343,6 +363,11 @@ if ~isempty(stageuse)
         tlock_tac{101,tt-2,stage+10}.sw={data_tac_ref.sw{find(cfg.trials)}};
         tlock_tac{101,tt-2,stage+10}.sp_fast={data_tac_ref.sp_fast{find(cfg.trials)}};
         tlock_tac{101,tt-2,stage+10}.sp_slow={data_tac_ref.sp_slow{find(cfg.trials)}};
+        tlock_tac{101,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_tac{101,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_tac{101,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_tac{101,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_tac{101,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -375,6 +400,11 @@ if ~isempty(stageuse)
         tlock_tac{102,tt-2,stage+10}.sw={data_tac_ref.sw{find(cfg.trials)}};
         tlock_tac{102,tt-2,stage+10}.sp_fast={data_tac_ref.sp_fast{find(cfg.trials)}};
         tlock_tac{102,tt-2,stage+10}.sp_slow={data_tac_ref.sp_slow{find(cfg.trials)}};
+        tlock_tac{102,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_tac{102,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_tac{102,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_tac{102,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_tac{102,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -413,6 +443,11 @@ if ~isempty(stageuse)
           tlock_aud{soalist(ll),tt-2,stage+10}.sw={data_aud_ref.sw{find(cfg.trials)}};
           tlock_aud{soalist(ll),tt-2,stage+10}.sp_fast={data_aud_ref.sp_fast{find(cfg.trials)}};
           tlock_aud{soalist(ll),tt-2,stage+10}.sp_slow={data_aud_ref.sp_slow{find(cfg.trials)}};
+          tlock_aud{soalist(ll),tt-2,stage+10}.deltadimord='{rpt}';
+          tlock_aud{soalist(ll),tt-2,stage+10}.kcdimord='{rpt}';
+          tlock_aud{soalist(ll),tt-2,stage+10}.swdimord='{rpt}';
+          tlock_aud{soalist(ll),tt-2,stage+10}.sp_fastdimord='{rpt}';
+          tlock_aud{soalist(ll),tt-2,stage+10}.sp_slowdimord='{rpt}';
         end
         lastwarn('')
       end
@@ -449,7 +484,7 @@ if ~isempty(stageuse)
         origindex=setdiff(1:length(origtrialindex),poststimeogexcluded);
         for ll=soalist,  % one of the ll needs to be 10 instead?
           %           cfg.trials=origcfgtrials;
-%           prevtotnumused=length(tr_back.t10trialkept{ll,3,10});
+          %           prevtotnumused=length(tr_back.t10trialkept{ll,3,10});
           traukeep_oldind=setdiff(tr.autrialkept{ll,tt-2,stage+10},poststimeogexcluded);
           all40excluded{ll,tt-2,stage+10}=dsearchn(tr.autrialkept{ll,tt-2,stage+10}',setdiff(tr.autrialkept{ll,tt-2,stage+10},traukeep_oldind)');
           tr.autrialkept{ll,tt-2,stage+10}=dsearchn(origindex',traukeep_oldind')';
@@ -492,6 +527,11 @@ if ~isempty(stageuse)
         tlock_aud{10,tt-2,stage+10}.sw={data_aud_ref.sw{find(cfg.trials)}};
         tlock_aud{10,tt-2,stage+10}.sp_fast={data_aud_ref.sp_fast{find(cfg.trials)}};
         tlock_aud{10,tt-2,stage+10}.sp_slow={data_aud_ref.sp_slow{find(cfg.trials)}};
+        tlock_aud{10,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_aud{10,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_aud{10,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_aud{10,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_aud{10,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -523,6 +563,11 @@ if ~isempty(stageuse)
         tlock_aud{100,tt-2,stage+10}.sw={data_aud_ref.sw{find(cfg.trials)}};
         tlock_aud{100,tt-2,stage+10}.sp_fast={data_aud_ref.sp_fast{find(cfg.trials)}};
         tlock_aud{100,tt-2,stage+10}.sp_slow={data_aud_ref.sp_slow{find(cfg.trials)}};
+        tlock_aud{100,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_aud{100,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_aud{100,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_aud{100,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_aud{100,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -554,6 +599,11 @@ if ~isempty(stageuse)
         tlock_aud{101,tt-2,stage+10}.sw={data_aud_ref.sw{find(cfg.trials)}};
         tlock_aud{101,tt-2,stage+10}.sp_fast={data_aud_ref.sp_fast{find(cfg.trials)}};
         tlock_aud{101,tt-2,stage+10}.sp_slow={data_aud_ref.sp_slow{find(cfg.trials)}};
+        tlock_aud{101,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_aud{101,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_aud{101,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_aud{101,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_aud{101,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -585,6 +635,11 @@ if ~isempty(stageuse)
         tlock_aud{102,tt-2,stage+10}.sw={data_aud_ref.sw{find(cfg.trials)}};
         tlock_aud{102,tt-2,stage+10}.sp_fast={data_aud_ref.sp_fast{find(cfg.trials)}};
         tlock_aud{102,tt-2,stage+10}.sp_slow={data_aud_ref.sp_slow{find(cfg.trials)}};
+        tlock_aud{102,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_aud{102,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_aud{102,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_aud{102,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_aud{102,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -634,6 +689,11 @@ if ~isempty(stageuse)
         tlock_nul{10,tt-2,stage+10}.sw={data_nul_ref.sw{find(cfg.trials)}};
         tlock_nul{10,tt-2,stage+10}.sp_fast={data_nul_ref.sp_fast{find(cfg.trials)}};
         tlock_nul{10,tt-2,stage+10}.sp_slow={data_nul_ref.sp_slow{find(cfg.trials)}};
+        tlock_nul{10,tt-2,stage+10}.deltadimord='{rpt}';
+        tlock_nul{10,tt-2,stage+10}.kcdimord='{rpt}';
+        tlock_nul{10,tt-2,stage+10}.swdimord='{rpt}';
+        tlock_nul{10,tt-2,stage+10}.sp_fastdimord='{rpt}';
+        tlock_nul{10,tt-2,stage+10}.sp_slowdimord='{rpt}';
       end
       lastwarn('')
     end
@@ -673,7 +733,6 @@ if ~isempty(stageuse)
     for ll=[soalist 10] % this loop is to remove trials with NaN in (e.g. if artifact rejection cut through middle of a trial)
       %     for tt=1:4
       tt=ttin;
-      
       if ~isempty(tlock_tac{ll,tt,ss})
         cfg=[];
         %       cfg.keeptrials='yes';
@@ -988,7 +1047,6 @@ if ~isempty(stageuse)
       % this subset of tlock_tac{ll,tt,ss} for the Multisensory-Shifted
       % comparison.
       
-      
       cfg=[];
       cfg.trials=tr.tmtrialkept{ll,tt,ss}; % only keep ms trials that have a paired shifted corresponding unisensory trial
       if length(cfg.trials)==1
@@ -1197,12 +1255,12 @@ if ~isempty(stageuse)
               tr.tlltrialkept{ll,tt,ss}=tr.tlltrialkept{ll,tt,ss}(setdiff(1:length(tr.tlltrialkept{ll,tt,ss}),all40excluded{ll,tt,ss}));
             elseif numcondtfinal(ll,tt,ss)==size(tlock_tac{10,tt,ss}.trial,1)
               tr.t10trialkept{ll,tt,ss}=1:numcondtfinal(ll,tt,ss);
-              tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(setdiff(1:length(tr.nllttrialkept{ll,tt,ss}),tac10orig_excluded{tt,ss}));              
+              tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(setdiff(1:length(tr.nllttrialkept{ll,tt,ss}),tac10orig_excluded{tt,ss}));
               tr.all40trialkept{ll,tt,ss}=tr.all40trialkept{ll,tt,ss}(setdiff(1:length(tr.all40trialkept{ll,tt,ss}),tac10orig_excluded{tt,ss}));
               tr.tlltrialkept{ll,tt,ss}=tr.tlltrialkept{ll,tt,ss}(setdiff(1:length(tr.tlltrialkept{ll,tt,ss}),tac10orig_excluded{tt,ss}));
             elseif numcondtfinal(ll,tt,ss)==size(tlock_tac{ll,tt,ss}.trial,1)
               tr.t10trialkept{ll,tt,ss}=tr.t10trialkept{ll,tt,ss}(setdiff(1:length(tr.t10trialkept{ll,tt,ss}),tacllorig_excluded{ll,tt,ss}));
-              tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(setdiff(1:length(tr.nllttrialkept{ll,tt,ss}),tacllorig_excluded{ll,tt,ss}));              
+              tr.nllttrialkept{ll,tt,ss}=tr.nllttrialkept{ll,tt,ss}(setdiff(1:length(tr.nllttrialkept{ll,tt,ss}),tacllorig_excluded{ll,tt,ss}));
               tr.all40trialkept{ll,tt,ss}=tr.all40trialkept{ll,tt,ss}(setdiff(1:length(tr.all40trialkept{ll,tt,ss}),tacllorig_excluded{ll,tt,ss}));
               tr.tlltrialkept{ll,tt,ss}=1:numcondtfinal(ll,tt,ss);
             elseif numcondtfinal(ll,tt,ss)==size(tlock_nul{10,tt,ss}.trial,1)
@@ -1216,7 +1274,7 @@ if ~isempty(stageuse)
             if max(tr.all40trialkept{ll,tt,ss})>size(tlock_aud{ll+40,tt,ss}.trial,1)
               tr.all40trialkept{ll,tt,ss}=dsearchn(tr.autrialkept{ll,tt,ss}',tr.all40trialkept{ll,tt,ss}')';
             end
-
+            
             tr.t10trialkept{ll,tt,ss}=unique(tr.t10trialkept{ll,tt,ss});
             tr.nllttrialkept{ll,tt,ss}=unique(tr.nllttrialkept{ll,tt,ss});
             tr.all40trialkept{ll,tt,ss}=unique(tr.all40trialkept{ll,tt,ss});
@@ -1324,7 +1382,7 @@ if ~isempty(stageuse)
           cfg=[];
           if usetr && max(tr.all40trialkept{ll,tt,ss})>size(tlock_aud{ll+40,tt,ss}.trial,1)
             error('fix me')
-%             tr.all40trialkept{ll,tt,ss}=dsearchn(tr.autrialkept{ll,tt,ss}',tr.all40trialkept{ll,tt,ss}')';
+            %             tr.all40trialkept{ll,tt,ss}=dsearchn(tr.autrialkept{ll,tt,ss}',tr.all40trialkept{ll,tt,ss}')';
           end
           cfg.trials=tr.all40trialkept{ll,tt,ss};
           %           if usetr && any(auwrong(soalist)) && length(cfg.trials)>size(tlock_aud{ll+40,tt,ss}.trial,1)
@@ -1455,55 +1513,55 @@ if ~isempty(stageuse)
     end % ll
     
     if usetr<2
-    for ll=[1 3 4] % for multisensory-shifted comparison
-      tt=ttin;
-      if [tacaud==1 && [isempty(tlock_tac{ll,tt,ss}) || isempty(tlock_tac{10-ll,tt,ss}) || isempty(tlock_tac{5,tt,ss})]] || [tacaud==0 && [isempty(tlock_aud{ll,tt,ss}) || isempty(tlock_aud{10-ll,tt,ss}) || isempty(tlock_aud{5,tt,ss})] ]
-        if tacaud==1
-          tr.tmstrialkept1{ll,tt,ss}=0;
-          tr.tmstrialkept2{ll,tt,ss}=0;
-          tr.tmstrialkept3{ll,tt,ss}=0;
-          tr.tmstrialkept4{ll,tt,ss}=0;
-        elseif tacaud==0
-          tr.amstrialkept1{ll,tt,ss}=0;
-          tr.amstrialkept2{ll,tt,ss}=0;
-          tr.amstrialkept3{ll,tt,ss}=0;
-          tr.amstrialkept4{ll,tt,ss}=0;
-        end
-        continue
-      else
-        if tacaud==1
-          numcondmstfinal(ll,tt,ss)=min([size(tlock_tac{ll,tt,ss}.trial,1) size(tlock_tac{10-ll,tt,ss}.trial,1) size(tlock_tac{5,tt,ss}.trial,1)]);
-        elseif tacaud==0
-          numcondmsafinal(ll,tt,ss)=min([size(tlock_aud{ll,tt,ss}.trial,1) size(tlock_aud{10-ll,tt,ss}.trial,1) size(tlock_aud{5,tt,ss}.trial,1)]);
-        end
-        
-        if tacaud==1
-          if ~usetr
-            tms1randtr=Shuffle(1:size(tlock_tac{ll,tt,ss}.trial,1));
-            tms2randtr=Shuffle(1:size(tlock_tac{10-ll,tt,ss}.trial,1));
-            tms3randtr=Shuffle(1:size(tlock_tac{5,tt,ss}.trial,1));
-            tms4randtr=Shuffle(1:size(tlock_tac{5,tt,ss}.trial,1)); % do this twice to get 2nd random subsampling
-            tr.tmstrialkept1{ll,tt,ss}=sort(tms1randtr(1:numcondmstfinal(ll,tt,ss)));
-            tr.tmstrialkept2{ll,tt,ss}=sort(tms2randtr(1:numcondmstfinal(ll,tt,ss)));
-            tr.tmstrialkept3{ll,tt,ss}=sort(tms3randtr(1:numcondmstfinal(ll,tt,ss)));
-            tr.tmstrialkept4{ll,tt,ss}=sort(tms4randtr(1:numcondmstfinal(ll,tt,ss)));
+      for ll=[1 3 4] % for multisensory-shifted comparison
+        tt=ttin;
+        if [tacaud==1 && [isempty(tlock_tac{ll,tt,ss}) || isempty(tlock_tac{10-ll,tt,ss}) || isempty(tlock_tac{5,tt,ss})]] || [tacaud==0 && [isempty(tlock_aud{ll,tt,ss}) || isempty(tlock_aud{10-ll,tt,ss}) || isempty(tlock_aud{5,tt,ss})] ]
+          if tacaud==1
+            tr.tmstrialkept1{ll,tt,ss}=0;
+            tr.tmstrialkept2{ll,tt,ss}=0;
+            tr.tmstrialkept3{ll,tt,ss}=0;
+            tr.tmstrialkept4{ll,tt,ss}=0;
+          elseif tacaud==0
+            tr.amstrialkept1{ll,tt,ss}=0;
+            tr.amstrialkept2{ll,tt,ss}=0;
+            tr.amstrialkept3{ll,tt,ss}=0;
+            tr.amstrialkept4{ll,tt,ss}=0;
+          end
+          continue
+        else
+          if tacaud==1
+            numcondmstfinal(ll,tt,ss)=min([size(tlock_tac{ll,tt,ss}.trial,1) size(tlock_tac{10-ll,tt,ss}.trial,1) size(tlock_tac{5,tt,ss}.trial,1)]);
+          elseif tacaud==0
+            numcondmsafinal(ll,tt,ss)=min([size(tlock_aud{ll,tt,ss}.trial,1) size(tlock_aud{10-ll,tt,ss}.trial,1) size(tlock_aud{5,tt,ss}.trial,1)]);
+          end
+          
+          if tacaud==1
+            if ~usetr
+              tms1randtr=Shuffle(1:size(tlock_tac{ll,tt,ss}.trial,1));
+              tms2randtr=Shuffle(1:size(tlock_tac{10-ll,tt,ss}.trial,1));
+              tms3randtr=Shuffle(1:size(tlock_tac{5,tt,ss}.trial,1));
+              tms4randtr=Shuffle(1:size(tlock_tac{5,tt,ss}.trial,1)); % do this twice to get 2nd random subsampling
+              tr.tmstrialkept1{ll,tt,ss}=sort(tms1randtr(1:numcondmstfinal(ll,tt,ss)));
+              tr.tmstrialkept2{ll,tt,ss}=sort(tms2randtr(1:numcondmstfinal(ll,tt,ss)));
+              tr.tmstrialkept3{ll,tt,ss}=sort(tms3randtr(1:numcondmstfinal(ll,tt,ss)));
+              tr.tmstrialkept4{ll,tt,ss}=sort(tms4randtr(1:numcondmstfinal(ll,tt,ss)));
+            end
+          end
+          
+          if tacaud==0
+            if ~usetr
+              ams1randtr=Shuffle(1:size(tlock_aud{ll,tt,ss}.trial,1));
+              ams2randtr=Shuffle(1:size(tlock_aud{10-ll,tt,ss}.trial,1));
+              ams3randtr=Shuffle(1:size(tlock_aud{5,tt,ss}.trial,1));
+              ams4randtr=Shuffle(1:size(tlock_aud{5,tt,ss}.trial,1)); % do this twice to get 2nd random subsampling
+              tr.amstrialkept1{ll,tt,ss}=sort(ams1randtr(1:numcondmsafinal(ll,tt,ss)));
+              tr.amstrialkept2{ll,tt,ss}=sort(ams2randtr(1:numcondmsafinal(ll,tt,ss)));
+              tr.amstrialkept3{ll,tt,ss}=sort(ams3randtr(1:numcondmsafinal(ll,tt,ss)));
+              tr.amstrialkept4{ll,tt,ss}=sort(ams4randtr(1:numcondmsafinal(ll,tt,ss)));
+            end
           end
         end
-        
-        if tacaud==0
-          if ~usetr
-            ams1randtr=Shuffle(1:size(tlock_aud{ll,tt,ss}.trial,1));
-            ams2randtr=Shuffle(1:size(tlock_aud{10-ll,tt,ss}.trial,1));
-            ams3randtr=Shuffle(1:size(tlock_aud{5,tt,ss}.trial,1));
-            ams4randtr=Shuffle(1:size(tlock_aud{5,tt,ss}.trial,1)); % do this twice to get 2nd random subsampling
-            tr.amstrialkept1{ll,tt,ss}=sort(ams1randtr(1:numcondmsafinal(ll,tt,ss)));
-            tr.amstrialkept2{ll,tt,ss}=sort(ams2randtr(1:numcondmsafinal(ll,tt,ss)));
-            tr.amstrialkept3{ll,tt,ss}=sort(ams3randtr(1:numcondmsafinal(ll,tt,ss)));
-            tr.amstrialkept4{ll,tt,ss}=sort(ams4randtr(1:numcondmsafinal(ll,tt,ss)));
-          end
-        end
-      end
-    end % ll
+      end % ll
     end
     
   end % ss
