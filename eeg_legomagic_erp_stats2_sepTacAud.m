@@ -5478,6 +5478,459 @@ save([edir 'tlock_numtrlltt.mat'],'numtr*');
 close all
 
 
+%% ANOVA F-test November 2018
+if ~exist('grind_tacPaud_save','var')
+  load tlock_grind_sleep0_iter27_statwinorig0_ftver0.mat;
+end
+soalist=[1 3 4 5 6 7 9];
+cfg=[];
+cfg.operation='subtract';
+cfg.parameter='individual';
+llind=1;
+clear grind_TPA_MSPN
+for ll=soalist
+  grind_TPA_MSPN{llind}=ft_math(cfg,grind_tacPaud_save{ll,3,10},grind_tacMSpN_save{ll,3,10});  
+  grind_tacPaud{llind}=grind_tacPaud_save{ll,3,10};
+  grind_tacMSpN{llind}=grind_tacMSpN_save{ll,3,10};
+  if ll>5
+    grind_TPA_MSPN{llind}.time=grind_TPA_MSPN{llind}.time-soades(ll);
+    grind_tacPaud{llind}.time=grind_tacPaud{llind}.time-soades(ll);
+    grind_tacMSpN{llind}.time=grind_tacMSpN{llind}.time-soades(ll);
+  end
+  llind=llind+1;
+end
+
+cfg=[];
+cfg.operation='add';
+cfg.parameter='individual';
+grind_TPA_MSPN_allsummed=ft_math(cfg,grind_TPA_MSPN{:});
+grind_tacPaud_allsummed=ft_math(cfg,grind_tacPaud{:});
+grind_tacMSpN_allsummed=ft_math(cfg,grind_tacMSpN{:});
+
+nsub=size(grind_TPA_MSPN{1}.individual,1);
+load eeg1010_neighb
+
+if 0
+cfg=[];
+cfg.latency=[0 0.5];
+cfg.method='montecarlo';
+cfg.parameter='individual';
+cfg.neighbours=neighbours;
+cfg.correctm='cluster';
+cfg.numrandomization=2000;
+cfg.tail=0; % 0 for two-sided t-test
+cfg.ivar=1;
+cfg.uvar=2;
+cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+cfg.design(2,:)=[1:nsub 1:nsub];
+cfg.randomseed=13;
+cfg.correcttail='alpha';
+cfg.clusterstatistic='maxsum';
+cfg.statistic='depsamplesT';
+cfg.computecritval='yes';
+cfg.comptueprob='yes';
+stat_TPA_MSPN_allsummed = ft_timelockstatistics(cfg,grind_tacPaud_allsummed,grind_tacMSpN_allsummed);
+% Nothing significant  (p>0.62)
+end
+
+cfg=[];
+cfg.latency=[0 0.5];
+cfg.method='montecarlo';
+cfg.parameter='individual';
+cfg.neighbours=neighbours;
+cfg.correctm='cluster';
+cfg.numrandomization=2000;
+cfg.tail=1; % only 1 makes sense for F-test
+cfg.ivar=1;
+cfg.uvar=2;
+cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub) 5*ones(1,nsub) 6*ones(1,nsub) 7*ones(1,nsub)];
+cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub];
+cfg.randomseed=13;
+cfg.clusterstatistic='maxsum';
+cfg.statistic='depsamplesFunivariate';
+cfg.computecritval='yes';
+cfg.comptueprob='yes';
+stat_TPA_MSPN_1wayANOVA = ft_timelockstatistics(cfg,grind_TPA_MSPN{:});
+
+posthoctimwin=[min(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1))))) max(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1)))))];
+
+clustermat=stat_TPA_MSPN_1wayANOVA.posclusterslabelmat;
+clustermat(clustermat>=3)=0;
+
+cfg=[];
+cfg.latency=[0 0.5];
+for llind=1:7
+  grind_TPA_MSPN_sel{llind}=ft_selectdata(cfg,grind_TPA_MSPN{llind});
+end
+cfg=[];
+cfg.latency=[0 0.5];
+cfg.avgoverrpt='yes';
+for llind=1:7
+  grave_TPA_MSPN_avg{llind}=ft_selectdata(cfg,grind_TPA_MSPN{llind});
+end
+% cfg.latency=posthoctimwin;
+% for llind=1:7
+%   grave_TPA_MSPN_timwin{llind}=ft_selectdata(cfg,grind_TPA_MSPN{llind});
+% end
+
+for llind=1:7
+  fullconmat(llind,:,:)=grave_TPA_MSPN_avg{llind}.individual;
+%   fullconmat_tw(llind,:,:)=grave_TPA_MSPN_timwin{llind}.individual;
+  fullconmat_grind(llind,:,:,:)=grind_TPA_MSPN_sel{llind}.individual;
+end
+fullconmat_reshape=reshape(fullconmat,[7 62*501]);
+% fullconmat_tw_reshape=reshape(fullconmat_tw,[7 62*353]);
+
+fullconmat_tmp=reshape(fullconmat_grind,[7 22 62*501]);
+fullconmat_grind_reshape=reshape(fullconmat_tmp,[7 22*62*501]);
+
+
+% PCA
+[aa1,bb1,vv1]=svd(fullconmat_reshape,'econ');
+% [aa2,bb2,vv2]=svd(fullconmat_tw_reshape,'econ');
+% [aa3,bb3,vv3]=svd(fullconmat_grind_reshape,'econ');
+% [aa4,bb4,vv4]=svd(fullconmat_pcared_reshape,'econ');
+
+% figure;for llind=1:7,subplot(4,2,llind);bar(aa4(:,llind));end
+% 
+% [V,rotdata] = varimax(aa3);
+% 
+% 
+% COEFF1 = pca(fullconmat_reshape);
+% COEFF2 = pca(fullconmat_grind_reshape);
+
+clear data4ica
+data4ica.trial{1}=fullconmat_reshape;
+% data4ica.trial{1}=fullconmat_pcared_ind_reshape;
+data4ica.dimord='chan_time';
+data4ica.time{1}=.001:.001:31.062;
+% data4ica.time{1}=.001:.001:683.364;
+data4ica.label={'1' '2' '3' '4' '5' '6' '7'};
+cfg=[];
+cfg.randomseed=13;
+cfg.method='runica';
+runicaout=ft_componentanalysis(cfg, data4ica);
+cfg.method='fastica';
+fasticaout_ind=ft_componentanalysis(cfg, data4ica);
+% data4ica.trial{1}=fullconmat_pcared_avg_reshape;
+% fasticaout_avg=ft_componentanalysis(cfg, data4ica);
+
+
+runicaout.topo(:,1)=-runicaout.topo(:,1);
+runicaout.trial{1}(1,:)=-runicaout.trial{1}(1,:);
+
+for llind=1:7
+  rica(:,:,llind)=reshape(runicaout.trial{1}(llind,:),[62 501]);
+%   pica(:,:,llind)=reshape(vv1(:,llind)',[62 501]);
+  
+  [af,bf,cf]=svd(rica(:,:,llind),'econ');
+  if llind==4 || llind==1
+    af=-af;cf=-cf;
+  end
+  statplot.avg=af(:,1);
+  statplot.time=1;
+  statplot.dimord='chan_time';
+  statplot.label=grave_TPA_MSPN_avg{llind}.label;
+  if 0 % for ICA alone figure
+    figure(20);subplot(7,3,llind*3-2);bar(runicaout.topo(:,llind));ylim([-3 3])
+    xticklabels({'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'})
+    set(gca,'XTickLabelRotation',45)
+    %   figure(20);subplot(7,3,llind*3-2);barh(runicaout.topo(:,llind));xlim([-3 3])
+    figure(20);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.zlim='maxabs';cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+    figure(20);subplot(7,3,llind*3);plot(cf(:,1));ylim([-max(abs(cf(:,1)))-.02 max(abs(cf(:,1)))+.02])
+  else % For ICA-ERP figure in paper
+    close all
+    if llind==4 % TA70
+      timeadd=.07;
+    else
+      timeadd=0;
+    end    
+    plot_ica(cf,runicaout,statplot,[-.1 .6],timeadd,[0:.001:.5],llind,'erpica',fdir)
+    icasaveERP{llind}.label=statplot.label;
+    icasaveERP{llind}.topo=statplot.avg;
+    icasaveERP{llind}.bar=runicaout.topo(:,llind);
+    icasaveERP{llind}.time=[0:.001:.5];  % don't put 'timeadd' here; it will be added later when correlating to ERP
+    icasaveERP{llind}.course=cf(:,1);    
+  end
+  
+  
+  %   [af,bf,cf]=svd(pica(:,:,llind),'econ');
+  %   statplot.avg=af(:,1);
+  %   figure(40);subplot(7,3,llind*3-2);bar(aa1(:,llind));
+  %   figure(40);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+  %   figure(40);subplot(7,3,llind*3);plot(cf(:,1));
+end
+save('icasave.mat','icasave*','-append')
+
+
+
+% Correlate sub-masked sections with sub-masked components
+figure;plot(mean(stat_TPA_MSPN_1wayANOVA.mask,1))
+% First 'peak' of cluster is 148-300ms
+% Second 'peak' is 351-421
+% Third 'peak' is 451-501
+
+% cluster 1 (148-300ms)
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:147)=0;
+mask_use(:,301:end)=0;
+[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+for llind=1:7
+  figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
+  figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
+end
+% rho = 0.3571    0.3532    *0.6089    *0.5210    0.1721    0.2454    0.0532
+
+% cluster 2 (351-421ms)
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:350)=0;
+mask_use(:,422:end)=0;
+[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+for llind=1:7
+  figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
+  figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
+end
+% rho = *0.7694    0.2988    0.4354    0.1108    *0.4713    0.1926    0.0820
+
+% cluster 3 (451-501ms)
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:450)=0;
+[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+for llind=1:7
+  figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
+  figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
+end
+% rho = 0.3342   *0.6531    0.3425    0.3038    0.2538    0.3992    0.1928
+
+% cluster 4 (early)
+mask_use=clustermat; % contains 2nd cluster at p=0.065
+mask_use(mask_use==1)=0;
+mask_use(mask_use==2)=1;
+[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+for llind=1:7
+  figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
+  figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
+end
+% rho= *0.5890    0.2918    0.1013    0.2599    *0.7392    0.2761    0.1745
+
+
+
+
+% Correlate masked data with masked components
+
+[rho,rho_nw]=mask_corr(stat_TPA_MSPN_1wayANOVA.mask,runicaout,fullconmat_reshape);
+for llind=1:7
+  figure;imagesc(rica(:,:,llind).*stat_TPA_MSPN_1wayANOVA.mask);caxis([-1.4 1.4])
+  figure;imagesc(stat_TPA_MSPN_1wayANOVA.mask.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
+end
+
+% % PCA denoise each condition first
+% for compkeep=1:9
+%   for llind=1:7    
+%     [aa,bb,cc]=svd(grave_TPA_MSPN_avg{llind}.individual,'econ');
+%     fullconmat_pcared_avg_reshape(llind,:)=reshape(aa(:,1:compkeep)*bb(1:compkeep,1:compkeep)*cc(:,1:compkeep)',[1 62*501]);
+%   end
+%   maskdatavec_pcared=reshape(fullconmat_pcared_avg_reshape(:,mask_induse)',[1 7*5647]); % yes transpose is critical here  
+%   for llind=1:7
+%     [rhoc(llind,compkeep),pvalc(llind,compkeep)]=corr(maskdatavec_pcared',rica_masked_w(llind,:)');
+%     [rhoc_nw(llind,compkeep),pvalc_nw(llind,compkeep)]=corr(maskdatavec_pcared',rica_masked_nw(llind,:)');
+%   end  
+% end
+
+
+% PCA denoise each condition first
+for compkeep=1:9
+  for llind=1:7
+    [aa,bb,cc]=svd(reshape(permute(grind_TPA_MSPN_sel{llind}.individual,[2 1 3]),[62 22*501]),'econ');
+    fullconmat_pcared_ind_reshape(llind,:)=reshape(squeeze(mean(reshape(aa(:,1:compkeep)*bb(1:compkeep,1:compkeep)*cc(:,1:compkeep)',[62 22 501]),2)),[1 62*501]);
+    
+    [aa,bb,cc]=svd(grave_TPA_MSPN_avg{llind}.individual,'econ');
+    fullconmat_pcared_avg_reshape(llind,:)=reshape(aa(:,1:compkeep)*bb(1:compkeep,1:compkeep)*cc(:,1:compkeep)',[1 62*501]);
+  end
+  
+%   [aa4,bb4,vv4]=svd(fullconmat_pcared_reshape,'econ');
+  
+  clear data4ica
+  % data4ica.trial{1}=fullconmat_reshape;
+  data4ica.trial{1}=fullconmat_pcared_ind_reshape;
+  data4ica.dimord='chan_time';
+  data4ica.time{1}=.001:.001:31.062;
+  % data4ica.time{1}=.001:.001:683.364;
+  data4ica.label={'1' '2' '3' '4' '5' '6' '7'};
+  cfg=[];
+  cfg.randomseed=13;
+%   cfg.method='runica';
+%   runicaout=ft_componentanalysis(cfg, data4ica);
+  cfg.method='fastica';
+  fasticaout_ind=ft_componentanalysis(cfg, data4ica);
+  data4ica.trial{1}=fullconmat_pcared_avg_reshape;
+  fasticaout_avg=ft_componentanalysis(cfg, data4ica);
+  
+  % figure;for llind=1:7,subplot(4,2,llind);bar(runicaout.topo(:,llind));end
+  % figure;for llind=1:7,subplot(4,2,llind);bar(fasticaout.topo(:,llind));end
+  
+  
+  for llind=1:7
+    fiica(:,:,llind)=reshape(fasticaout_ind.trial{1}(llind,:),[62 501]);
+    faica(:,:,llind)=reshape(fasticaout_avg.trial{1}(llind,:),[62 501]);
+%     rica(:,:,llind)=reshape(runicaout.trial{1}(llind,:),[62 501]);
+%     pica(:,:,llind)=reshape(vv4(:,llind)',[62 501]);
+    
+%     clear data4ica
+%     data4ica.dimord='chan_time';
+%     data4ica.time{1}=0:.001:.5;
+%     data4ica.label=grave_TPA_MSPN_avg{llind}.label;
+%     data4ica.trial{1}=fica(:,:,llind);
+%     cfg=[];
+%     cfg.randomseed=13;
+%     cfg.method='fastica';
+%       fAW{llind}=ft_componentanalysis(cfg, data4ica);
+%     data4ica.trial{1}=rica(:,:,llind);
+%     cfg.method='runica';
+%       rAW{llind}=ft_componentanalysis(cfg, data4ica);
+    
+    [af,bf,cf]=svd(fiica(:,:,llind),'econ');
+    statplot.avg=af(:,1);
+    statplot.time=1;
+    statplot.dimord='chan_time';
+    statplot.label=grave_TPA_MSPN_avg{llind}.label;
+    figure(30+compkeep);subplot(7,3,llind*3-2);bar(fasticaout_ind.topo(:,llind));
+    figure(30+compkeep);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+    figure(30+compkeep);subplot(7,3,llind*3);plot(cf(:,1));
+    
+    [af,bf,cf]=svd(faica(:,:,llind),'econ');
+    statplot.avg=af(:,1);
+    figure(50+compkeep);subplot(7,3,llind*3-2);bar(fasticaout_avg.topo(:,llind));
+    figure(50+compkeep);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+    figure(50+compkeep);subplot(7,3,llind*3);plot(cf(:,1));
+
+    
+%     [af,bf,cf]=svd(pica(:,:,llind),'econ');
+%     statplot.avg=af(:,1);
+%     figure(40+compkeep);subplot(7,3,llind*3-2);bar(aa4(:,llind));
+%     figure(40+compkeep);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+%     figure(40+compkeep);subplot(7,3,llind*3);plot(cf(:,1));
+    
+  end
+end % compkeep
+
+vv11=reshape(vv1(:,1),[62 501]); % 1st space-time map, reshaped
+[u1,d1,v1]=svd(vv11,'econ'); % get best chan topography and time course
+vv12=reshape(vv1(:,2),[62 501]); % 2nd space-time map, reshaped
+[u2,d2,v2]=svd(vv12,'econ'); % get best chan topography and time course
+vv13=reshape(vv1(:,3),[62 501]); % 3rd space-time map, reshaped
+[u3,d3,v3]=svd(vv13,'econ'); % get best chan topography and time course
+vv14=reshape(vv1(:,4),[62 501]); % 3rd space-time map, reshaped
+[u4,d4,v4]=svd(vv14,'econ'); % get best chan topography and time course
+vv15=reshape(vv1(:,5),[62 501]); % 3rd space-time map, reshaped
+[u5,d5,v5]=svd(vv15,'econ'); % get best chan topography and time course
+vv16=reshape(vv1(:,6),[62 501]); % 3rd space-time map, reshaped
+[u6,d6,v6]=svd(vv16,'econ'); % get best chan topography and time course
+vv17=reshape(vv1(:,7),[62 501]); % 3rd space-time map, reshaped
+[u7,d7,v7]=svd(vv17,'econ'); % get best chan topography and time course
+
+vv21=reshape(permute(reshape(vv3(:,1),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u1,d1,v1]=svd(vv21,'econ'); % get best chan topography and time course
+vv22=reshape(permute(reshape(vv3(:,2),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u2,d2,v2]=svd(vv22,'econ'); % get best chan topography and time course
+vv23=reshape(permute(reshape(vv3(:,3),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u3,d3,v3]=svd(vv23,'econ'); % get best chan topography and time course
+vv24=reshape(permute(reshape(vv3(:,4),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u4,d4,v4]=svd(vv24,'econ'); % get best chan topography and time course
+vv25=reshape(permute(reshape(vv3(:,5),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u5,d5,v5]=svd(vv25,'econ'); % get best chan topography and time course
+vv26=reshape(permute(reshape(vv3(:,6),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u6,d6,v6]=svd(vv25,'econ'); % get best chan topography and time course
+vv27=reshape(permute(reshape(vv3(:,7),[22 62 501]),[2 1 3]),[62 22*501]); % 1st space-time map, reshaped
+[u7,d7,v7]=svd(vv25,'econ'); % get best chan topography and time course
+
+% plot topography
+statplot.avg=u1(:,1);
+statplot.time=1;
+statplot.dimord='chan_time';
+statplot.label=grave_TPA_MSPN_avg{llind}.label;
+figure(1);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u2(:,1);
+figure(2);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u3(:,1);
+figure(3);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u4(:,1);
+figure(4);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u5(:,1);
+figure(5);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u6(:,1);
+figure(6);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+statplot.avg=u7(:,1);
+figure(7);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+
+
+for llind=1:7
+  statplot.avg=fAW{llind}.topo(:,1);
+  figure(10+llind);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+  statplot.avg=rAW{llind}.topo(:,1);
+  figure(20+llind);subplot(3,1,2);cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+end
+
+% % plot ICA topography
+% statplot.avg=A1(:,1);
+% statplot.time=1;
+% statplot.dimord='chan_time';
+% statplot.label=grave_TPA_MSPN_avg{llind}.label;
+% figure;cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+% statplot.avg=A2(:,1);
+% figure;cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+% statplot.avg=A3(:,1);
+% figure;cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+% statplot.avg=A4(:,1);
+% figure;cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+% statplot.avg=A5(:,1);
+% figure;cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+
+% plot time course
+figure(1);subplot(3,1,3);plot(v1(:,1))
+figure(2);subplot(3,1,3);plot(v2(:,1))
+figure(3);subplot(3,1,3);plot(v3(:,1))
+figure(4);subplot(3,1,3);plot(v4(:,1))
+figure(5);subplot(3,1,3);plot(v5(:,1))
+figure(6);subplot(3,1,3);plot(v6(:,1))
+figure(7);subplot(3,1,3);plot(v7(:,1))
+figure(1);subplot(3,1,3);plot(mean(reshape(v1(:,1),[22 501]),1))
+figure(2);subplot(3,1,3);plot(mean(reshape(v2(:,1),[22 501]),1))
+figure(3);subplot(3,1,3);plot(mean(reshape(v3(:,1),[22 501]),1))
+figure(4);subplot(3,1,3);plot(mean(reshape(v4(:,1),[22 501]),1))
+figure(5);subplot(3,1,3);plot(mean(reshape(v5(:,1),[22 501]),1))
+figure(6);subplot(3,1,3);plot(mean(reshape(v6(:,1),[22 501]),1))
+figure(7);subplot(3,1,3);plot(mean(reshape(v7(:,1),[22 501]),1))
+for llind=1:7
+  figure(10+llind);subplot(3,1,3);plot(fAW{llind}.trial{1}(1,:));
+  figure(20+llind);subplot(3,1,3);plot(rAW{llind}.trial{1}(1,:));
+end
+
+% plot condition loading
+ymax=.8;
+figure(1);subplot(3,1,1);bar(aa1(:,1));ylim([-ymax ymax])
+figure(2);subplot(3,1,1);bar(aa1(:,2));ylim([-ymax ymax])
+figure(3);subplot(3,1,1);bar(aa1(:,3));ylim([-ymax ymax])
+figure(4);subplot(3,1,1);bar(aa1(:,4));ylim([-ymax ymax])
+figure(5);subplot(3,1,1);bar(aa1(:,5));ylim([-ymax ymax])
+figure(6);subplot(3,1,1);bar(aa1(:,6));ylim([-ymax ymax])
+figure(7);subplot(3,1,1);bar(aa1(:,7));ylim([-ymax ymax])
+
+for llind=1:7
+  ymax=0.8;
+  figure(10+llind);subplot(3,1,1);bar(fasticaout.topo(:,llind));ylim([-ymax ymax])
+  ymax=2.2;
+  figure(20+llind);subplot(3,1,1);bar(runicaout.topo(:,llind));ylim([-ymax ymax])
+end
+
+% 
+
+% erpname={'erp_AT500' 'erp_AT70' 'erp_AT20' 'erp_AT0' 'erp_TA20' 'erp_TA70' 'erp_TA500'};
+% for llind=1:7
+%   spm_eeg_ft2spm(grind_TPA_MSPN{llind},erpname{llind})
+% end
+
+
 %% Compare Stages during 'sleep' data (W vs N1 vs N2)
 % This had been written and then lost during a file transfer.
 % Thus only bits of original code remain or are gussed at as to how it was set up.
@@ -6435,13 +6888,16 @@ if iterflag
     end
   else
     try
-      load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat']);
-      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat']);
+%       load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat']);
+%       load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_usetr' num2str(usetr) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat']);
+      load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat']);
+      load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) '.mat']);
     catch
       try
         load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
         load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '_statwinorig' num2str(statwinorig) '.mat']);
       catch
+        error('must use one of above')
         load([edir 'tlock_statmc_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
         load([edir 'tlock_grind_sleep' num2str(sleep) '_iter' num2str(iter) '.mat']);
       end
@@ -6453,8 +6909,7 @@ else
 end
 
 soalist=[1 3 4 5 6 7 9];
-timwinstatflag=0; % =1 for using only stat.time, =0 for using [-0.5 1.0];
-timwin=[-0.5 1];
+timwinstatflag=0; % =1 for using only stat.time, =0 for using fixed time e.g. [-0.5 1.0];
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 tacbasemax=min(-.15,soades-.15);
 
@@ -6491,13 +6946,24 @@ colorblindN  =[128 128 128]/256;
 % colorblind(7,:)=[.8 .4 0];
 % colorblind(8,:)=[.8 .6 .7];
 
+incondflag=0; % =1 for within-condition, =0 for across-condition (only showing <=70)
+if incondflag==1 % for within-condition
+  timwin=[-0.5 1];
+  topozlim=[-5 5];
+  topozlimdiff=[-5 5];
+else % for across-condition (only showing <=70)
+  timwin=[-0.05 .57];  % this will cause an error for ll=9, but not a problem as we don't need that one for ICA
+  topozlim=[-5 5];
+  topozlimdiff=[-3 3];
+end
 
+timeadd=max(0,soades);
 
 close all
 clear tmp*
 clear grind_TPA_MSPN
 for ll=soalist
-% for ll=3
+% for ll=[6 7 9]
   cfg=[];
   cfg.operation='subtract';
   cfg.parameter='individual';
@@ -6507,7 +6973,7 @@ for ll=soalist
   if timwinstatflag==1
     cfg.latency=[statt_mc{ll,tt,ss}.time(1) statt_mc{ll,tt,ss}.time(end)];
   elseif timwinstatflag==0
-    cfg.latency=timwin;
+    cfg.latency=timwin+timeadd(ll);
     stattimwin=[statt_mc{ll,tt,ss}.time(1) statt_mc{ll,tt,ss}.time(end)];
   end
   cfg.channel=statt_mc{ll,tt,ss}.label;
@@ -6656,7 +7122,7 @@ for ll=soalist
     cfg.layout='elec1010.lay';
     cfg.ylim=[-3 7];
     cfg.linewidth=3;
-    cfg.xlim=timwin;
+    cfg.xlim=timwin+timeadd(ll);
     if cg>length(chanplot)
       cfg.channel=tmpd5.label(any(tmpd5.mask,2));
     else
@@ -6678,7 +7144,7 @@ for ll=soalist
     plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
     plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
     plot(cfg.xlim,[0 0],'Color','k')
-    axis([-0.55 1 cfg.ylim(1) cfg.ylim(2)])
+    axis([timwin(1)+timeadd(ll)-0.05 timwin(2)+timeadd(ll) cfg.ylim(1) cfg.ylim(2)])
     pbaspect([2 1 1]);
     if cg==3
       legend('Null','Tactile','Auditory','Multisensory')
@@ -6701,7 +7167,7 @@ for ll=soalist
     cfg.layout='elec1010.lay';
     cfg.ylim=[-5 8];
     cfg.linewidth=3;
-    cfg.xlim=[-.6 1.1]; %[-.5 1]
+    cfg.xlim=[timwin(1)+timeadd(ll)-.05 timwin(2)+timeadd(ll)+.05]; 
     if cg>length(chanplot)
       cfg.channel=tmpd5.label(any(tmpd5.mask,2));
     else
@@ -6744,6 +7210,14 @@ for ll=soalist
       print(ll+40,[fdir 'erp_tacPaud_MSpN_diff_SigLabels_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
     end
   end
+  
+  xlimlim=[timwin(1)+timeadd(ll)-.05 timwin(2)+timeadd(ll)+.05];
+  selchan1 = match_str(tmpd5.label, chanplot{1});
+  selchan2 = match_str(tmpd5.label, chanplot{2});
+  erpsave{ll}.time=tmpd5.time(nearest(tmpd5.time, xlimlim(1)):nearest(tmpd5.time, xlimlim(2)));
+  erpsave{ll}.courseFC=mean(tmpd5.avg(selchan1,nearest(tmpd5.time,xlimlim(1)):nearest(tmpd5.time, xlimlim(2))),1);
+  erpsave{ll}.courseOP=mean(tmpd5.avg(selchan2,nearest(tmpd5.time,xlimlim(1)):nearest(tmpd5.time, xlimlim(2))),1);
+
   
   %   cfg=[];
   %   cfg.avgoverchan='yes';
@@ -6804,7 +7278,7 @@ for ll=soalist
     cfg.parameter='avg';
     cfg.layout='elec1010.lay';
     cfg.maskalpha=0.5;
-    cfg.zlim=[-5 5];
+    cfg.zlim=topozlim;
     cfg.highlight='on';
     cfg.highlightsize=12;
     cfg.xlim=[tmpd5.time(masktime(1)) tmpd5.time(masktime(end))];
@@ -6830,9 +7304,11 @@ for ll=soalist
     print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
     figure(120+ll);
+    cfg.zlim=topozlimdiff;
     ft_topoplotER(cfg,tmpd5);
     print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    erpsave{ll}.topo{1}=mean(tmpd5.avg(:,nearest(tmpd5.time,cfg.xlim(1)):nearest(tmpd5.time,cfg.xlim(2))),2);
     
     %     figure(50+ll);
     %     %   for cg=1:length(chanplot)
@@ -6865,6 +7341,32 @@ for ll=soalist
     %     print(50+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   end
 end
+for ll=soalist,erpsave{ll}.label=statt_allmc{ll,tt,ss}.label;end
+save erpsave.mat erpsave*
+
+load erpsave.mat
+load icasave.mat
+
+timeadd=max(0,soades);
+topocorrERP=nan(7,9);
+courseFCcorrERP=nan(7,9);
+courseOPcorrERP=nan(7,9);
+for ll=soalist
+  for llind=1:7
+    if isfield(erpsave{ll},'topo')
+      chanuse=match_str(icasaveERP{llind}.label,erpsave{ll}.label);
+      topocorrERP(llind,ll)=corr(icasaveERP{llind}.topo(chanuse),erpsave{ll}.topo{1});
+    end
+    time1=nearest(erpsave{ll}.time,icasaveERP{llind}.time(1)+timeadd(ll));
+    time2=nearest(erpsave{ll}.time,icasaveERP{llind}.time(end)+timeadd(ll));
+    courseFCcorrERP(llind,ll)=corr(icasaveERP{llind}.course,erpsave{ll}.courseFC(time1:time2)');
+    courseOPcorrERP(llind,ll)=corr(icasaveERP{llind}.course,erpsave{ll}.courseOP(time1:time2)');
+  end
+end
+figure;imagescc(topocorrERP)
+figure;imagescc(courseFCcorrERP)
+figure;imagescc(courseOPcorrERP)
+
 
 % plotting topo for peak times of interest, across all conditions
 for ll=soalist
