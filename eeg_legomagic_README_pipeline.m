@@ -49,10 +49,6 @@ concat_stim_files  % updated on 20 March, 2015 to process response-no-EEG sessio
 % eeg_legomagic_erp_stats1 % calls eeg_legomagic_trialSelection2_wakeSleep
 eeg_legomagic_erp_stats2_sepTacAud % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
 
-eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to disk.
-% above had called eeg_legomagic_epoching2_featurestats, but this is now
-% deprecated and should call eeg_legomagic_epoching2(ii,sleep,0,saveflag).
-
 % eeg_freqanalysis_sensor % calls eeg_legomagic_trialSelection_freqwide
 eeg_freqanalysis_sensor1 % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
 eeg_freqanalysis_nonlinearBootstrap_sensor % calls eeg_legomagic_trialSelection1
@@ -64,6 +60,13 @@ eeg_legomagic_brainBehaviourCorrelations
 % eeg_mriheadmodels
 % eeg_erp_sourceloc
 % eeg_tfr_sourceloc
+
+%% Sleep specific
+eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to disk.
+% above had called eeg_legomagic_epoching2_featurestats, but this is now
+% deprecated and should call eeg_legomagic_epoching2(ii,sleep,0,saveflag).
+
+
 
 %% obsolete
 % eeg_legomagic_preproc2 % with ICA
