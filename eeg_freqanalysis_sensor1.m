@@ -7927,7 +7927,9 @@ for pp=1:3
     if ff==1
       cfg.frequency   = [4 6.5];
     elseif ff==2
-      cfg.frequency   = [8 20];
+      cfg.frequency   = [14 30];
+    elseif ff==3
+      cfg.frequency   = [8 12]; % not used
     end
     cfg.avgoverfreq = 'yes';
     cfg.nanmean     = 'yes';
@@ -7937,7 +7939,7 @@ end
 clear pow
 % baseline correct first, then remove baseline area for plotting
 
-for ff=1:2,
+for ff=1:2
   base=powf{2,ff};
   base.powspctrm=repmat(nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3),nanmean(powf{3,ff}.powspctrm(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
   base.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3),nanmean(powf{3,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
@@ -7997,7 +7999,9 @@ for cg=1:length(chanplot)
     cfg.layout='elec1010.lay';
     if ff==1
       cfg.ylim=[-2.5 2.5];  % or [1 2.5]?
-    elseif ff==2
+    elseif ff==2 % beta
+      cfg.ylim=[-1 1];
+    elseif ff==3 % alpha
       cfg.ylim=[-2.5 2.5];
     end
     cfg.linewidth=3;
@@ -8037,9 +8041,9 @@ for cg=1:length(chanplot)
   end % ff
 end % cg
 print(20,[fdir 'tfr_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(20+100,[fdir 'tfr_UniNul_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+print(20+100,[fdir 'tfr_UniNul_FC_' num2str(ll) '_beta' '.eps'],'-depsc2')
 print(30,[fdir 'tfr_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(30+100,[fdir 'tfr_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+print(30+100,[fdir 'tfr_UniNul_OP_' num2str(ll) '_beta' '.eps'],'-depsc2')
 
 
 for cg=1:length(chanplot)
