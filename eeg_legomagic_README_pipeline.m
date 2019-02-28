@@ -1,7 +1,5 @@
 % EEG awake & sleep analysis pipeline
 
-%%%% THIS MEANS STILL TO-DO
-
 % code to call stimulation paradigm
 call_lego_audtac % calls lego_audtac
 
@@ -50,7 +48,6 @@ concat_stim_files  % updated on 20 March, 2015 to process response-no-EEG sessio
 % eeg_legomagic_erp_stats % calls eeg_legomagic_trialSelection1_wakeSleep;
 % eeg_legomagic_erp_stats1 % calls eeg_legomagic_trialSelection2_wakeSleep
 eeg_legomagic_erp_stats2_sepTacAud % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
-%%%% RERUN ABOVE WITH BASELINING AND DOWNSAMPLING
 
 eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to disk.
 % above had called eeg_legomagic_epoching2_featurestats, but this is now
@@ -63,14 +60,12 @@ eeg_freqanalysis_nonlinearBootstrap_sensor % calls eeg_legomagic_trialSelection1
 % RT analysis as well as RT-EEG correlations
 eeg_legomagic_brainBehaviourCorrelations
 
-% Source analysis
-eeg_mriheadmodels
-
-eeg_erp_sourceloc
-
-eeg_tfr_sourceloc
+% % Source analysis
+% eeg_mriheadmodels
+% eeg_erp_sourceloc
+% eeg_tfr_sourceloc
 
 %% obsolete
-eeg_legomagic_preproc2 % with ICA
-eeg_legomagic_preprocSleep2 % with ICA
+% eeg_legomagic_preproc2 % with ICA
+% eeg_legomagic_preprocSleep2 % with ICA
 
