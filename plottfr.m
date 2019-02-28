@@ -1,5 +1,5 @@
 function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
-% function plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
+% function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
 
 colorblindD  =[204 101 0]/256;
 colorblindApT=[5 165 255]/256;
@@ -192,6 +192,39 @@ for dd=1:length(masktime)
     print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
     print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
     tfrsave.topo{dd}=mean(tmpA.(param)(:,1,nearest(tmpA.time,cfg.xlim(1)):nearest(tmpA.time,cfg.xlim(2))),3);
+    switch purpose
+      case 'within'
+        switch param
+          case 'powspctrm'
+            switch band
+              case 'theta'
+                cfg.zlim=[-1.5 1.5];
+              case 'alpha'
+                cfg.zlim=[-4 4];
+              case 'beta'
+                cfg.zlim=[-1.1 1.1];
+            end
+          case 'plvabs'
+            switch band
+              case 'theta'
+                cfg.zlim=[0 .4];
+              case 'alpha'
+                cfg.zlim=[-.1 .1];
+              case 'beta'
+                cfg.zlim=[-.1 .1];
+            end
+        end
+        figure(10*ll+4+100);
+        ft_topoplotTFR(cfg,tmpuA);
+        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
+        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
+        tfrsave.topoU{dd}=mean(tmpuA.(param)(:,1,nearest(tmpuA.time,cfg.xlim(1)):nearest(tmpuA.time,cfg.xlim(2))),3);
+        figure(10*ll+4+200);
+        ft_topoplotTFR(cfg,tmpsA);
+        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
+        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
+        tfrsave.topoM{dd}=mean(tmpsA.(param)(:,1,nearest(tmpsA.time,cfg.xlim(1)):nearest(tmpsA.time,cfg.xlim(2))),3);
+    end
   end
 end
 
