@@ -3876,14 +3876,75 @@ else
   load freqstat.mat
 end
 
-% figure;imagesc(squeeze(sum(freqstat_TPA_MSPN_1wayANOVA.mask,1)));axis xy
-figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask))
-figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask))
-% figure;imagesc(squeeze(sum(freqstat_TPA_MSPN_1wayANOVA_thetaall.mask,2)))
 
-% figure;imagesc(squeeze(sum(plvstat_TPA_MSPN_1wayANOVA.mask,1)));axis xy
-figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask))
-% figure;imagesc(squeeze(sum(plvstat_TPA_MSPN_1wayANOVA_thetaall.mask,2)))
+% % figure;imagesc(squeeze(sum(freqstat_TPA_MSPN_1wayANOVA.mask,1)));axis xy
+% figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask))
+% figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask))
+% % figure;imagesc(squeeze(sum(freqstat_TPA_MSPN_1wayANOVA_thetaall.mask,2)))
+% % figure;imagesc(squeeze(sum(plvstat_TPA_MSPN_1wayANOVA.mask,1)));axis xy
+% figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask))
+% % figure;imagesc(squeeze(sum(plvstat_TPA_MSPN_1wayANOVA_thetaall.mask,2)))
+
+% Figure for paper:
+figure(43);imagesc(freqstat_TPA_MSPN_1wayANOVA_theta.time,1:63,squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask));
+xlim([-.01 1.051]);
+set(gca,'FontSize',30);
+set(gca,'XTick',[-.6:.1:1.8])
+set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+set(gca,'YTick',1:63)
+set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
+set(gca,'YTickMode','auto')
+print(43,[fdir 'PowThetastatANOVA.eps'],'-painters','-depsc')
+figure(44);imagesc(freqstat_TPA_MSPN_1wayANOVA_theta.time,1:63,squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask));
+xlim([-.01 1.051]);
+set(gca,'FontSize',30);
+set(gca,'XTick',[-.6:.1:1.8])
+set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+set(gca,'YTick',1:63)
+set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
+set(gca,'YTickMode','auto')
+print(44,[fdir 'PowBetastatANOVA.eps'],'-painters','-depsc')
+figure(45);imagesc(freqstat_TPA_MSPN_1wayANOVA_theta.time,1:63,squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask));
+xlim([-.01 1.051]);
+set(gca,'FontSize',30);
+set(gca,'XTick',[-.6:.1:1.8])
+set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+set(gca,'YTick',1:63)
+set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
+set(gca,'YTickMode','auto')
+print(45,[fdir 'PlvThetastatANOVA.eps'],'-painters','-depsc')
+
+
+
+
+% Plotting topo of stat for figures
+freqstat_TPA_MSPN_1wayANOVA_theta.stat1=freqstat_TPA_MSPN_1wayANOVA_theta.stat.*freqstat_TPA_MSPN_1wayANOVA_theta.mask;
+freqstat_TPA_MSPN_1wayANOVA_beta.stat1=freqstat_TPA_MSPN_1wayANOVA_beta.stat.*freqstat_TPA_MSPN_1wayANOVA_beta.mask;
+plvstat_TPA_MSPN_1wayANOVA_theta.stat1=plvstat_TPA_MSPN_1wayANOVA_theta.stat.*plvstat_TPA_MSPN_1wayANOVA_theta.mask;
+figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.stat.*freqstat_TPA_MSPN_1wayANOVA_theta.mask))
+figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.stat.*freqstat_TPA_MSPN_1wayANOVA_beta.mask))
+figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.stat.*plvstat_TPA_MSPN_1wayANOVA_theta.mask))
+
+cfg=[];
+cfg.parameter='stat1';
+cfg.xlim=[.2 .4]; % time
+cfg.zlim='maxabs';
+cfg.layout='eeg1010';
+cfg.highlight          = 'on';
+cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
+cfg.highlightsize = 16;
+cfg.markersymbol = 'o';
+figure(1);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_theta)
+print(1,[fdir 'ANOVA_PowTheta_topo1.eps'],'-painters','-depsc')
+cfg.xlim=[.12 .32]; % time
+cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat1,3)));
+figure(2);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+print(2,[fdir 'ANOVA_PowBeta_topo1.eps'],'-painters','-depsc')
+cfg.xlim=[.05 .3]; % time
+cfg.highlightchannel   =  plvstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(plvstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
+figure(3);ft_topoplotTFR(cfg,plvstat_TPA_MSPN_1wayANOVA_theta)
+print(3,[fdir 'ANOVA_PlvTheta_topo1.eps'],'-painters','-depsc')
+
 
 
 clear fullpow fullplv
@@ -3905,6 +3966,23 @@ thetaplv_reshape=reshape(thetaplv,[7 63*size(gravelo_TPA_MSPN_avg{llind}.powspct
 % alphaplv_reshape=reshape(alphaplv,[7 63*size(gravelo_TPA_MSPN_avg{llind}.powspctrm,3)]);
 betapow_reshape=reshape(betapow,[7 63*size(gravelo_TPA_MSPN_avg{llind}.powspctrm,3)]);
 % betaplv_reshape=reshape(betaplv,[7 63*size(gravelo_TPA_MSPN_avg{llind}.powspctrm,3)]);
+
+
+
+% Masked-PCA Theta power
+mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask);
+name='PowTheta';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,thetapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+
+mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask);
+name='PowBeta';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,betapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+
+mask_use=squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask);
+name='PlvTheta';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,thetaplv_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+
+
 
 % [aao,bbo,vvo]=svd(fullpow_reshape,'econ');
 % [aal,bbl,vvl]=svd(fullplv_reshape,'econ');
@@ -4032,11 +4110,29 @@ end
 
 save('icasave.mat','icasave*','-append')
 
+% Correlate (non-masked) ICA with data
+for llind=1:7
+  [af,bf,cf]=svd(rOTica(:,:,llind),'econ');
+  pcarOTica=af(:,1)*cf(:,1)';
+  [af,bf,cf]=svd(rOBica(:,:,llind),'econ');
+  pcarOBica=af(:,1)*cf(:,1)';
+  [af,bf,cf]=svd(rLTica(:,:,llind),'econ');
+  pcarLTica=af(:,1)*cf(:,1)';
+  for llcond=1:7
+    rOTica_grave_corr(llind,llcond)=corr(reshape(rOTica(:,:,llind),[63*106 1]),reshape(squeeze(thetapow_reshape(llcond,:,:)),[63*106 1]));
+    pcarOTica_grave_corr(llind,llcond)=corr(reshape(pcarOTica,[63*106 1]),reshape(squeeze(thetapow_reshape(llcond,:,:)),[63*106 1]));
+    rOBica_grave_corr(llind,llcond)=corr(reshape(rOBica(:,:,llind),[63*106 1]),reshape(squeeze(betapow_reshape(llcond,:,:)),[63*106 1]));
+    pcarOBica_grave_corr(llind,llcond)=corr(reshape(pcarOBica,[63*106 1]),reshape(squeeze(betapow_reshape(llcond,:,:)),[63*106 1]));
+    rLTica_grave_corr(llind,llcond)=corr(reshape(rLTica(:,:,llind),[63*106 1]),reshape(squeeze(thetaplv_reshape(llcond,:,:)),[63*106 1]));
+    pcarLTica_grave_corr(llind,llcond)=corr(reshape(pcarLTica,[63*106 1]),reshape(squeeze(thetaplv_reshape(llcond,:,:)),[63*106 1]));
+  end
+end
+
 
 
 % 2) Power Theta averaged
 mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask);
-[rho,rho_nw]=mask_corr(mask_use,runicaPowT,thetapow_reshape,0);
+[rho,rho_nw,rhocondOT]=mask_corr(mask_use,runicaPowT,thetapow_reshape,0);
 for llind=1:7
   figure;imagesc(rOTica(:,:,llind).*mask_use); colorbar; caxis([-0.2 0.2])
   figure;imagesc(mask_use.*squeeze(gravelo_TPA_MSPN_avg_theta{llind}.powspctrm));colorbar; caxis([-.4 .4])
@@ -4045,7 +4141,7 @@ end
     
 % 2) Power Beta averaged
 mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask);
-[rho,rho_nw]=mask_corr(mask_use,runicaPowB,betapow_reshape,0);
+[rho,rho_nw,rhocondOB]=mask_corr(mask_use,runicaPowB,betapow_reshape,0);
 for llind=1:7
   figure;imagesc(rOBica(:,:,llind).*mask_use); colorbar; caxis([-0.2 0.2])
   figure;imagesc(mask_use.*squeeze(gravelo_TPA_MSPN_avg_beta{llind}.powspctrm));colorbar; caxis([-.4 .4])
@@ -4054,7 +4150,7 @@ end
 
 % 3) ITC Theta averaged
 mask_use=squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask);
-[rho,rho_nw]=mask_corr(mask_use,runicaPlvT,thetaplv_reshape,1);
+[rho,rho_nw,rhocondLT]=mask_corr(mask_use,runicaPlvT,thetaplv_reshape,0);
 for llind=1:7
   figure;imagesc(rLTica(:,:,llind).*squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask)); colorbar; caxis([-0.04 0.04])
   figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask.*gravelo_TPA_MSPN_avg_theta{llind}.plvabs));colorbar; caxis([-.08 .08])
@@ -4115,6 +4211,19 @@ figure;imagescc(courseOPcorrOB)
 figure;imagescc(topocorrLT)
 figure;imagescc(courseFCcorrLT)
 figure;imagescc(courseOPcorrLT)
+
+abs(topocorrOT)>.45 & (abs(courseFCcorrOT)>.7 | abs(courseOPcorrOT)>.7)
+
+max(abs(courseFCcorrOT),abs(courseOPcorrOT))
+
+
+figure;imagesc((abs(topocorrOT)+max(abs(courseFCcorrOT),abs(courseOPcorrOT)))/2);caxis([0 1]);colormap('gray')
+figure;imagesc((abs(topocorrOB)+max(abs(courseFCcorrOB),abs(courseOPcorrOB)))/2);caxis([0 1]);colormap('gray')
+figure;imagesc((abs(topocorrLT)+max(abs(courseFCcorrLT),abs(courseOPcorrLT)))/2);caxis([0 1]);colormap('gray')
+
+figure;imagesc([(abs(topocorrOT)+max(abs(courseFCcorrOT),abs(courseOPcorrOT)))/2]>.6)
+figure;imagesc([(abs(topocorrOB)+max(abs(courseFCcorrOB),abs(courseOPcorrOB)))/2]>.6)
+figure;imagesc([(abs(topocorrLT)+max(abs(courseFCcorrLT),abs(courseOPcorrLT)))/2]>.6)
 
 
 % for llind=1:7
@@ -7749,7 +7858,7 @@ else
 end
 plotplvflag=0;
 plottfrflag=0;
-peakfindflag=1;
+peakfindflag=0;
 coloruse=varycolor(10);
 % optimsied to be maximally apart and distinct
 % 1  TacPAud
@@ -7989,7 +8098,7 @@ print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
 
 for ll=soalist
 % for ll=[1 3 4 5 6]
-% for ll=3
+% for ll=4
   close all
 %   clear grave* stat* tmp*
   clear tmp*
@@ -8037,7 +8146,7 @@ for ll=soalist
   if plottfrflag
     clear pow*
     
-    plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,[-.6 1.8],stattl_mc_comb2_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
+%     plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,[-.6 1.8],stattl_mc_comb2_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
     
     cfg=[];
     tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
@@ -8715,8 +8824,8 @@ combval=1;
 adda=3;
 
 % for all ll, print at least a TFR even if nothing significant.
-% for ll=soalist
-for ll=[1]
+for ll=soalist
+% for ll=[1]
   close all
   clear grave* stat*
   if pre30plot

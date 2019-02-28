@@ -70,9 +70,12 @@ sub{31}='e31';
 sub{32}='e32';
 
 if ispc
+  warning off
   rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
   rmpath(genpath('D:\fieldtrip_svn\'))
-  addpath('D:\fieldtrip_svn\')
+  rmpath(genpath('D:\fieldtrip_git\'))
+  warning on
+  addpath('D:\fieldtrip_git\')
 else
   rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
   rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
@@ -336,7 +339,9 @@ print(4,[fdir 'rt_med_Xlog_RTE.png'],'-dpng')
 % load([ddir 'rt_allsubj.mat'],'rt_ms*');
 load([ddir 'rt_allsubj22.mat'],'rt_ms*');
 rtuse=squeeze(rt_msMminshiftuni(:,3,:));
-anova_rm(rtuse([3 4 5 6 7],:)')
+[pa,ptable]=anova_rm(rtuse([1 3 4 5 6 7 9],:)'); % p=0000
+[pa70,ptable70]=anova_rm(rtuse([3 4 5 6 7],:)'); % p=0.0103
+[pa20,ptable20]=anova_rm(rtuse([4 5 6],:)'); % p=0.1657
 
 p=nan(7,7);
 [h,p(3,4)]=ttest(rtuse(3,:),rtuse(4,:))

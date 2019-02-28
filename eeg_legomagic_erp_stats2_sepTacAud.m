@@ -5557,6 +5557,17 @@ posthoctimwin=[min(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wa
 clustermat=stat_TPA_MSPN_1wayANOVA.posclusterslabelmat;
 clustermat(clustermat>=3)=0;
 
+% For paper:
+figure(42);imagesc(0:.001:.5,1:62,clustermat);
+xlim([-.01 .51]);
+set(gca,'FontSize',30);
+set(gca,'XTick',[-.6:.1:1.8])
+set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+set(gca,'YTick',1:62)
+set(gca,'YTickLabel',stat_TPA_MSPN_1wayANOVA.label)
+set(gca,'YTickMode','auto')
+print(42,[fdir 'ERPstatANOVA.eps'],'-painters','-depsc')
+
 cfg=[];
 cfg.latency=[0 0.5];
 for llind=1:7
@@ -5584,9 +5595,43 @@ fullconmat_reshape=reshape(fullconmat,[7 62*501]);
 fullconmat_tmp=reshape(fullconmat_grind,[7 22 62*501]);
 fullconmat_grind_reshape=reshape(fullconmat_tmp,[7 22*62*501]);
 
+% cluster 1 (early)
+mask_use=clustermat; % contains 2nd cluster at p=0.065
+mask_use(mask_use==1)=0;
+mask_use(mask_use==2)=1;
+name='ERP1';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,fullconmat_reshape,grave_TPA_MSPN_avg{1}.label,1,[0:.001:.5],[-.1 .6],fdir,name);
 
+% Cluster 2
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:147)=0;
+mask_use(:,301:end)=0;
+name='ERP2';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,fullconmat_reshape,grave_TPA_MSPN_avg{1}.label,1,[0:.001:.5],[-.1 .6],fdir,name);
+
+% Cluster 3
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:350)=0;
+mask_use(:,422:end)=0;
+name='ERP3';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,fullconmat_reshape,grave_TPA_MSPN_avg{1}.label,1,[0:.001:.5],[-.1 .6],fdir,name);
+
+% Cluster 4
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:450)=0;
+name='ERP4';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,fullconmat_reshape,grave_TPA_MSPN_avg{1}.label,1,[0:.001:.5],[-.1 .6],fdir,name);
+
+% Cluster 34
+mask_use=stat_TPA_MSPN_1wayANOVA.mask;
+mask_use(:,1:350)=0;
+name='ERP34';
+[aa1,aaa1,vvv1]=pca_masked(mask_use,fullconmat_reshape,grave_TPA_MSPN_avg{1}.label,1,[0:.001:.5],[-.1 .6],fdir,name);
+
+
+% % % %%%%%%%%%%%%%%%%
 % PCA
-[aa1,bb1,vv1]=svd(fullconmat_reshape,'econ');
+% [aa1,bb1,vv1]=svd(fullconmat_reshape,'econ');
 % [aa2,bb2,vv2]=svd(fullconmat_tw_reshape,'econ');
 % [aa3,bb3,vv3]=svd(fullconmat_grind_reshape,'econ');
 % [aa4,bb4,vv4]=svd(fullconmat_pcared_reshape,'econ');
@@ -5636,7 +5681,7 @@ for llind=1:7
     xticklabels({'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'})
     set(gca,'XTickLabelRotation',45)
     %   figure(20);subplot(7,3,llind*3-2);barh(runicaout.topo(:,llind));xlim([-3 3])
-    figure(20);subplot(7,3,llind*3-1);cfg=[];cfg.latency=1;cfg.zlim='maxabs';cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
+    figure(20);subplot(7,3,llind*3-1);cfg=[];cfg.xlim=1;cfg.zlim='maxabs';cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
     figure(20);subplot(7,3,llind*3);plot(cf(:,1));ylim([-max(abs(cf(:,1)))-.02 max(abs(cf(:,1)))+.02])
   else % For ICA-ERP figure in paper
     close all
@@ -5662,7 +5707,16 @@ for llind=1:7
 end
 save('icasave.mat','icasave*','-append')
 
-
+% Correlate (non-masked) ICA with data
+for llind=1:7
+  [af,bf,cf]=svd(rica(:,:,llind),'econ');
+  pcarica=af(:,1)*cf(:,1)';
+  for llcond=1:7
+    rica_grave_corr(llind,llcond)=corr(reshape(rica(:,:,llind),[62*501 1]),reshape(squeeze(fullconmat(llcond,:,:)),[62*501 1]));
+    pcarica_grave_corr(llind,llcond)=corr(reshape(pcarica,[62*501 1]),reshape(squeeze(fullconmat(llcond,:,:)),[62*501 1]));
+  end
+end
+figure;imagescc(rica_grave_corr.*[abs(rica_grave_corr)>.7])
 
 % Correlate sub-masked sections with sub-masked components
 figure;plot(mean(stat_TPA_MSPN_1wayANOVA.mask,1))
@@ -5670,48 +5724,86 @@ figure;plot(mean(stat_TPA_MSPN_1wayANOVA.mask,1))
 % Second 'peak' is 351-421
 % Third 'peak' is 451-501
 
-% cluster 1 (148-300ms)
+% cluster 2 (148-300ms)
 mask_use=stat_TPA_MSPN_1wayANOVA.mask;
 mask_use(:,1:147)=0;
 mask_use(:,301:end)=0;
-[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+[rho,rho_nw,rhocond2]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
 for llind=1:7
   figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
   figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
 end
 % rho = 0.3571    0.3532    *0.6089    *0.5210    0.1721    0.2454    0.0532
 
-% cluster 2 (351-421ms)
+stat_TPA_MSPN_1wayANOVA.stat2=stat_TPA_MSPN_1wayANOVA.stat.*mask_use;
+
+% cluster 3 (351-421ms)
 mask_use=stat_TPA_MSPN_1wayANOVA.mask;
 mask_use(:,1:350)=0;
 mask_use(:,422:end)=0;
-[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+[rho,rho_nw,rhocond3]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
 for llind=1:7
   figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
   figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
 end
 % rho = *0.7694    0.2988    0.4354    0.1108    *0.4713    0.1926    0.0820
 
-% cluster 3 (451-501ms)
+stat_TPA_MSPN_1wayANOVA.stat3=stat_TPA_MSPN_1wayANOVA.stat.*mask_use;
+
+% cluster 4 (451-501ms)
 mask_use=stat_TPA_MSPN_1wayANOVA.mask;
 mask_use(:,1:450)=0;
-[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+[rho,rho_nw,rhocond4]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
 for llind=1:7
   figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
   figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
 end
 % rho = 0.3342   *0.6531    0.3425    0.3038    0.2538    0.3992    0.1928
 
-% cluster 4 (early)
+stat_TPA_MSPN_1wayANOVA.stat4=stat_TPA_MSPN_1wayANOVA.stat.*mask_use;
+stat_TPA_MSPN_1wayANOVA.stat4rm=repmat(nanmean(stat_TPA_MSPN_1wayANOVA.stat4,2),[62 501]);
+
+% cluster 1 (early)
 mask_use=clustermat; % contains 2nd cluster at p=0.065
 mask_use(mask_use==1)=0;
 mask_use(mask_use==2)=1;
-[rho,rho_nw]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
+[rho,rho_nw,rhocond1]=mask_corr(mask_use,runicaout,fullconmat_reshape,0);
 for llind=1:7
   figure;imagesc(rica(:,:,llind).*mask_use);caxis([-1.4 1.4])
   figure;imagesc(mask_use.*grave_TPA_MSPN_avg{llind}.individual);caxis([-4 4])
 end
 % rho= *0.5890    0.2918    0.1013    0.2599    *0.7392    0.2761    0.1745
+
+stat_TPA_MSPN_1wayANOVA.stat1=stat_TPA_MSPN_1wayANOVA.stat.*mask_use;
+stat_TPA_MSPN_1wayANOVA.stat1rm=repmat(nanmean(stat_TPA_MSPN_1wayANOVA.stat1,2),[62 501]);
+
+
+cfg=[];
+cfg.parameter='stat1rm';
+cfg.xlim=[.5 1.3];
+cfg.zlim='maxabs';
+cfg.layout='eeg1010';
+cfg.highlight          = 'on';
+cfg.highlightchannel   =  stat_TPA_MSPN_1wayANOVA.label(find(mean(stat_TPA_MSPN_1wayANOVA.stat1,2)));
+cfg.highlightsize = 16;
+cfg.markersymbol = 'o';
+figure(1);ft_topoplotER(cfg,stat_TPA_MSPN_1wayANOVA)
+print(1,[fdir 'ANOVA_ERP_topo1.eps'],'-painters','-depsc')
+cfg.parameter='stat2';
+cfg.xlim=[.21 .23];
+cfg.highlightchannel   =  stat_TPA_MSPN_1wayANOVA.label(find(mean(stat_TPA_MSPN_1wayANOVA.stat2,2)));
+figure(2);ft_topoplotER(cfg,stat_TPA_MSPN_1wayANOVA)
+print(2,[fdir 'ANOVA_ERP_topo2.eps'],'-painters','-depsc')
+cfg.parameter='stat3';
+cfg.xlim=[.37 .39];
+cfg.highlightchannel   =  stat_TPA_MSPN_1wayANOVA.label(find(mean(stat_TPA_MSPN_1wayANOVA.stat3,2)));
+figure(3);ft_topoplotER(cfg,stat_TPA_MSPN_1wayANOVA)
+print(3,[fdir 'ANOVA_ERP_topo3.eps'],'-painters','-depsc')
+cfg.parameter='stat4rm';
+cfg.xlim=[.37 .39];
+cfg.highlightchannel   =  stat_TPA_MSPN_1wayANOVA.label(find(mean(stat_TPA_MSPN_1wayANOVA.stat4,2)));
+figure(4);ft_topoplotER(cfg,stat_TPA_MSPN_1wayANOVA)
+print(4,[fdir 'ANOVA_ERP_topo4.eps'],'-painters','-depsc')
 
 
 
@@ -7367,6 +7459,14 @@ figure;imagescc(topocorrERP)
 figure;imagescc(courseFCcorrERP)
 figure;imagescc(courseOPcorrERP)
 
+figure;imagesc(abs(topocorrERP));caxis([0 1]);colormap('gray')
+figure;imagesc(abs(courseFCcorrERP));caxis([0 1]);colormap('gray')
+figure;imagesc(abs(courseOPcorrERP));caxis([0 1]);colormap('gray')
+
+abs(topocorrERP)>.45 & (abs(courseFCcorrERP)>.7 | abs(courseOPcorrERP)>.7)
+
+figure;imagesc((abs(topocorrERP)+max(abs(courseFCcorrERP),abs(courseOPcorrERP)))/2);caxis([0 1]);colormap('gray')
+figure;imagesc([(abs(topocorrERP)+max(abs(courseFCcorrERP),abs(courseOPcorrERP)))/2]>.55)
 
 % plotting topo for peak times of interest, across all conditions
 for ll=soalist

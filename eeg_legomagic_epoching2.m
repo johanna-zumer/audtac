@@ -35,7 +35,7 @@ end
 cd(edir)
 
 sub{5}='e05'; 
-sub{6}='e06'; 
+sub{6}='e06';
 sub{7}='e07'; 
 sub{8}='e08'; 
 sub{9}='e09';
@@ -273,8 +273,6 @@ elseif featfull==0
   %   cfg.reref='yes';
   %   cfg.refchannel='all'; % used linked-mastoids for sleep staging but use average reference for ERPs and TFRs and source localisation
   raw_hpf=ft_preprocessing(cfg);
-  
-  
   
   prestim=4;  % seconds to evaluate overall;  % changed from 5 to 4 Oct 2018
   poststim=4;

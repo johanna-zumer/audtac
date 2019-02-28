@@ -1,4 +1,4 @@
-function [rho,rho_nw]=mask_corr(mask,runicaout,datareshape,plotflag)
+function [rho,rho_nw,rhocond]=mask_corr(mask,runicaout,datareshape,plotflag)
 % function [rho,rho_nw]=mask_corr(mask,runicaout,datareshape,plotflag)
 
 mask_vector=reshape(mask,[1 size(mask,1)*size(mask,2)]);
@@ -14,6 +14,9 @@ maskdatavec=reshape(datareshape(:,mask_induse)',[1 7*length(mask_induse)]);
 for llind=1:7
   [rho(llind),pval(llind)]=corr(maskdatavec',rica_masked_w(llind,:)');
   [rho_nw(llind),pval_nw(llind)]=corr(maskdatavec',rica_masked_nw(llind,:)');
+  for llcond=1:7
+    rhocond(llind,llcond)=corr(rica_masked(llind,:)',datareshape(llcond,mask_induse)');
+  end
 end
 if plotflag
   figure;imagesc(maskdatavec);caxis([-max(abs(maskdatavec)) max(abs(maskdatavec))])
