@@ -47,7 +47,17 @@ concat_stim_files  % updated on 20 March, 2015 to process response-no-EEG sessio
 % much.
 % eeg_legomagic_erp_stats % calls eeg_legomagic_trialSelection1_wakeSleep;
 % eeg_legomagic_erp_stats1 % calls eeg_legomagic_trialSelection2_wakeSleep
-eeg_legomagic_erp_stats2_sepTacAud % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
+% eeg_legomagic_erp_stats2_sepTacAud % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
+eeg_legomagic_erp_tlockdiffs % to generate tlock_diffs*.mat
+eeg_legomagic_erp_stats_only % runs group stats on above ERP data
+eeg_legomagic_erp_stats_anova % does across-asynchrony ANOVA and PCA
+eeg_legomagic_erp_plot % plots many of final figures
+
+% % Obsolete
+% eeg_legomagic_stats_reproducibility
+% eeg_legomagic_rsa 
+% eeg_pcm
+% eeg_legomagic_tscore
 
 % eeg_freqanalysis_sensor % calls eeg_legomagic_trialSelection_freqwide
 eeg_freqanalysis_sensor1 % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
@@ -56,16 +66,26 @@ eeg_freqanalysis_nonlinearBootstrap_sensor % calls eeg_legomagic_trialSelection1
 % RT analysis as well as RT-EEG correlations
 eeg_legomagic_brainBehaviourCorrelations
 
+eeg_legomagic_ERPphaseSort
+
 % % Source analysis
 % eeg_mriheadmodels
 % eeg_erp_sourceloc
 % eeg_tfr_sourceloc
 
 %% Sleep specific
+
+% most relevant
 eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to disk.
 % above had called eeg_legomagic_epoching2_featurestats, but this is now
 % deprecated and should call eeg_legomagic_epoching2(ii,sleep,0,saveflag).
 
+tac_alone_sleep % looks in to why tactile response lost in N2 (including median split analysis)
+
+% less relevant
+eeg_legomagic_ERPphaseSort
+test_power_dist_delta_prestim
+eeg_legomagic_stagecomp
 
 
 %% obsolete

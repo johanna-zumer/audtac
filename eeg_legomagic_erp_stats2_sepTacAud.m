@@ -32,8 +32,8 @@ else
     %       iteruse=32; % smart sampling;  set to value of usetr=0 in combination with usetr=2 to get new paired sample (iteruse+1)
 end
 freqsub=nan(1,max(iiuse));
-% for ii=iiuse
-    for ii=setdiff(iiuse,[8:16])
+for ii=iiuse
+%     for ii=setdiff(iiuse,[8:16])
 %   for ii=16
   cd([edir sub{ii} ])
   clearvars -except ii sub edir ddir ii*use sleep featurestats* ttuse soades usetr tacaloneproc synchasynch phaset0* binonly pcmflag plothist iter* trialkc*
