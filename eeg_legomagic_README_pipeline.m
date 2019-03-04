@@ -61,7 +61,16 @@ eeg_legomagic_erp_plot % plots many of final figures
 
 % eeg_freqanalysis_sensor % calls eeg_legomagic_trialSelection_freqwide
 eeg_freqanalysis_sensor1 % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
-eeg_freqanalysis_nonlinearBootstrap_sensor % calls eeg_legomagic_trialSelection1
+eeg_freqanalysis_unisensory % Unisensory stats and plotting
+eeg_freqanalysis_ANOVA % ANOVA across conditions
+eeg_freqanalysis_stats % main T-stat 
+eeg_freqanalysis_plotLines % plots time courses of band-specific results
+eeg_freqanalysis_phaseTime0 % phase at time zero plays a role? % see also eeg_legomagic_power_phase_bins
+
+% % Obsolete
+% eeg_freqanalysis_comb2stats % looks at diff combinations stat results
+% eeg_freqanalysis_nonlinearBootstrap_sensor % calls eeg_legomagic_trialSelection1
+eeg_freqanalysis_plottingTFimagescTopos
 
 % RT analysis as well as RT-EEG correlations
 eeg_legomagic_brainBehaviourCorrelations
@@ -86,6 +95,7 @@ tac_alone_sleep % looks in to why tactile response lost in N2 (including median 
 eeg_legomagic_ERPphaseSort
 test_power_dist_delta_prestim
 eeg_legomagic_stagecomp
+eeg_freqanalysis_medSplit
 
 
 %% obsolete
