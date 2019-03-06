@@ -4037,7 +4037,7 @@ for ll=soalist
           for ff=1:length(fn)
             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
             tlock_tacMSpN_each{subuseind}.(fn{ff})=featstruct_tacMSpN{ll,tt,ss}.(fn{ff});
-          end
+          end          
           KcDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
           KcPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
           KcEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
