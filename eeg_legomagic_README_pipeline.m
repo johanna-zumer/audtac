@@ -96,7 +96,7 @@ eeg_legomagic_ERPphaseSort
 test_power_dist_delta_prestim
 eeg_legomagic_stagecomp
 eeg_freqanalysis_medSplit
-
+eeg_legomagic_featurestats_stats
 
 %% obsolete
 % eeg_legomagic_preproc2 % with ICA
