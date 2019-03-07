@@ -7,8 +7,8 @@ fn={'delta' 'kc' 'sw' 'sp_fast' 'sp_slow'};
 data_sum={};
 data_sum.trialinfo1=data1.trialinfo;
 data_sum.trialinfo2=data2.trialinfo;
-for ff=1:length(fn)
-  for tr=1:length(data1.(fn{ff}))
+for ff=1:length(fn) % fieldname
+  for tr=1:length(data1.(fn{ff})) % trial
     data_sum.(fn{ff}){tr}=[data1.(fn{ff}){tr} data2.(fn{ff}){tr}];
   end
 end
