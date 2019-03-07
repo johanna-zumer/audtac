@@ -219,123 +219,128 @@ for ll=soalist
             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
             tlock_tacMSpN_each{subuseind}.(fn{ff})=featstruct_tacMSpN{ll,tt,ss}.(fn{ff});
           end
-          KcDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          KcPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          KcEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          for kk=1:numt_trials(ll,tt,ss)
-            numKc=length(tlock_tacPaud_each{subuseind}.kc{kk});
-            for nk=1:numKc
-              if tlock_tacPaud_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
-                KcDuring_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
-                KcPre_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-                KcEvoked_tacPaud{subuseind}(kk)=1;
-              end
-            end % nk
-            numKc=length(tlock_tacPaud_each{subuseind}.sw{kk});
-            for nk=1:numKc
-              if tlock_tacPaud_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
-                KcDuring_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
-                KcPre_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-                KcEvoked_tacPaud{subuseind}(kk)=1;
-              end
-            end % nk
-          end  % kk
-          KcDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          KcPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          KcEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          for kk=1:numt_trials(ll,tt,ss)
-            numKc=length(tlock_tacMSpN_each{subuseind}.kc{kk});
-            for nk=1:numKc
-              if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
-                KcPre_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
-                KcDuring_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll) %  Dang Vu 2011
-                KcEvoked_tacMSpN{subuseind}(kk)=1;
-              end
-            end % nk
-            numKc=length(tlock_tacMSpN_each{subuseind}.sw{kk});
-            for nk=1:numKc
-              if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
-                KcPre_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
-                KcDuring_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-                KcEvoked_tacMSpN{subuseind}(kk)=1;
-              end
-            end % nk
-          end  % kk
-          % Now spindles
-          SpDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          SpPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          SpEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          for kk=1:numt_trials(ll,tt,ss)
-            numSp=length(tlock_tacPaud_each{subuseind}.sp_fast{kk});
-            for nk=1:numSp
-              if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
-                SpPre_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
-                SpDuring_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-                SpEvoked_tacPaud{subuseind}(kk)=1;
-              end
-            end % nk
-            numSp=length(tlock_tacPaud_each{subuseind}.sp_slow{kk});
-            for nk=1:numSp
-              if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
-                SpPre_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
-                SpDuring_tacPaud{subuseind}(kk)=1;
-              end
-              if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-                SpEvoked_tacPaud{subuseind}(kk)=1;
-              end
-            end % nk
-          end  % kk
-          SpDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          SpPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          SpEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-          for kk=1:numt_trials(ll,tt,ss)
-            numSp=length(tlock_tacMSpN_each{subuseind}.sp_fast{kk});
-            for nk=1:numSp
-              if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
-                SpPre_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
-                SpDuring_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-                SpEvoked_tacMSpN{subuseind}(kk)=1;
-              end
-            end % nk
-            numSp=length(tlock_tacMSpN_each{subuseind}.sp_slow{kk});
-            for nk=1:numSp
-              if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
-                SpPre_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
-                SpDuring_tacMSpN{subuseind}(kk)=1;
-              end
-              if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-                SpEvoked_tacMSpN{subuseind}(kk)=1;
-              end
-            end % nk
-          end  % kk
+          featind_tacPaud{subusedind} = feat_pre_during_evoked(tlock_tacPaud_each{subuseind},ll);
+          featind_tacMSpN{subusedind} = feat_pre_during_evoked(tlock_tacMSpN_each{subuseind},ll);
+          disp('what to do next?')
+          keyboard
+
+%           KcDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           KcPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           KcEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           for kk=1:numt_trials(ll,tt,ss)
+%             numKc=length(tlock_tacPaud_each{subuseind}.kc{kk});
+%             for nk=1:numKc
+%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
+%                 KcDuring_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
+%                 KcPre_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
+%                 KcEvoked_tacPaud{subuseind}(kk)=1;
+%               end
+%             end % nk
+%             numKc=length(tlock_tacPaud_each{subuseind}.sw{kk});
+%             for nk=1:numKc
+%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
+%                 KcDuring_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
+%                 KcPre_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
+%                 KcEvoked_tacPaud{subuseind}(kk)=1;
+%               end
+%             end % nk
+%           end  % kk
+%           KcDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           KcPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           KcEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           for kk=1:numt_trials(ll,tt,ss)
+%             numKc=length(tlock_tacMSpN_each{subuseind}.kc{kk});
+%             for nk=1:numKc
+%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
+%                 KcPre_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
+%                 KcDuring_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll) %  Dang Vu 2011
+%                 KcEvoked_tacMSpN{subuseind}(kk)=1;
+%               end
+%             end % nk
+%             numKc=length(tlock_tacMSpN_each{subuseind}.sw{kk});
+%             for nk=1:numKc
+%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
+%                 KcPre_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
+%                 KcDuring_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
+%                 KcEvoked_tacMSpN{subuseind}(kk)=1;
+%               end
+%             end % nk
+%           end  % kk
+%           % Now spindles
+%           SpDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           SpPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           SpEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           for kk=1:numt_trials(ll,tt,ss)
+%             numSp=length(tlock_tacPaud_each{subuseind}.sp_fast{kk});
+%             for nk=1:numSp
+%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
+%                 SpPre_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
+%                 SpDuring_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
+%                 SpEvoked_tacPaud{subuseind}(kk)=1;
+%               end
+%             end % nk
+%             numSp=length(tlock_tacPaud_each{subuseind}.sp_slow{kk});
+%             for nk=1:numSp
+%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
+%                 SpPre_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
+%                 SpDuring_tacPaud{subuseind}(kk)=1;
+%               end
+%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
+%                 SpEvoked_tacPaud{subuseind}(kk)=1;
+%               end
+%             end % nk
+%           end  % kk
+%           SpDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           SpPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           SpEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
+%           for kk=1:numt_trials(ll,tt,ss)
+%             numSp=length(tlock_tacMSpN_each{subuseind}.sp_fast{kk});
+%             for nk=1:numSp
+%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
+%                 SpPre_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
+%                 SpDuring_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
+%                 SpEvoked_tacMSpN{subuseind}(kk)=1;
+%               end
+%             end % nk
+%             numSp=length(tlock_tacMSpN_each{subuseind}.sp_slow{kk});
+%             for nk=1:numSp
+%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
+%                 SpPre_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
+%                 SpDuring_tacMSpN{subuseind}(kk)=1;
+%               end
+%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
+%                 SpEvoked_tacMSpN{subuseind}(kk)=1;
+%               end
+%             end % nk
+%           end  % kk
 
           
         end
