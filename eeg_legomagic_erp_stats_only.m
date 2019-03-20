@@ -48,6 +48,7 @@ if sleep
   iteruse=11;
   trialkc=-1;  % change me: 0 (no Kc) or 1 (only Kc) or -1 (all trials)
   usetr=1;
+  computetrlkeep=1; % =1 ugly hack to get trlkkeep but not run stats;  =0 normal run for stats
 else
   chanuse=chanuse_sleep0;
   %   warning('change me back to 27!!')
@@ -66,7 +67,7 @@ figind=1;
 for ll=soalist
   %       for ll=[5]
   %   for tt=1:4
-  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed
+  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed P_* H_* STATS_* featind* *trlkeep*
   
   %     if ll==1 | ll==9
   %       subuse=8:32;
@@ -124,7 +125,7 @@ for ll=soalist
         end
         if sleep
           load(['tlock_diffs_features_' sub{ii} '_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'featstruct*');
-        end          
+        end
       else % either trialkc=-1 or not exist
         try
           load(['tlock_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tt' num2str(tt) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'])
@@ -219,130 +220,8 @@ for ll=soalist
             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
             tlock_tacMSpN_each{subuseind}.(fn{ff})=featstruct_tacMSpN{ll,tt,ss}.(fn{ff});
           end
-          featind_tacPaud{subusedind} = feat_pre_during_evoked(tlock_tacPaud_each{subuseind},ll);
-          featind_tacMSpN{subusedind} = feat_pre_during_evoked(tlock_tacMSpN_each{subuseind},ll);
-          disp('what to do next?')
-          keyboard
-
-%           KcDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           KcPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           KcEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           for kk=1:numt_trials(ll,tt,ss)
-%             numKc=length(tlock_tacPaud_each{subuseind}.kc{kk});
-%             for nk=1:numKc
-%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
-%                 KcDuring_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
-%                 KcPre_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-%                 KcEvoked_tacPaud{subuseind}(kk)=1;
-%               end
-%             end % nk
-%             numKc=length(tlock_tacPaud_each{subuseind}.sw{kk});
-%             for nk=1:numKc
-%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
-%                 KcDuring_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
-%                 KcPre_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacPaud_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-%                 KcEvoked_tacPaud{subuseind}(kk)=1;
-%               end
-%             end % nk
-%           end  % kk
-%           KcDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           KcPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           KcEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           for kk=1:numt_trials(ll,tt,ss)
-%             numKc=length(tlock_tacMSpN_each{subuseind}.kc{kk});
-%             for nk=1:numKc
-%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>-0.5+soades(ll)
-%                 KcPre_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).upend>0+soades(ll)
-%                 KcDuring_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.kc{kk}(nk).negmax>0.1+soades(ll) %  Dang Vu 2011
-%                 KcEvoked_tacMSpN{subuseind}(kk)=1;
-%               end
-%             end % nk
-%             numKc=length(tlock_tacMSpN_each{subuseind}.sw{kk});
-%             for nk=1:numKc
-%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>-0.5+soades(ll)
-%                 KcPre_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).down<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).upend>0+soades(ll)
-%                 KcDuring_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax<0.8+soades(ll) && tlock_tacMSpN_each{subuseind}.sw{kk}(nk).negmax>0.1+soades(ll)  %  Dang Vu 2011
-%                 KcEvoked_tacMSpN{subuseind}(kk)=1;
-%               end
-%             end % nk
-%           end  % kk
-%           % Now spindles
-%           SpDuring_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           SpPre_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           SpEvoked_tacPaud{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           for kk=1:numt_trials(ll,tt,ss)
-%             numSp=length(tlock_tacPaud_each{subuseind}.sp_fast{kk});
-%             for nk=1:numSp
-%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
-%                 SpPre_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
-%                 SpDuring_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-%                 SpEvoked_tacPaud{subuseind}(kk)=1;
-%               end
-%             end % nk
-%             numSp=length(tlock_tacPaud_each{subuseind}.sp_slow{kk});
-%             for nk=1:numSp
-%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
-%                 SpPre_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
-%                 SpDuring_tacPaud{subuseind}(kk)=1;
-%               end
-%               if tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacPaud_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-%                 SpEvoked_tacPaud{subuseind}(kk)=1;
-%               end
-%             end % nk
-%           end  % kk
-%           SpDuring_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           SpPre_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           SpEvoked_tacMSpN{subuseind}=zeros(1,numt_trials(ll,tt,ss));
-%           for kk=1:numt_trials(ll,tt,ss)
-%             numSp=length(tlock_tacMSpN_each{subuseind}.sp_fast{kk});
-%             for nk=1:numSp
-%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>-0.5+soades(ll)
-%                 SpPre_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).endtime>0+soades(ll)
-%                 SpDuring_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_fast{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-%                 SpEvoked_tacMSpN{subuseind}(kk)=1;
-%               end
-%             end % nk
-%             numSp=length(tlock_tacMSpN_each{subuseind}.sp_slow{kk});
-%             for nk=1:numSp
-%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>-0.5+soades(ll)
-%                 SpPre_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<0+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).endtime>0+soades(ll)
-%                 SpDuring_tacMSpN{subuseind}(kk)=1;
-%               end
-%               if tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime<3+soades(ll) && tlock_tacMSpN_each{subuseind}.sp_slow{kk}(nk).starttime>0.1+soades(ll)  %  Sato et al 2007
-%                 SpEvoked_tacMSpN{subuseind}(kk)=1;
-%               end
-%             end % nk
-%           end  % kk
-
-          
+          featind_tacPaud{subuseind,ll} = feat_pre_during_evoked(tlock_tacPaud_each{subuseind},ll);
+          featind_tacMSpN{subuseind,ll} = feat_pre_during_evoked(tlock_tacMSpN_each{subuseind},ll);
         end
         
         cfg=[];
@@ -427,14 +306,15 @@ for ll=soalist
   subuseindfinal=subuseind
   %     end
   
-  keyboard
-  
   for ii=1:subuseindfinal
     cfg=[];
     cfg.operation='subtract';
     cfg.parameter='avg';
     cfg.channel=chanuse;
     if usetr==0
+      iterinduse=1;
+    end
+    if usetr==1
       iterinduse=1;
     end
     for iterind=1:iterinduse
@@ -483,6 +363,20 @@ for ll=soalist
     if ll<5
       grave_AMSs_AMSa{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_AMSs_AMSa{:});
     end
+  end
+  
+  
+  if sleep && trialkc==-1 && ss==12 && computetrlkeep  % this is ugly coding practice
+    for ii=1:size(featind_tacMSpN,1)
+      [trlkeepKP_tacPaud{ii,ll},trlkeepKP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcPre');
+      [trlkeepKD_tacPaud{ii,ll},trlkeepKD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcDuring');
+      [trlkeepKE_tacPaud{ii,ll},trlkeepKE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcEvoked');
+      [trlkeepSP_tacPaud{ii,ll},trlkeepSP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpPre');
+      [trlkeepSD_tacPaud{ii,ll},trlkeepSD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpDuring');
+      [trlkeepSE_tacPaud{ii,ll},trlkeepSE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpEvoked');
+    end
+    save([edir 'trlkeep_sleep1.mat'],'trlkeep*','subuseall')
+    continue % because we're only doing this now for the trlkeep, not for stats
   end
   
   
@@ -833,7 +727,11 @@ for ll=soalist
   % save out for later
   cfg=[];
   %         cfg.latency=[statt_mc{ll,tt,ss}.time(1) statt_mc{ll,tt,ss}.time(end)];
-  cfg.latency=[-.5 1];
+  if sleep
+    cfg.latency=[-.5 1.7];
+  else
+    cfg.latency=[-.5 1];
+  end
   grind_tacPaud_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacPaud);
   grind_tacMSpN_save{ll,tt,ss}=ft_selectdata(cfg,grind_tacMSpN);
   if synchasynch && ll<5
@@ -1094,6 +992,11 @@ for ll=soalist
         stata_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
         stata_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
       end
+      if sleep && ss==12
+        disp('do trlkeep stats here')
+        keyboard
+        
+      end
       
       % Funny/Uta temporal (in)congruent contrast: (AT70 + TA70) vs (Simult + Simult_shift70)
       if synchasynch && ll<5
@@ -1150,18 +1053,18 @@ for ll=soalist
     
     if sleep
       for ii=1:subuseind
-        KcPreMSpN_mean(ll,ii)=mean(KcPre_tacMSpN{ii});
-        KcDuringMSpN_mean(ll,ii)=mean(KcDuring_tacMSpN{ii});
-        KcEvokedMSpN_mean(ll,ii)=mean(KcEvoked_tacMSpN{ii});
-        KcPreTpA_mean(ll,ii)=mean(KcPre_tacPaud{ii});
-        KcDuringTpA_mean(ll,ii)=mean(KcDuring_tacPaud{ii});
-        KcEvokedTpA_mean(ll,ii)=mean(KcEvoked_tacPaud{ii});
-        SpPreMSpN_mean(ll,ii)=mean(SpPre_tacMSpN{ii});
-        SpDuringMSpN_mean(ll,ii)=mean(SpDuring_tacMSpN{ii});
-        SpEvokedMSpN_mean(ll,ii)=mean(SpEvoked_tacMSpN{ii});
-        SpPreTpA_mean(ll,ii)=mean(SpPre_tacPaud{ii});
-        SpDuringTpA_mean(ll,ii)=mean(SpDuring_tacPaud{ii});
-        SpEvokedTpA_mean(ll,ii)=mean(SpEvoked_tacPaud{ii});
+        KcPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcPre);
+        KcDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcDuring);
+        KcEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcEvoked);
+        KcPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcPre);
+        KcDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcDuring);
+        KcEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcEvoked);
+        SpPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpPre);
+        SpDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpDuring);
+        SpEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpEvoked);
+        SpPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpPre);
+        SpDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpDuring);
+        SpEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpEvoked);
       end
       [P_KcPre(ll),H_KcPre(ll),STATS_KcPre{ll}] = signtest(KcPreMSpN_mean(ll,:),KcPreTpA_mean(ll,:));  % no assumptions on distribution using signtest
       [P_KcDuring(ll),H_KcDuring(ll),STATS_KcDuring{ll}] = signtest(KcDuringMSpN_mean(ll,:),KcDuringTpA_mean(ll,:));
@@ -1176,7 +1079,7 @@ for ll=soalist
     if iterflag
       if sleep
         %               if trialkcflag
-        save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*','Kc*mean','Sp*mean','P_*','H_*','STATS_*');
+        save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*','Kc*mean','Sp*mean','P_*','H_*','STATS_*','featind*');
         %               else
         %                 save([edir 'tlock_statmc_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '.mat'],'stat*');
         %               end
@@ -1209,7 +1112,7 @@ for ll=soalist
     %   if audtacflag
     %     save([edir 'tlock_statmc_sleep' num2str(sleep) '.mat'],'stat*');
     %   end
-    keyboard
+    %     keyboard
   end % statsflag
   
   
@@ -1363,42 +1266,42 @@ for ll=soalist
   %       end
   
   if medsplitstatsflag && nsub>1
-
+    
     
     nsub=size(tlock_tac9T_gndavgtopWwideP2N1{ss,tk}.individual,1);
-% try for just one channel of main effect.
-cfg=[];
-cfg.channel={'Fz' 'C1' 'C2' 'FC1' 'FC2'};
-cfg.avgoverchan='yes';
-cfg.latency=[.05 .25];
-cfg.parameter='individual';
-cfg.method='montecarlo';
-cfg.numrandomization=2000;
-% cfg.correctm='fdr';
-cfg.correctm='cluster';
-cfg.clusteralpha = 0.05;
-cfg.clusterstatistic = 'maxsum';
-cfg.statistic='indepsamplesT';
-cfg.design=zeros(2,2*nsub);
-cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-cfg.ivar=1;
-% for ss=10:12
-%   for tk=1:2
-%     statt_tactopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopWP2N1{ss,tk}, tlock_tac9T_gndavgbotWP2N1{ss,tk});
-%     statt_audtopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopWP2N1{ss,tk}, tlock_aud1A_gndavgbotWP2N1{ss,tk});
-%     statt_nultopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWP2N1{ss,tk},   tlock_nul_gndavgbotWP2N1{ss,tk});
-%   end
-% end
-
-for ss=10:12
-  for tk=1:2
-    statt_tactopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopWwideP2N1{ss,tk}, tlock_tac9T_gndavgbotWwideP2N1{ss,tk});
-    statt_audtopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopWwideP2N1{ss,tk}, tlock_aud1A_gndavgbotWwideP2N1{ss,tk});
-    statt_nultopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWwideP2N1{ss,tk},   tlock_nul_gndavgbotWwideP2N1{ss,tk});
-  end
-end
-
-
+    % try for just one channel of main effect.
+    cfg=[];
+    cfg.channel={'Fz' 'C1' 'C2' 'FC1' 'FC2'};
+    cfg.avgoverchan='yes';
+    cfg.latency=[.05 .25];
+    cfg.parameter='individual';
+    cfg.method='montecarlo';
+    cfg.numrandomization=2000;
+    % cfg.correctm='fdr';
+    cfg.correctm='cluster';
+    cfg.clusteralpha = 0.05;
+    cfg.clusterstatistic = 'maxsum';
+    cfg.statistic='indepsamplesT';
+    cfg.design=zeros(2,2*nsub);
+    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+    cfg.ivar=1;
+    % for ss=10:12
+    %   for tk=1:2
+    %     statt_tactopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopWP2N1{ss,tk}, tlock_tac9T_gndavgbotWP2N1{ss,tk});
+    %     statt_audtopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopWP2N1{ss,tk}, tlock_aud1A_gndavgbotWP2N1{ss,tk});
+    %     statt_nultopbotWP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWP2N1{ss,tk},   tlock_nul_gndavgbotWP2N1{ss,tk});
+    %   end
+    % end
+    
+    for ss=10:12
+      for tk=1:2
+        statt_tactopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_tac9T_gndavgtopWwideP2N1{ss,tk}, tlock_tac9T_gndavgbotWwideP2N1{ss,tk});
+        statt_audtopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_aud1A_gndavgtopWwideP2N1{ss,tk}, tlock_aud1A_gndavgbotWwideP2N1{ss,tk});
+        statt_nultopbotWwideP2N1F{ss,tk}=ft_timelockstatistics(cfg, tlock_nul_gndavgtopWwideP2N1{ss,tk},   tlock_nul_gndavgbotWwideP2N1{ss,tk});
+      end
+    end
+    
+    
     
     
     load eeg1010_neighb
@@ -1435,14 +1338,14 @@ end
     cfg.minnbchan = 2;
     cfg.ivar=1;
     cfg.randomseed=mcseed;
-
+    
     cfg.statistic='depsamplesT';
     % cfg.statistic='indepsamplesT';
     cfg.design=zeros(2,2*nsub);
     cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
     cfg.design(2,:)=[1:nsub 1:nsub];
     cfg.uvar=2;
-
+    
     statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
     
   end
@@ -1548,6 +1451,9 @@ end
 end % ll
 %     keyboard
 %     end % tt
+
+
+save([edir 'featind_sleep' num2str(sleep) '_iter' num2str(iter) '.mat'],'featind*');
 
 if savegrindflag
   if ~iterflag

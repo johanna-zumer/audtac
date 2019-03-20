@@ -1,19 +1,26 @@
 function featind = feat_pre_during_evoked(data,ll)
 % function featind = feat_pre_during_evoked(data,ll)
-
+%
+% ll: refers to asynchrony index
+% data: structure that has already combined either A+T or AT+N
+%
 % See litreview_evokedKc_evokedSp.xls for guidance on cutoff
-% Kc/SW:  If negmax between 400-750 ms, then is evoked Kc
-%         If down <0ms and upend>0, then Kc during
-%         If upend between -0.5 to 0ms, then Pre
+% Kc/SW:  If negmax between 400-750 ms, then is KcEvoked, 
+%         If down <0ms and upend>0, then KcDuring, where '0ms' means start of first stimulus
+%         If upend between -0.5 to 0ms, then KcPre, where '0ms' means start of first stimulus
 %
 % Spindles: Sato et al. 2007 found spindles evoked anywhere from 0-3s (median 2s)
 
-% Keep in mind the range should be suitable for either A or T to be relevant/evoked.
+% Keep in mind the range should be suitable for either A or T to be relevant/evoked, and shift according to asynchrony.
 
 soades= [-.5 nan -.07 -.02 0 .02 .07 nan .5];
 preadd= [-.5 nan -.07 -.02 0   0   0 nan  0];
 % postadd=[  0 nan    0    0 0 .02 .07 nan .5];
-numtr=size(data.trialinfo1,1);
+try
+  numtr=size(data.trialinfo,1);
+catch
+  numtr=size(data.trialinfo1,1);
+end
 
 featind.KcPre=zeros(1,numtr);
 featind.KcDuring=zeros(1,numtr);
