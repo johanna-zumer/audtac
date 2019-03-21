@@ -76,7 +76,13 @@ if ispc
   warning on
   addpath('D:\fieldtrip_git\')
 else
-  if strfind(hostname,'les')
+  if strfind(hostname,'LES')
+    warning off
+    rmpath(genpath('~/matlab/spm8/external/fieldtrip/'))
+    rmpath(genpath('~/fieldtrip_svn/'))
+    rmpath(genpath('~/fieldtrip_git/'))
+    warning on
+    addpath('~/fieldtrip_git/')
   else
     warning off
     rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
