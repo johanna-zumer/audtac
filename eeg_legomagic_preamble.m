@@ -11,7 +11,16 @@ if ispc
   pdir='D:\audtac\polhemus\';
 else
   [~,hostname]=system('hostname');
-  if ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % either COLLES-151401 or LES-LINUX_FS3
+  if ~isempty(strfind(hostname,'151401')) % COLLES-151401
+    edir='/home/adf/zumerj/audtac/eeg_data/';
+    esdir='/home/adf/zumerj/audtac/source_data/';
+    ddir='/home/adf/zumerj/audtac/legomagic/diaries/';
+    bdir='/home/adf/zumerj/audtac/behav_data/';
+    sdir='/home/adf/zumerj/audtac/spss_stuff/';
+    fdir='/home/adf/zumerj/audtac/figs/';
+    mdir='/home/adf/zumerj/audtac/structural_MRI/';
+    pdir='/home/adf/zumerj/audtac/polhemus/';
+  elseif ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % LES-LINUX_FS3
     edir='/home/zumerj/audtac/eeg_data/';
     esdir='/home/zumerj/audtac/source_data/';
     ddir='/home/zumerj/audtac/legomagic/diaries/';
@@ -76,7 +85,7 @@ if ispc
   warning on
   addpath('D:\fieldtrip_git\')
 else
-  if strfind(hostname,'LES')
+  if ~isempty(strfind(hostname,'LES')) | ~isempty(strfind(hostname,'les'))
     warning off
     rmpath(genpath('~/matlab/spm8/external/fieldtrip/'))
     rmpath(genpath('~/fieldtrip_svn/'))
