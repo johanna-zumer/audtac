@@ -220,6 +220,7 @@ if ~isempty(stageuse)
         end
       end
       if trialkc>=0
+        keyboard
         if trialkc==0
           cfg.trials=cfg.trials & sum(data_tac_ref.trialinfo(:,[15 14 16 25 24 26]),2)<.1; % exclude delta/Kc/SW trials
         elseif trialkc==1 % include evoked Kc trials
