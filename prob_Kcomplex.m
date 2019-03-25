@@ -2,6 +2,7 @@ function [pKpred,pKdiff]=prob_Kcomplex(m_n,m_a,m_t,m_at)
 %-------------------------------------------------------------------------
 % Boolean approach: Noisy-Or model
 % -- correct!
+% written by Uta; modified by Johanna for specific AT paradigm
 
 % 
 %  m_n = P(null event) % probability of spontaneous  k-complex for null condition
@@ -16,6 +17,6 @@ function [pKpred,pKdiff]=prob_Kcomplex(m_n,m_a,m_t,m_at)
 
 pKpred = 1 - ((1-m_a)*(1-m_t)/(1-m_n));
 
-pKdiff = m_at-K_pred;
+pKdiff = m_at-pKpred; % real minus predicted
 
 

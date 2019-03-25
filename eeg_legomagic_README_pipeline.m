@@ -89,6 +89,9 @@ eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to 
 % above had called eeg_legomagic_epoching2_featurestats, but this is now
 % deprecated and should call eeg_legomagic_epoching2(ii,sleep,0,saveflag).
 
+feat_pre_during_evoked_individual % calculates for each trial if there is a Kc or spindle 'during' or 'evoked'
+prob_Kcomplex % Uta's Boolean Noisy-OR model
+
 tac_alone_sleep % looks in to why tactile response lost in N2 (including median split analysis)
 
 % less relevant
