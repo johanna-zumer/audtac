@@ -21,7 +21,7 @@ if sleep
   %     iiuse=setdiff(iiBuse,[3:7 8]);
   trialkc=-1;  % CHANGE ME: -1 (use all), 0 (only non-Kc), or 1 (only Kc)
   iteruse=11;
-  trlfeat=1;  % =1 compute featind*.  =2 load and use computed featind*
+  trlfeat=2;  % =1 compute featind*.  =2 load and use computed featind*
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:9);
@@ -33,9 +33,9 @@ else
   %       iteruse=32; % smart sampling;  set to value of usetr=0 in combination with usetr=2 to get new paired sample (iteruse+1)
 end
 freqsub=nan(1,max(iiuse));
-% for ii=iiuse
-  % for ii=setdiff(iiuse,[8])
-  for ii=8
+for ii=iiuse
+% for ii=setdiff(iiuse,[8])
+%   for ii=8
   cd([edir sub{ii} ])
   clearvars -except ii sub edir ddir ii*use sleep featurestats* ttuse soades usetr tacaloneproc synchasynch phaset0* binonly pcmflag plothist iter* trialkc* subuseall trl*
   [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
@@ -44,7 +44,7 @@ freqsub=nan(1,max(iiuse));
     if trlfeat==1  % compute featind*
       load(['tlock_diffs_features_' sub{ii} '_sleep' num2str(sleep) '_iter' num2str(iteruse) '_trialkc' num2str(trialkc) '.mat'],'featstruct*');
     elseif trlfeat==2
-      load(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat'],'featind*');
+      load(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat']);
     end
   end
   
@@ -731,30 +731,30 @@ freqsub=nan(1,max(iiuse));
                 for ff=1:length(fn)
                   tlock_tac{ll,tt,ss}.(fn{ff})=featstruct_tac{ll,tt,ss}.(fn{ff});
                 end
-                featind_tac{ll} = feat_pre_during_evoked_individual(tlock_tac{ll,tt,ss},ll);
+                featind_tac{ll} = feat_pre_during_evoked_individual(tlock_tac{ll,tt,ss},rem(ll,10));
               elseif trlfeat==2
                 tcfg=cfg;cfg=[];cfg.randomseed=13;ft_preamble randomseed;cfg=tcfg;  % Sets call to 'rand' in Shuffle to same starting point, for reproducibility
-                if min_nKD(ll)>20
+                if min_nKD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_tac{ll}.KcDuring));
-                  trlkeep_tac_nKD{ll,ii}=tmp(1:min_nKD(ll));
+                  trlkeep_tac_nKD{ll,ii}=tmp(1:min_nKD(rem(ll,10)));
                   cfg.trials=trlkeep_tac_nKD{ll,ii};
                   tlock_tactlock_nKD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                   tlock_tactlock_nKD{ll,tt,ss}=rmfield(tlock_tactlock_nKD{ll,tt,ss},{'var' 'dof'});
                 else
                   tlock_tactlock_nKD{ll,tt,ss}=[];
                 end
-                if min_nSD(ll)>20
+                if min_nSD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_tac{ll}.SpDuring));
-                  trlkeep_tac_nSD{ll,ii}=tmp(1:min_nSD(ll));
+                  trlkeep_tac_nSD{ll,ii}=tmp(1:min_nSD(rem(ll,10)));
                   cfg.trials=trlkeep_tac_nSD{ll,ii};
                   tlock_tactlock_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                   tlock_tactlock_nSD{ll,tt,ss}=rmfield(tlock_tactlock_nSD{ll,tt,ss},{'var' 'dof'});
                 else
                   tlock_tactlock_nSD{ll,tt,ss}=[];
                 end
-                if min_nKD_nSD(ll)>20
+                if min_nKD_nSD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_tac{ll}.KcDuring & ~featind_tac{ll}.SpDuring));
-                  trlkeep_tac_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(ll));
+                  trlkeep_tac_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(rem(ll,10)));
                   cfg.trials=trlkeep_tac_nKD_nSD{ll,ii};
                   tlock_tactlock_nKD_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_tac{ll,tt,ss});
                   tlock_tactlock_nKD_nSD{ll,tt,ss}=rmfield(tlock_tactlock_nKD_nSD{ll,tt,ss},{'var' 'dof'});
@@ -1062,27 +1062,27 @@ freqsub=nan(1,max(iiuse));
                 featind_aud{ll} = feat_pre_during_evoked_individual(tlock_aud{ll,tt,ss},ll-40); %
               elseif trlfeat==2
                 tcfg=cfg;cfg=[];cfg.randomseed=13;ft_preamble randomseed;cfg=tcfg;  % Sets call to 'rand' in Shuffle to same starting point, for reproducibility
-                if min_nKD(ll)>20
+                if min_nKD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_aud{ll}.KcDuring));
-                  trlkeep_aud_nKD{ll,ii}=tmp(1:min_nKD(ll));
+                  trlkeep_aud_nKD{ll,ii}=tmp(1:min_nKD(rem(ll,10)));
                   cfg.trials=trlkeep_aud_nKD{ll,ii};
                   tlock_audtlock_nKD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                   tlock_audtlock_nKD{ll,tt,ss}=rmfield(tlock_audtlock_nKD{ll,tt,ss},{'var' 'dof'});
                 else
                   tlock_audtlock_nKD{ll,tt,ss}=[];
                 end
-                if min_nSD(ll)>20
+                if min_nSD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_aud{ll}.SpDuring));
-                  trlkeep_aud_nSD{ll,ii}=tmp(1:min_nSD(ll));
+                  trlkeep_aud_nSD{ll,ii}=tmp(1:min_nSD(rem(ll,10)));
                   cfg.trials=trlkeep_aud_nSD{ll,ii};
                   tlock_audtlock_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                   tlock_audtlock_nSD{ll,tt,ss}=rmfield(tlock_audtlock_nSD{ll,tt,ss},{'var' 'dof'});
                 else
                   tlock_audtlock_nSD{ll,tt,ss}=[];
                 end
-                if min_nKD_nSD(ll)>20
+                if min_nKD_nSD(rem(ll,10))>20
                   tmp=Shuffle(find(~featind_aud{ll}.KcDuring & ~featind_aud{ll}.SpDuring));
-                  trlkeep_aud_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(ll));
+                  trlkeep_aud_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(rem(ll,10)));
                   cfg.trials=trlkeep_aud_nKD_nSD{ll,ii};
                   tlock_audtlock_nKD_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_aud{ll,tt,ss});
                   tlock_audtlock_nKD_nSD{ll,tt,ss}=rmfield(tlock_audtlock_nKD_nSD{ll,tt,ss},{'var' 'dof'});
@@ -1251,27 +1251,27 @@ freqsub=nan(1,max(iiuse));
               featind_nul{ll} = feat_pre_during_evoked_individual(tlock_nul{ll,tt,ss},ll-50); %
             elseif trlfeat==2
               tcfg=cfg;cfg=[];cfg.randomseed=13;ft_preamble randomseed;cfg=tcfg;  % Sets call to 'rand' in Shuffle to same starting point, for reproducibility
-              if min_nKD(ll)>20
+              if min_nKD(rem(ll,10))>20
                 tmp=Shuffle(find(~featind_nul{ll}.KcDuring));
-                trlkeep_nul_nKD{ll,ii}=tmp(1:min_nKD(ll));
+                trlkeep_nul_nKD{ll,ii}=tmp(1:min_nKD(rem(ll,10)));
                 cfg.trials=trlkeep_nul_nKD{ll,ii};
                 tlock_nultlock_nKD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
                 tlock_nultlock_nKD{ll,tt,ss}=rmfield(tlock_nultlock_nKD{ll,tt,ss},{'var' 'dof'});
               else
                 tlock_nultlock_nKD{ll,tt,ss}=[];
               end
-              if min_nSD(ll)>20
+              if min_nSD(rem(ll,10))>20
                 tmp=Shuffle(find(~featind_nul{ll}.SpDuring));
-                trlkeep_nul_nSD{ll,ii}=tmp(1:min_nSD(ll));
+                trlkeep_nul_nSD{ll,ii}=tmp(1:min_nSD(rem(ll,10)));
                 cfg.trials=trlkeep_nul_nSD{ll,ii};
                 tlock_nultlock_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
                 tlock_nultlock_nSD{ll,tt,ss}=rmfield(tlock_nultlock_nSD{ll,tt,ss},{'var' 'dof'});
               else
                 tlock_nultlock_nSD{ll,tt,ss}=[];
               end
-              if min_nKD_nSD(ll)>20
+              if min_nKD_nSD(rem(ll,10))>20
                 tmp=Shuffle(find(~featind_nul{ll}.KcDuring & ~featind_nul{ll}.SpDuring));
-                trlkeep_nul_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(ll));
+                trlkeep_nul_nKD_nSD{ll,ii}=tmp(1:min_nKD_nSD(rem(ll,10)));
                 cfg.trials=trlkeep_nul_nKD_nSD{ll,ii};
                 tlock_nultlock_nKD_nSD{ll,tt,ss}=ft_timelockanalysis(cfg,tlock_nul{ll,tt,ss});
                 tlock_nultlock_nKD_nSD{ll,tt,ss}=rmfield(tlock_nultlock_nKD_nSD{ll,tt,ss},{'var' 'dof'});
@@ -1499,6 +1499,7 @@ freqsub=nan(1,max(iiuse));
         tlock_tTacAlone{ll,tt,ss}=tlock_tactlock{ll+20,tt,ss}; % keeping tac centred but jitter aud (to match tlock_tac{X,tt})
         tlock_tAudAlone{ll,tt,ss}=tlock_audtlock{ll+40,tt,ss}; % keeping tac centred but jitter aud (to match tlock_tac{X,tt})
         if sleep==1 && ss==12 && trlfeat==2
+          cfg.parameter='avg';
           try
             tlock_tacPaud_nKD{ll,tt,ss}=ft_math(cfg,tlock_tactlock_nKD{ll+20,tt,ss},tlock_audtlock_nKD{ll+40,tt,ss}); % keeping tac centred but jitter aud (to match tlock_tac{X,tt})
           catch
@@ -1576,6 +1577,7 @@ freqsub=nan(1,max(iiuse));
         tlock_tMSAlone{ll,tt,ss}=tlock_tactlock{ll,tt,ss}; % TA+N
         tlock_tNulAlone{ll,tt,ss}=tlock_nultlock{ll+50,tt,ss}; % TA+N
         if sleep==1 && ss==12 && trlfeat==2
+          cfg.parameter='avg';
           try
             tlock_tacMSpN_nKD{ll,tt,ss}=ft_math(cfg,tlock_tactlock_nKD{ll,tt,ss},tlock_nultlock_nKD{ll+50,tt,ss}); % TA+N
           catch
