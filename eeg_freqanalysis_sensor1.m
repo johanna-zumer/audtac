@@ -26,7 +26,6 @@ if sleep
   %     iiuse=[32];
   iteruse=11;
   trialkc=-1;  % vary this from -1, 0, and 1
-  load([edir 'trlkeep_sleep1.mat']);
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:30);
@@ -50,11 +49,6 @@ for ii=iiuse;
     %       [tlock_tac,tlock_aud,tlock_nul,tr]=eeg_legomagic_trialSelection2_wakeSleep_sepTacAud(ii,sleep,tt,tacaud);
     [tlock_tac,tlock_aud,tlock_nul,tr]=eeg_legomagic_trialSelection2_wakeSleep_sepTacAud(ii,sleep,tt,tacaud,raw_tac, raw_aud, raw_nul, iter, usetr, trialkc);
     
-    if sleep==0
-      tlock_aud{10,tt,12}=[];
-      tlock_aud{10,tt,13}=[];
-    end
-    
     if usetr==2
       if length(iteruse)>1
         error('only one iteruse at a time for usetr2')
@@ -75,9 +69,10 @@ for ii=iiuse;
 %         ssuse=[tr.stageuse+10];
         ssuse=12;
       end
+      load(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat']);      
     else
-      ssuse=tr.stageuse+10;
-      warning('remove me later')
+      tlock_aud{10,tt,12}=[];
+      tlock_aud{10,tt,13}=[];
       ssuse=10;
     end
     
