@@ -1368,6 +1368,8 @@ for ii=iiuse
       end
       save(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat'],'featind*','min_n*')
       continue % to next ss
+    elseif trlfeat==2
+      save(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat'],'featind*','min_n*','trlkeep*')      
     end
     
     if tacaloneproc
