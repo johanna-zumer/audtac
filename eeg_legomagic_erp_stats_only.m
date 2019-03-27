@@ -91,6 +91,9 @@ for ll=soalist
   
   submin=subuseall(1)-1;
   subuseind=0;
+  subuseind_nKD=0;
+  subuseind_nSD=0;
+  subuseind_nKD_nSD=0;
   subuse=subuseall; % reset to all for each sleep stage
   
   for ii=subuseall
@@ -215,12 +218,22 @@ for ll=soalist
         end
         
         if sleep
-          tlock_tacPaud_nKD_each{subuseind,1}=tlock_tacPaud_nKD{ll,tt,ss};
-          tlock_tacMSpN_nKD_each{subuseind,1}=tlock_tacMSpN_nKD{ll,tt,ss};
-          tlock_tacPaud_nSD_each{subuseind,1}=tlock_tacPaud_nSD{ll,tt,ss};
-          tlock_tacMSpN_nsD_each{subuseind,1}=tlock_tacMSpN_nSD{ll,tt,ss};
-          tlock_tacPaud_nKD_nSD_each{subuseind,1}=tlock_tacPaud_nKD_nSD{ll,tt,ss};
-          tlock_tacMSpN_nKD_nSD_each{subuseind,1}=tlock_tacMSpN_nKD_nSD{ll,tt,ss};
+          if ~isempty(tlock_tacPaud_nKD{ll,tt,ss})
+            subuseind_nKD=subuseind_nKD+1;
+            tlock_tacPaud_nKD_each{subuseind_nKD,1}=tlock_tacPaud_nKD{ll,tt,ss};
+            tlock_tacMSpN_nKD_each{subuseind_nKD,1}=tlock_tacMSpN_nKD{ll,tt,ss};
+          end
+          if ~isempty(tlock_tacPaud_nSD{ll,tt,ss})
+            subuseind_nSD=subuseind_nSD+1;
+            tlock_tacPaud_nSD_each{subuseind_nSD,1}=tlock_tacPaud_nSD{ll,tt,ss};
+            tlock_tacMSpN_nSD_each{subuseind_nSD,1}=tlock_tacMSpN_nSD{ll,tt,ss};
+          end
+          if ~isempty(tlock_tacPaud_nKD_nSD{ll,tt,ss})
+            subuseind_nKD_nSD=subuseind_nKD_nSD+1;
+            tlock_tacPaud_nKD_nSD_each{subuseind_nKD_nSD,1}=tlock_tacPaud_nKD_nSD{ll,tt,ss};
+            tlock_tacMSpN_nKD_nSD_each{subuseind_nKD_nSD,1}=tlock_tacMSpN_nKD_nSD{ll,tt,ss};
+          end
+            
 %           fn=fieldnames(featstruct_tacMSpN{ll,tt,ss});
 %           for ff=1:length(fn)
 %             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
@@ -310,6 +323,9 @@ for ll=soalist
     
   end % ii
   subuseindfinal=subuseind
+  subuseindfinal_nKD=subuseind_nKD
+  subuseindfinal_nSD=subuseind_nSD
+  subuseindfinal_nKD_nSD=subuseind_nKD_nSD
   %     end
   
   for ii=1:subuseindfinal
@@ -327,9 +343,15 @@ for ll=soalist
       tlock_TPA_MSPN{ii,iterind}=ft_math(cfg,tlock_tacPaud_each{ii,iterind},tlock_tacMSpN_each{ii,iterind});
     end
     if sleep && ss==12
-      tlock_TPA_MSPN_nKD{ii}=ft_math(cfg,tlock_tacPaud_nKD_each{ii},tlock_tacMSpN_nKD_each{ii});      
-      tlock_TPA_MSPN_nSD{ii}=ft_math(cfg,tlock_tacPaud_nSD_each{ii},tlock_tacMSpN_nSD_each{ii});      
-      tlock_TPA_MSPN_nKD_nSD{ii}=ft_math(cfg,tlock_tacPaud_nKD_nSD_each{ii},tlock_tacMSpN_nKD_nSD_each{ii});      
+      if ii<=subuseindfinal_nKD
+        tlock_TPA_MSPN_nKD{ii}=ft_math(cfg,tlock_tacPaud_nKD_each{ii},tlock_tacMSpN_nKD_each{ii});
+      end
+      if ii<=subuseindfinal_nSD
+        tlock_TPA_MSPN_nSD{ii}=ft_math(cfg,tlock_tacPaud_nSD_each{ii},tlock_tacMSpN_nSD_each{ii});
+      end
+      if ii<=subuseindfinal_nKD_nSD
+        tlock_TPA_MSPN_nKD_nSD{ii}=ft_math(cfg,tlock_tacPaud_nKD_nSD_each{ii},tlock_tacMSpN_nKD_nSD_each{ii});
+      end
     end
     if synchasynch && ll<5
       tlock_TMSs_TMSa{ii}=ft_math(cfg,tlock_tMSsynch_each{ii},tlock_tMSasynch_each{ii});
@@ -409,7 +431,7 @@ for ll=soalist
     grind_tacPaud_nKD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nKD_each{:});
     grind_tacMSpN_nKD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nKD_each{:});
     grind_tacPaud_nSD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nSD_each{:});
-    grind_tacMSpN_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nSD_each{:});
+    grind_tacMSpN_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nSD_each{:});    
     grind_tacPaud_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nKD_nSD_each{:});
     grind_tacMSpN_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nKD_nSD_each{:});
   end
@@ -816,6 +838,9 @@ for ll=soalist
   
   
   nsub=length(tlock_tacMSpN_each);
+  nsub_nKD=length(tlock_tacMSpN_nKD_each);
+  nsub_nSD=length(tlock_tacMSpN_nSD_each);
+  nsub_nKD_nSD=length(tlock_tacMSpN_nKD_nSD_each);
   if statsflag && nsub>1
     load eeg1010_neighb
     
@@ -873,9 +898,10 @@ for ll=soalist
     cfg.statistic='depsamplesT';
     % cfg.statistic='indepsamplesregrT';
     % cfg.statistic='indepsamplesT';
-    cfg.design=zeros(2,2*nsub);
-    cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-    cfg.design(2,:)=[1:nsub 1:nsub];
+%     cfg.design=zeros(2,2*nsub);
+%     cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+%     cfg.design(2,:)=[1:nsub 1:nsub];
+    cfg.design=set_cfg_design_depT(nsub);
     cfg.ivar=1;
     cfg.uvar=2;
     cfg.randomseed=mcseed;
@@ -888,9 +914,13 @@ for ll=soalist
       statt_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
     end
     if sleep && ss==12
+      cfg.design=set_cfg_design_depT(nsub_nKD);
       statt_mc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD, grind_tacMSpN_nKD);
+      cfg.design=set_cfg_design_depT(nsub_nSD);
       statt_mc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nSD, grind_tacMSpN_nSD);
+      cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
       statt_mc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD_nSD, grind_tacMSpN_nKD_nSD);
+      cfg.design=set_cfg_design_depT(nsub);
     end
     if audtacflag
       stata_mc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
@@ -953,18 +983,20 @@ for ll=soalist
       cfg.statistic='depsamplesT';
       % cfg.statistic='indepsamplesregrT';
       % cfg.statistic='indepsamplesT';
-      cfg.design=zeros(2,2*nsub);
-      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-      cfg.design(2,:)=[1:nsub 1:nsub];
+      cfg.design=set_cfg_design_depT(nsub);
       cfg.ivar=1;
       cfg.uvar=2;
       cfg.randomseed=mcseed;
       disp('test2')
       statt_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
       if sleep && ss==12
+        cfg.design=set_cfg_design_depT(nsub_nKD);
         statt_latemc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD, grind_tacMSpN_nKD);
+        cfg.design=set_cfg_design_depT(nsub_nSD);
         statt_latemc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nSD, grind_tacMSpN_nSD);
+        cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
         statt_latemc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD_nSD, grind_tacMSpN_nKD_nSD);
+        cfg.design=set_cfg_design_depT(nsub);
       end
       if audtacflag
         stata_latemc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
@@ -1022,18 +1054,20 @@ for ll=soalist
       cfg.statistic='depsamplesT';
       % cfg.statistic='indepsamplesregrT';
       % cfg.statistic='indepsamplesT';
-      cfg.design=zeros(2,2*nsub);
-      cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-      cfg.design(2,:)=[1:nsub 1:nsub];
+      cfg.design=set_cfg_design_depT(nsub);
       cfg.ivar=1;
       cfg.uvar=2;
       cfg.randomseed=mcseed;
       disp('test4')
       statt_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
       if sleep && ss==12
+        cfg.design=set_cfg_design_depT(nsub_nKD);
         statt_allmc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD, grind_tacMSpN_nKD);
+        cfg.design=set_cfg_design_depT(nsub_nSD);
         statt_allmc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nSD, grind_tacMSpN_nSD);
+        cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
         statt_allmc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD_nSD, grind_tacMSpN_nKD_nSD);
+        cfg.design=set_cfg_design_depT(nsub);
       end
       disp('test5')
       statt_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
@@ -1101,10 +1135,11 @@ for ll=soalist
       end
     end % usetr
     
-    if sleep      
+    if sleep  
+      cd(edir)
       for ii=1:subuseind
-        load(['trlfeat_' sub{subuseall(ii)} '_iter' num2str(iteruse) '.mat']);
-        [pKpred(ll,ii),pKdiff(ll,ii)]=prob_Kcomplex(featind_nul{ll+50},featind_aud{ll+40},featind_tac{ll+20},featind_tac{ll});
+        load([sub{subuseall(ii)} '/' 'trlfeat_' sub{subuseall(ii)} '_iter' num2str(iteruse) '.mat']);
+        [pKpred(ll,ii),pKdiff(ll,ii)]=prob_Kcomplex(mean(featind_nul{ll+50}.KcEvoked),mean(featind_aud{ll+40}.KcEvoked),mean(featind_tac{ll+20}.KcEvoked),mean(featind_tac{ll}.KcEvoked));
       end
 %       for ii=1:subuseind
 %         KcPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcPre);
