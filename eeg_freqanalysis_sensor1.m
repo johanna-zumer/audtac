@@ -25,7 +25,7 @@ if sleep
   iiuse=iiBuse;
   %     iiuse=[32];
   iteruse=11;
-  trialkc=-1;  % vary this from -1, 0, and 1
+  trialkc=-1;  % obsolete (used to vary this from -1, 0, and 1) but now use trlfeat/trlkeep instead
 else
   iiuse=iiSuse;
   %         iiuse=setdiff(iiSuse,1:30);
@@ -1063,42 +1063,45 @@ for ii=iiuse;
           %             combindex=reshape(1:numcomb,numt_trials(ll,tt,ss),numt_trials(ll,tt,ss));
           freqlo_tacPaud_tmp{1}=[];
           freqhi_tacPaud_tmp{1}=[];
+          keyboard
+          cfg=[];cfg.randomseed=13;ft_preamble randomseed
           for cc=1:numtests
             %               tmp=Shuffle(combindex(:));
             %               combuse=tmp(1:numt_trials(ll,tt,ss));
-            combuse=Shuffle(1:numt_trials(ll,tt,ss));
-              keyboard
-            for at=1:numt_trials(ll,tt,ss)
-              if cc==1  % do it as 'normal'
-                tind=at;aind=at;
-              else
-                %                   [tind,aind]=find(combindex==combuse(at));
-                tind=at;
-                aind=combuse(at);
-                %                   [tind,aind]=find(combindex==combuse(at));
-              end
-              cfg=[];
-              cfg.trials=tind;
-              tmpt=ft_selectdata(cfg,tlock_tac{ll+20,tt,ss});
-              cfg.trials=aind;
-              tmpa=ft_selectdata(cfg,tlock_aud{ll+40,tt,ss});
-              cfg=[];
-              cfg.operation='add';
-              cfg.parameter='trial';
-              tmpsum=ft_math(cfg,tmpt,tmpa);
-              if at==1
-                tlock_fake=tmpsum;
-              end
-              tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
-            end
+            allnumtr=1:numt_trials(ll,tt,ss);
+            combuse=Shuffle(allnumtr);
+            
             if cc==1
-              tlock_fake_nKP=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepKP_tacPaud{subuseall==ii,ll});
-              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepKD_tacPaud{subuseall==ii,ll});
-              tlock_fake_nKE=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepKE_tacPaud{subuseall==ii,ll});
-              tlock_fake_nSP=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepSP_tacPaud{subuseall==ii,ll});
-              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepSD_tacPaud{subuseall==ii,ll});
-              tlock_fake_nSE=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeepSE_tacPaud{subuseall==ii,ll});
+              tlock_fake=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},allnumtr,allnumtr);
+              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD{ll+20,ii},trlkeep_aud_nKD{ll+40,ii});
+              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nSD{ll+20,ii},trlkeep_aud_nSD{ll+40,ii});
+              tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD_nSD{ll+20,ii},trlkeep_aud_nKD_nSD{ll+40,ii});
+            else
+              tlock_fake=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},allnumtr,combuse);
             end
+%             for at=1:numt_trials(ll,tt,ss)
+%               if cc==1  % do it as 'normal'
+%                 tind=at;aind=at;
+%               else
+%                 %                   [tind,aind]=find(combindex==combuse(at));
+%                 tind=at;
+%                 aind=combuse(at);
+%                 %                   [tind,aind]=find(combindex==combuse(at));
+%               end
+%               cfg=[];
+%               cfg.trials=tind;
+%               tmpt=ft_selectdata(cfg,tlock_tac{ll+20,tt,ss});
+%               cfg.trials=aind;
+%               tmpa=ft_selectdata(cfg,tlock_aud{ll+40,tt,ss});
+%               cfg=[];
+%               cfg.operation='add';
+%               cfg.parameter='trial';
+%               tmpsum=ft_math(cfg,tmpt,tmpa);
+%               if at==1
+%                 tlock_fake=tmpsum;
+%               end
+%               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
+%             end
             
             cfg=[];
             cfg.method='mtmconvol';
@@ -1111,12 +1114,9 @@ for ii=iiuse;
             cfg.output='fourier';
             freqlo_tacPaud_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
             if cc==1
-              freqlo_tacPaud_nKP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKP);
               freqlo_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqlo_tacPaud_nKE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKE);
-              freqlo_tacPaud_nSP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSP);
               freqlo_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqlo_tacPaud_nSE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSE);
+              freqlo_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
             end            
             
             cfg=[];
@@ -1130,12 +1130,9 @@ for ii=iiuse;
             cfg.output='fourier';
             freqhi_tacPaud_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
             if cc==1
-              freqhi_tacPaud_nKP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKP);
               freqhi_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqhi_tacPaud_nKE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKE);
-              freqhi_tacPaud_nSP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSP);
               freqhi_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqhi_tacPaud_nSE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSE);
+              freqhi_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
             end            
 
             disp(['tacPaud cc ' num2str(cc)]),toc
@@ -1219,48 +1216,44 @@ for ii=iiuse;
           
           
           % tacMSpN
-          numcomb=numt_trials(ll,tt,ss)^2;
-          numtests=min(numcomb,minnumcomb);
-          %             combindex=reshape(1:numcomb,numt_trials(ll,tt,ss),numt_trials(ll,tt,ss));
           freqlo_tacMSpN_tmp{1}=[];
           freqhi_tacMSpN_tmp{1}=[];
           for cc=1:numtests
-            %               tmp=Shuffle(combindex(:));
-            %               combuse=tmp(1:numt_trials(ll,tt,ss));
-            combuse=Shuffle(1:numt_trials(ll,tt,ss));
+            allnumtr=1:numt_trials(ll,tt,ss);
+            combuse=Shuffle(allnumtr);
             
-            tlock_fake=tlock_tac{ll,tt,ss};
-            for at=1:numt_trials(ll,tt,ss)
-              if cc==1  % do it as 'normal'
-                tind=at;aind=at;
-              else
-                %                   [tind,aind]=find(combindex==combuse(at));
-                tind=at;
-                aind=combuse(at);
-              end
-              cfg=[];
-              cfg.trials=tind;
-              tmpt=ft_selectdata(cfg,tlock_tac{ll,tt,ss});
-              cfg.trials=aind;
-              tmpa=ft_selectdata(cfg,tlock_nul{ll+50,tt,ss});
-              cfg=[];
-              cfg.operation='add';
-              cfg.parameter='trial';
-              tmpsum=ft_math(cfg,tmpt,tmpa);
-              if at==1
-                tlock_fake=tmpsum;
-              end
-              tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
-              %           tlock_fake.trial(at,:,:)=tlock_tac{ll,tt,ss}.trial(tind,:,:)+tlock_nul{ll+50,tt,ss}.trial(aind,:,:);
-            end
             if cc==1
-              tlock_fake_nKP=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepKP_tacMSpN{subuseall==ii,ll});
-              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepKD_tacMSpN{subuseall==ii,ll});
-              tlock_fake_nKE=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepKE_tacMSpN{subuseall==ii,ll});
-              tlock_fake_nSP=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepSP_tacMSpN{subuseall==ii,ll});
-              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepSD_tacMSpN{subuseall==ii,ll});
-              tlock_fake_nSE=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeepSE_tacMSpN{subuseall==ii,ll});
+              tlock_fake=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},allnumtr,allnumtr);
+              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD{ll,ii},trlkeep_nul_nKD{ll+50,ii});
+              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nSD{ll,ii},trlkeep_nul_nSD{ll+50,ii});
+              tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD_nSD{ll,ii},trlkeep_nul_nKD_nSD{ll+50,ii});
+            else
+              tlock_fake=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},allnumtr,combuse);
             end
+            
+%             for at=1:numt_trials(ll,tt,ss)
+%               if cc==1  % do it as 'normal'
+%                 tind=at;aind=at;
+%               else
+%                 %                   [tind,aind]=find(combindex==combuse(at));
+%                 tind=at;
+%                 aind=combuse(at);
+%               end
+%               cfg=[];
+%               cfg.trials=tind;
+%               tmpt=ft_selectdata(cfg,tlock_tac{ll,tt,ss});
+%               cfg.trials=aind;
+%               tmpa=ft_selectdata(cfg,tlock_nul{ll+50,tt,ss});
+%               cfg=[];
+%               cfg.operation='add';
+%               cfg.parameter='trial';
+%               tmpsum=ft_math(cfg,tmpt,tmpa);
+%               if at==1
+%                 tlock_fake=tmpsum;
+%               end
+%               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
+%               %           tlock_fake.trial(at,:,:)=tlock_tac{ll,tt,ss}.trial(tind,:,:)+tlock_nul{ll+50,tt,ss}.trial(aind,:,:);
+%             end
             
             cfg=[];
             cfg.method='mtmconvol';
@@ -1274,12 +1267,9 @@ for ii=iiuse;
             
             freqlo_tacMSpN_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
             if cc==1
-              freqlo_tacMSpN_nKP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKP);
               freqlo_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqlo_tacMSpN_nKE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKE);
-              freqlo_tacMSpN_nSP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSP);
               freqlo_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqlo_tacMSpN_nSE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSE);
+              freqlo_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
             end
             
             cfg=[];
@@ -1293,12 +1283,9 @@ for ii=iiuse;
             cfg.output='fourier';
             freqhi_tacMSpN_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
             if cc==1
-              freqhi_tacMSpN_nKP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKP);
               freqhi_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqhi_tacMSpN_nKE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKE);
-              freqhi_tacMSpN_nSP{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSP);
               freqhi_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqhi_tacMSpN_nSE{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSE);
+              freqhi_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
             end
           end
           freqlo_tacMSpN_comb{ll,tt,ss,1}=freqlo_tacMSpN_tmp{1};
@@ -1775,10 +1762,10 @@ for ii=iiuse;
         %               save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '.mat'],'freq*comb','num*trials','-v7.3')
         %             end
         if numtests>2
-          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','-v7.3')
+          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','stats*','num*trials','freq*_n*','-v7.3')
         else
           %           save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_tt' num2str(tt) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
-          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','-v7.3')
+          save(['freqcomb_diffs_averef_' sub{ii} '_sleep' num2str(sleep) '_tacaud' num2str(tacaud) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'freq*comb','num*trials','freq*_n*','-v7.3')
         end
       end
     end
