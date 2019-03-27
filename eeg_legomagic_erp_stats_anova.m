@@ -1,58 +1,80 @@
 eeg_legomagic_preamble
 
-%% ANOVA F-test November 2018
-if ~exist('grind_tacPaud_save','var')
-  load tlock_grind_sleep0_iter27_statwinorig0_ftver0.mat;
-end
+%% ANOVA F-test (initially added/begun in November 2018 after JoN comments)
+
+sleep=1;
+
 soalist=[1 3 4 5 6 7 9];
+soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
+if sleep
+  ss=12;
+else
+  ss=10;
+end
+
+%% 
+if sleep
+  load tlock_grind_sleep1_ss12_iter11_trialkc-1_statwinorig0_ftver0.mat;
+else
+  if ~exist('grind_tacPaud_save','var')
+    load tlock_grind_sleep0_iter27_statwinorig0_ftver0.mat;
+  end
+end
 cfg=[];
 cfg.operation='subtract';
 cfg.parameter='individual';
 llind=1;
 clear grind_TPA_MSPN
 for ll=soalist
-  grind_TPA_MSPN{llind}=ft_math(cfg,grind_tacPaud_save{ll,3,10},grind_tacMSpN_save{ll,3,10});  
-  grind_tacPaud{llind}=grind_tacPaud_save{ll,3,10};
-  grind_tacMSpN{llind}=grind_tacMSpN_save{ll,3,10};
-  if ll>5
-    grind_TPA_MSPN{llind}.time=grind_TPA_MSPN{llind}.time-soades(ll);
-    grind_tacPaud{llind}.time=grind_tacPaud{llind}.time-soades(ll);
-    grind_tacMSpN{llind}.time=grind_tacMSpN{llind}.time-soades(ll);
+  [grind_TPA_MSPN{llind},grind_tacPaud{llind},grind_tacMSpN{llind}]=grind_anova_helper(grind_tacPaud_save{ll,3,ss},grind_tacMSpN_save{ll,3,ss},ll);
+  if sleep
+    [grind_TPA_MSPN_nKD{llind},grind_tacPaud_nKD{llind},grind_tacMSpN_nKD{llind}]=grind_anova_helper(grind_tacPaud_nKD_save{ll,3,ss},grind_tacMSpN_nKD_save{ll,3,ss},ll);
+    [grind_TPA_MSPN_nSD{llind},grind_tacPaud_nSD{llind},grind_tacMSpN_nSD{llind}]=grind_anova_helper(grind_tacPaud_nSD_save{ll,3,ss},grind_tacMSpN_nSD_save{ll,3,ss},ll);
+    [grind_TPA_MSPN_nKD_nSD{llind},grind_tacPaud_nKD_nSD{llind},grind_tacMSpN_nKD_nSD{llind}]=grind_anova_helper(grind_tacPaud_nKD_nSD_save{ll,3,ss},grind_tacMSpN_nKD_nSD_save{ll,3,ss},ll);
   end
+%   grind_TPA_MSPN{llind}=ft_math(cfg,grind_tacPaud_save{ll,3,ss},grind_tacMSpN_save{ll,3,ss});  
+%   grind_tacPaud{llind}=grind_tacPaud_save{ll,3,ss};
+%   grind_tacMSpN{llind}=grind_tacMSpN_save{ll,3,ss};
+%   if ll>5
+%     grind_TPA_MSPN{llind}.time=grind_TPA_MSPN{llind}.time-soades(ll);
+%     grind_tacPaud{llind}.time=grind_tacPaud{llind}.time-soades(ll);
+%     grind_tacMSpN{llind}.time=grind_tacMSpN{llind}.time-soades(ll);
+%   end
   llind=llind+1;
 end
 
-cfg=[];
-cfg.operation='add';
-cfg.parameter='individual';
-grind_TPA_MSPN_allsummed=ft_math(cfg,grind_TPA_MSPN{:});
-grind_tacPaud_allsummed=ft_math(cfg,grind_tacPaud{:});
-grind_tacMSpN_allsummed=ft_math(cfg,grind_tacMSpN{:});
-
 nsub=size(grind_TPA_MSPN{1}.individual,1);
+nsub_nKD_nSD=size(grind_TPA_MSPN_nKD_nSD{1}.individual,1);
 load eeg1010_neighb
 
+
 if 0
-cfg=[];
-cfg.latency=[0 0.5];
-cfg.method='montecarlo';
-cfg.parameter='individual';
-cfg.neighbours=neighbours;
-cfg.correctm='cluster';
-cfg.numrandomization=2000;
-cfg.tail=0; % 0 for two-sided t-test
-cfg.ivar=1;
-cfg.uvar=2;
-cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-cfg.design(2,:)=[1:nsub 1:nsub];
-cfg.randomseed=13;
-cfg.correcttail='alpha';
-cfg.clusterstatistic='maxsum';
-cfg.statistic='depsamplesT';
-cfg.computecritval='yes';
-cfg.comptueprob='yes';
-stat_TPA_MSPN_allsummed = ft_timelockstatistics(cfg,grind_tacPaud_allsummed,grind_tacMSpN_allsummed);
-% Nothing significant  (p>0.62)
+  cfg=[];
+  cfg.operation='add';
+  cfg.parameter='individual';
+  grind_TPA_MSPN_allsummed=ft_math(cfg,grind_TPA_MSPN{:});
+  grind_tacPaud_allsummed=ft_math(cfg,grind_tacPaud{:});
+  grind_tacMSpN_allsummed=ft_math(cfg,grind_tacMSpN{:});
+  cfg=[];
+  cfg.latency=[0 0.5];
+  cfg.method='montecarlo';
+  cfg.parameter='individual';
+  cfg.neighbours=neighbours;
+  cfg.correctm='cluster';
+  cfg.numrandomization=2000;
+  cfg.tail=0; % 0 for two-sided t-test
+  cfg.ivar=1;
+  cfg.uvar=2;
+  cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+  cfg.design(2,:)=[1:nsub 1:nsub];
+  cfg.randomseed=13;
+  cfg.correcttail='alpha';
+  cfg.clusterstatistic='maxsum';
+  cfg.statistic='depsamplesT';
+  cfg.computecritval='yes';
+  cfg.computeprob='yes';
+  stat_TPA_MSPN_allsummed = ft_timelockstatistics(cfg,grind_tacPaud_allsummed,grind_tacMSpN_allsummed);
+  % Nothing significant  (p>0.62)
 end
 
 cfg=[];
@@ -65,21 +87,40 @@ cfg.numrandomization=2000;
 cfg.tail=1; % only 1 makes sense for F-test
 cfg.ivar=1;
 cfg.uvar=2;
-cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub) 5*ones(1,nsub) 6*ones(1,nsub) 7*ones(1,nsub)];
-cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub];
+cfg.design = set_cfg_design_depF(nsub);
+% cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub) 5*ones(1,nsub) 6*ones(1,nsub) 7*ones(1,nsub)];
+% cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub];
 cfg.randomseed=13;
 cfg.clusterstatistic='maxsum';
 cfg.statistic='depsamplesFunivariate';
 cfg.computecritval='yes';
-cfg.comptueprob='yes';
+cfg.computeprob='yes';
 stat_TPA_MSPN_1wayANOVA = ft_timelockstatistics(cfg,grind_TPA_MSPN{:});
+if sleep
+  cfg.latency=[0 0.5];
+  stat_TPA_MSPN_nKD_1wayANOVA = ft_timelockstatistics(cfg,grind_TPA_MSPN_nKD{:});
+  stat_TPA_MSPN_nSD_1wayANOVA = ft_timelockstatistics(cfg,grind_TPA_MSPN_nSD{:});
+  cfg.design = set_cfg_design_depF(nsub_nKD_nSD);
+  stat_TPA_MSPN_nKD_nSD_1wayANOVA = ft_timelockstatistics(cfg,grind_TPA_MSPN_nKD_nSD{:});
+  cfg.design = set_cfg_design_depF(nsub);
+  cfg.latency=[0.1 0.8];
+  stat_TPA_MSPN_1wayANOVA_long = ft_timelockstatistics(cfg,grind_TPA_MSPN{:});
+  stat_TPA_MSPN_nKD_1wayANOVA_long = ft_timelockstatistics(cfg,grind_TPA_MSPN_nKD{:});
+  stat_TPA_MSPN_nSD_1wayANOVA_long = ft_timelockstatistics(cfg,grind_TPA_MSPN_nSD{:});
+  cfg.design = set_cfg_design_depF(nsub_nKD_nSD);
+  stat_TPA_MSPN_nKD_nSD_1wayANOVA_long = ft_timelockstatistics(cfg,grind_TPA_MSPN_nKD_nSD{:});
+  cfg.design = set_cfg_design_depF(nsub);  
+end
 
-posthoctimwin=[min(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1))))) max(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1)))))];
+if sleep
+  keyboard
+else
+  posthoctimwin=[min(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1))))) max(stat_TPA_MSPN_1wayANOVA.time(find(ceil(mean(stat_TPA_MSPN_1wayANOVA.mask,1)))))];
+  clustermat=stat_TPA_MSPN_1wayANOVA.posclusterslabelmat;
+  clustermat(clustermat>=3)=0;
+end
 
-clustermat=stat_TPA_MSPN_1wayANOVA.posclusterslabelmat;
-clustermat(clustermat>=3)=0;
-
-% For paper:
+% For awake paper:
 figure(42);imagesc(0:.001:.5,1:62,clustermat);
 xlim([-.01 .51]);
 set(gca,'FontSize',30);
@@ -550,7 +591,7 @@ end
 load tlock_statmc_sleep0_iter27_statwinorig0_ftver0mcseed13
 soalist=[1 3 4 5 6 7 9];
 for ind=1:length(soalist)
-  statmat(ind,:)=reshape(statt_mc{soalist(ind),3,10}.stat,[1 61*501]);
+  statmat(ind,:)=reshape(statt_mc{soalist(ind),3,ss}.stat,[1 61*501]);
 end
 [uu,dd,vv]=svd(statmat,'econ');
 
@@ -569,7 +610,7 @@ vv5=reshape(vv(:,5),[61 501]); % 3rd space-time map, reshaped
 statplot.avg=u1(:,1);
 statplot.time=1;
 statplot.dimord='chan_time';
-statplot.label=statt_mc{9,3,10}.label;
+statplot.label=statt_mc{9,3,ss}.label;
 cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
 statplot.avg=u2(:,1);
 cfg=[];cfg.latency=1;cfg.layout='eeg1010';ft_topoplotER(cfg,statplot)
@@ -596,13 +637,17 @@ figure;bar(uu(:,4));ylim([-ymax ymax])
 figure;bar(uu(:,5));ylim([-ymax ymax])
 
 % % %
-load tlock_grind_sleep0_iter27_statwinorig0_ftver0
-grindDiff(:,:,:,1)=grind_tacPaud_save{1,3,10}.individual(:,:,500:1000)-grind_tacMSpN_save{1,3,10}.individual(:,:,500:1000);
-grindDiff(:,:,:,2)=grind_tacPaud_save{3,3,10}.individual(:,:,500:1000)-grind_tacMSpN_save{3,3,10}.individual(:,:,500:1000);
-grindDiff(:,:,:,3)=grind_tacPaud_save{4,3,10}.individual(:,:,500:1000)-grind_tacMSpN_save{4,3,10}.individual(:,:,500:1000);
-grindDiff(:,:,:,4)=grind_tacPaud_save{5,3,10}.individual(:,:,500:1000)-grind_tacMSpN_save{5,3,10}.individual(:,:,500:1000);
-grindDiff(:,:,:,5)=grind_tacPaud_save{6,3,10}.individual(:,:,520:1020)-grind_tacMSpN_save{6,3,10}.individual(:,:,520:1020);
-grindDiff(:,:,:,6)=grind_tacPaud_save{7,3,10}.individual(:,:,570:1070)-grind_tacMSpN_save{7,3,10}.individual(:,:,570:1070);
-grindDiff(:,:,:,7)=grind_tacPaud_save{9,3,10}.individual(:,:,1000:1500)-grind_tacMSpN_save{9,3,10}.individual(:,:,1000:1500);
+if sleep
+  load tlock_grind_sleep1_ss12_iter11_trialkc-1_statwinorig0_ftver0.mat
+else
+  load tlock_grind_sleep0_iter27_statwinorig0_ftver0
+end
+grindDiff(:,:,:,1)=grind_tacPaud_save{1,3,ss}.individual(:,:,500:1000)-grind_tacMSpN_save{1,3,ss}.individual(:,:,500:1000);
+grindDiff(:,:,:,2)=grind_tacPaud_save{3,3,ss}.individual(:,:,500:1000)-grind_tacMSpN_save{3,3,ss}.individual(:,:,500:1000);
+grindDiff(:,:,:,3)=grind_tacPaud_save{4,3,ss}.individual(:,:,500:1000)-grind_tacMSpN_save{4,3,ss}.individual(:,:,500:1000);
+grindDiff(:,:,:,4)=grind_tacPaud_save{5,3,ss}.individual(:,:,500:1000)-grind_tacMSpN_save{5,3,ss}.individual(:,:,500:1000);
+grindDiff(:,:,:,5)=grind_tacPaud_save{6,3,ss}.individual(:,:,520:1020)-grind_tacMSpN_save{6,3,ss}.individual(:,:,520:1020);
+grindDiff(:,:,:,6)=grind_tacPaud_save{7,3,ss}.individual(:,:,570:1070)-grind_tacMSpN_save{7,3,ss}.individual(:,:,570:1070);
+grindDiff(:,:,:,7)=grind_tacPaud_save{9,3,ss}.individual(:,:,1000:1500)-grind_tacMSpN_save{9,3,ss}.individual(:,:,1000:1500);
 
 
