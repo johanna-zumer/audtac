@@ -21,10 +21,10 @@ if ispc
 else
   [~,hostname]=system('hostname');
   if ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % either COLLES-151401 or LES-LINUX_FS3
-    edir='/home/zumerj/audtac/eeg_data/';
-    ddir='/home/zumerj/audtac/legomagic/diaries/';
-    bdir='/home/zumerj/audtac/behav_data/';
-    sdir='/home/zumerj/audtac/spss_stuff/';
+    edir='~/audtac/eeg_data/';
+    ddir='~/audtac/legomagic/diaries/';
+    bdir='~/audtac/behav_data/';
+    sdir='~/audtac/spss_stuff/';
   else % assume on VM linux of psychl-132432
     edir='/mnt/hgfs/D/audtac/eeg_data/';
     ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
