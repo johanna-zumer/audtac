@@ -62,8 +62,8 @@ eeg_legomagic_erp_plot % plots many of final figures
 % eeg_freqanalysis_sensor % calls eeg_legomagic_trialSelection_freqwide
 eeg_freqanalysis_sensor1 % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacAud
 eeg_freqanalysis_unisensory % Unisensory stats and plotting
-eeg_freqanalysis_ANOVA % ANOVA across conditions
 eeg_freqanalysis_stats % main T-stat 
+eeg_freqanalysis_ANOVA % ANOVA across conditions
 eeg_freqanalysis_plotLines % plots time courses of band-specific results
 eeg_freqanalysis_phaseTime0 % phase at time zero plays a role? % see also eeg_legomagic_power_phase_bins
 
@@ -90,6 +90,7 @@ eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to 
 % deprecated and should call eeg_legomagic_epoching2(ii,sleep,0,saveflag).
 
 feat_pre_during_evoked_individual % calculates for each trial if there is a Kc or spindle 'during' or 'evoked'
+%  feat_pre_during_evoked % obsolete version of above
 prob_Kcomplex % Uta's Boolean Noisy-OR model
 
 tac_alone_sleep % looks in to why tactile response lost in N2 (including median split analysis)
