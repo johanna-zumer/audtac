@@ -1,74 +1,80 @@
 % computing eog artifact segments (saving them to be rejected later)
 
 
-clear all
-close all
-if ispc
-  edir='D:\audtac\eeg_data\';
-  ddir='D:\audtac\legomagic\diaries\';
-else
-  edir='/mnt/hgfs/D/audtac/eeg_data/';
-  ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
-end
-cd(edir)
+% clear all
+% close all
+% if ispc
+%   edir='D:\audtac\eeg_data\';
+%   ddir='D:\audtac\legomagic\diaries\';
+% else
+%   edir='/mnt/hgfs/D/audtac/eeg_data/';
+%   ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
+% end
+% cd(edir)
+% 
+% % sub{100}='p01'; 
+% sub{1}='e01'; 
+% sub{2}='e02'; 
+% sub{3}='e03'; 
+% sub{4}='e04'; 
+% %%%  above is pilot, below is real
+% sub{5}='e05'; 
+% sub{6}='e06'; 
+% sub{7}='e07'; 
+% sub{8}='e08'; 
+% sub{9}='e09';
+% sub{10}='e10';
+% sub{11}='e11';
+% sub{12}='e12';
+% sub{13}='e13';
+% sub{14}='e14';
+% sub{15}='e15';
+% sub{16}='e16';
+% sub{17}='e17';
+% sub{18}='e18';
+% sub{19}='e19';
+% sub{20}='e20';
+% sub{21}='e21';
+% sub{22}='e22';
+% sub{23}='e23';
+% sub{24}='e24';
+% sub{25}='e25';
+% sub{26}='e26';
+% sub{27}='e27';
+% sub{28}='e28';
+% sub{29}='e29';
+% sub{30}='e30';
+% sub{31}='e31';
+% sub{32}='e32';
+% 
+% if ispc
+%   rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
+%   rmpath(genpath('D:\fieldtrip_svn\'))
+%   addpath('D:\fieldtrip_svn\')
+% else
+%   rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
+%   rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
+%   addpath('/mnt/hgfs/D/fieldtrip_svn/')
+% end
+% which ft_defaults.m
+% ft_defaults;
+% load([edir 'iikeep.mat'])
 
-% sub{100}='p01'; 
-sub{1}='e01'; 
-sub{2}='e02'; 
-sub{3}='e03'; 
-sub{4}='e04'; 
-%%%  above is pilot, below is real
-sub{5}='e05'; 
-sub{6}='e06'; 
-sub{7}='e07'; 
-sub{8}='e08'; 
-sub{9}='e09';
-sub{10}='e10';
-sub{11}='e11';
-sub{12}='e12';
-sub{13}='e13';
-sub{14}='e14';
-sub{15}='e15';
-sub{16}='e16';
-sub{17}='e17';
-sub{18}='e18';
-sub{19}='e19';
-sub{20}='e20';
-sub{21}='e21';
-sub{22}='e22';
-sub{23}='e23';
-sub{24}='e24';
-sub{25}='e25';
-sub{26}='e26';
-sub{27}='e27';
-sub{28}='e28';
-sub{29}='e29';
-sub{30}='e30';
-sub{31}='e31';
-sub{32}='e32';
+eeg_legomagic_preamble
+rmpath(genpath('~/fieldtrip_git/'))
+addpath(genpath('~/Matlab/spm8/'))
 
-if ispc
-  rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
-  rmpath(genpath('D:\fieldtrip_svn\'))
-  addpath('D:\fieldtrip_svn\')
-else
-  rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
-  rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
-  addpath('/mnt/hgfs/D/fieldtrip_svn/')
-end
-which ft_defaults.m
-ft_defaults;
-load([edir 'iikeep.mat'])
+addpath('~/Matlab/FASST-master')
 
 %% wake or sleep
 
 % for ii=union(iiBuse(iiBuse>7),iiSuse)
 % for ii=setdiff(union(iiBuse(iiBuse>7),iiSuse),[8:16])
-for ii=16:17
+for ii=9
   
   
-  for sleep=[0 1]
-%   for sleep=[1]
+%   for sleep=[0 1]
+  for sleep=[1]
     
     clearvars -except ii sub  edir ddir sleep ii*use
 %     pack
@@ -142,12 +148,13 @@ for ii=16:17
     cfg.fmri=0;
     cfg.Begpts=0;
     cfg.Endpts=1;
-    cfg.fname=[pwd '\' D.fname];
+    cfg.fname=[pwd filesep D.fname];
     cfg.marker=[];
     cfg.TR=[];
     cfg.reref=1;
     cfg.scorer=1;
     D=crc_SWS_detect_jz(cfg);
+    keyboard
     
     clear artfctdef
     kcnt=1;scnt=1;dcnt=1;
