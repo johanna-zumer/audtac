@@ -48,7 +48,8 @@ if sleep
   iteruse=11;
   trialkc=-1;  % change me: 0 (no Kc) or 1 (only Kc) or -1 (all trials)
   usetr=1;
-%   computetrlkeep=1; % =1 ugly hack to get trlkkeep but not run stats;  =0 normal run for stats
+  minfind=1;  % first use =1 for min per ll, then set =2 for min over all conditions
+  %   computetrlkeep=1; % =1 ugly hack to get trlkkeep but not run stats;  =0 normal run for stats
 else
   chanuse=chanuse_sleep0;
   %   warning('change me back to 27!!')
@@ -67,7 +68,7 @@ figind=1;
 for ll=soalist
   %       for ll=[5]
   %   for tt=1:4
-  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed P_* H_* STATS_* featind* *trlkeep* pK*
+  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed P_* H_* STATS_* featind* *trlkeep* pK* minfind
   
   %     if ll==1 | ll==9
   %       subuse=8:32;
@@ -97,6 +98,9 @@ for ll=soalist
   subuse=subuseall; % reset to all for each sleep stage
   
   for ii=subuseall
+    if ii>=27
+      keyboard
+    end
     %           for ii=[8 9]
     cd([edir sub{ii} ])
     %   load(['tlock_diffs_' sub{ii} '.mat']);
@@ -220,27 +224,62 @@ for ll=soalist
         if sleep
           if ~isempty(tlock_tacPaud_nKD{ll,tt,ss})
             subuseind_nKD=subuseind_nKD+1;
-            tlock_tacPaud_nKD_each{subuseind_nKD,1}=tlock_tacPaud_nKD{ll,tt,ss};
-            tlock_tacMSpN_nKD_each{subuseind_nKD,1}=tlock_tacMSpN_nKD{ll,tt,ss};
+            %             subindkeep_nKD(subuseind,ll)=1;
+            tlock_tacPaud_nKD_each{subuseind_nKD}=tlock_tacPaud_nKD{ll,tt,ss};
+            tlock_tacMSpN_nKD_each{subuseind_nKD}=tlock_tacMSpN_nKD{ll,tt,ss};
+            tlock_MStlock_nKD_each{subuseind_nKD}=tlock_tMSAlone_nKD{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+            tlock_tactlock_nKD_each{subuseind_nKD}=tlock_tTacAlone_nKD{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+            tlock_audtlock_nKD_each{subuseind_nKD}=tlock_tAudAlone_nKD{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+            tlock_nulttlock_nKD_each{subuseind_nKD}=tlock_tNulAlone_nKD{ll,tt,ss}; % ll+50 is nul, tac-locked
+            %           else
+            %             subindkeep_nKD(subuseind)=0;
           end
           if ~isempty(tlock_tacPaud_nSD{ll,tt,ss})
             subuseind_nSD=subuseind_nSD+1;
-            tlock_tacPaud_nSD_each{subuseind_nSD,1}=tlock_tacPaud_nSD{ll,tt,ss};
-            tlock_tacMSpN_nSD_each{subuseind_nSD,1}=tlock_tacMSpN_nSD{ll,tt,ss};
+            %             subindkeep_nSD(subuseind)=1;
+            tlock_tacPaud_nSD_each{subuseind_nSD}=tlock_tacPaud_nSD{ll,tt,ss};
+            tlock_tacMSpN_nSD_each{subuseind_nSD}=tlock_tacMSpN_nSD{ll,tt,ss};
+            tlock_MStlock_nSD_each{subuseind_nSD}=tlock_tMSAlone_nSD{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+            tlock_tactlock_nSD_each{subuseind_nSD}=tlock_tTacAlone_nSD{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+            tlock_audtlock_nSD_each{subuseind_nSD}=tlock_tAudAlone_nSD{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+            tlock_nulttlock_nSD_each{subuseind_nSD}=tlock_tNulAlone_nSD{ll,tt,ss}; % ll+50 is nul, tac-locked
+            %           else
+            %             subindkeep_nSD(subuseind)=0;
           end
           if ~isempty(tlock_tacPaud_nKD_nSD{ll,tt,ss})
             subuseind_nKD_nSD=subuseind_nKD_nSD+1;
-            tlock_tacPaud_nKD_nSD_each{subuseind_nKD_nSD,1}=tlock_tacPaud_nKD_nSD{ll,tt,ss};
-            tlock_tacMSpN_nKD_nSD_each{subuseind_nKD_nSD,1}=tlock_tacMSpN_nKD_nSD{ll,tt,ss};
+            %             subindkeep_nKD_nSD(subuseind)=1;
+            tlock_tacPaud_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tacPaud_nKD_nSD{ll,tt,ss};
+            tlock_tacMSpN_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tacMSpN_nKD_nSD{ll,tt,ss};
+            tlock_MStlock_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tMSAlone_nKD_nSD{ll,tt,ss}; % ll is tac plus auditory multisensory, tac-locked
+            tlock_tactlock_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tTacAlone_nKD_nSD{ll,tt,ss}; % ll+20 is tac alone, tac-locked
+            tlock_audtlock_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tAudAlone_nKD_nSD{ll,tt,ss}; % ll+20 is aud alone, aud-locked
+            tlock_nulttlock_nKD_nSD_each{subuseind_nKD_nSD}=tlock_tNulAlone_nKD_nSD{ll,tt,ss}; % ll+50 is nul, tac-locked
+            %           else
+            %             subindkeep_nKD_nSD(subuseind)=0;
           end
-            
-%           fn=fieldnames(featstruct_tacMSpN{ll,tt,ss});
-%           for ff=1:length(fn)
-%             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
-%             tlock_tacMSpN_each{subuseind}.(fn{ff})=featstruct_tacMSpN{ll,tt,ss}.(fn{ff});
-%           end
-%           featind_tacPaud{subuseind,ll} = feat_pre_during_evoked(tlock_tacPaud_each{subuseind},ll);
-%           featind_tacMSpN{subuseind,ll} = feat_pre_during_evoked(tlock_tacMSpN_each{subuseind},ll);
+          
+          %           fn=fieldnames(featstruct_tacMSpN{ll,tt,ss});
+          %           for ff=1:length(fn)
+          %             tlock_tacPaud_each{subuseind}.(fn{ff})=featstruct_tacPaud{ll,tt,ss}.(fn{ff});
+          %             tlock_tacMSpN_each{subuseind}.(fn{ff})=featstruct_tacMSpN{ll,tt,ss}.(fn{ff});
+          %           end
+          %           featind_tacPaud{subuseind,ll} = feat_pre_during_evoked(tlock_tacPaud_each{subuseind},ll);
+          %           featind_tacMSpN{subuseind,ll} = feat_pre_during_evoked(tlock_tacMSpN_each{subuseind},ll);
+          numtr1=size(tlock_tacKc2nd{ll}.trial,1);
+          numtr2=size(tlock_tacKc2nd{ll+20}.trial,1);
+          numtr3=size(tlock_audKc2nd{ll+40}.trial,1);
+          numtr4=size(tlock_nulKc2nd{ll+50}.trial,1);
+          numtr=min([numtr1 numtr2 numtr3 numtr4]);
+          cfg=[];cfg.randomseed=13;ft_preamble randomseed
+          combtr=Shuffle(1:numtr);
+          kcdist{ll,subuseind}.ATpN=addbeforeFFT(tlock_tacKc2nd{ll},tlock_nulKc2nd{ll+50},1:numtr,combtr);
+          kcdist{ll,subuseind}.ApT=addbeforeFFT(tlock_audKc2nd{ll+40},tlock_tacKc2nd{ll+20},1:numtr,combtr);
+          kcdist{ll,subuseind}.AT.trial=squeeze(tlock_tacKc2nd{ll}.trial);
+          kcdist{ll,subuseind}.A.trial=squeeze(tlock_audKc2nd{ll+40}.trial);
+          kcdist{ll,subuseind}.T.trial=squeeze(tlock_tacKc2nd{ll+20}.trial);
+          kcdist{ll,subuseind}.N.trial=squeeze(tlock_nulKc2nd{ll+50}.trial);
+%           kcdist{ll,subuseind}.Aaud=squeeze(tlock_audKcaud{ll+40}.trial);
         end
         
         cfg=[];
@@ -249,6 +288,23 @@ for ll=soalist
         tlock_tacVSnul_each{subuseind,1}=ft_math(cfg,tlock_tTacAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
         tlock_audVSnul_each{subuseind,1}=ft_math(cfg,tlock_tAudAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
         tlock_msVSnul_each{subuseind,1}=ft_math(cfg,tlock_tMSAlone{ll,tt,ss},tlock_tNulAlone{ll,tt,ss});
+        if sleep && ss==12
+          if ~isempty(tlock_tacPaud_nKD{ll,tt,ss})
+            tlock_tacVSnul_nKD{subuseind_nKD}=ft_math(cfg,tlock_tTacAlone_nKD{ll,tt,ss},tlock_tNulAlone_nKD{ll,tt,ss});
+            tlock_audVSnul_nKD{subuseind_nKD}=ft_math(cfg,tlock_tAudAlone_nKD{ll,tt,ss},tlock_tNulAlone_nKD{ll,tt,ss});
+            tlock_msVSnul_nKD{subuseind_nKD}=ft_math(cfg,tlock_tMSAlone_nKD{ll,tt,ss},tlock_tNulAlone_nKD{ll,tt,ss});
+          end
+          if ~isempty(tlock_tacPaud_nSD{ll,tt,ss})
+            tlock_tacVSnul_nSD{subuseind_nSD}=ft_math(cfg,tlock_tTacAlone_nSD{ll,tt,ss},tlock_tNulAlone_nSD{ll,tt,ss});
+            tlock_audVSnul_nSD{subuseind_nSD}=ft_math(cfg,tlock_tAudAlone_nSD{ll,tt,ss},tlock_tNulAlone_nSD{ll,tt,ss});
+            tlock_msVSnul_nSD{subuseind_nSD}=ft_math(cfg,tlock_tMSAlone_nSD{ll,tt,ss},tlock_tNulAlone_nSD{ll,tt,ss});
+          end
+          if ~isempty(tlock_tacPaud_nKD_nSD{ll,tt,ss})
+            tlock_tacVSnul_nKD_nSD{subuseind_nKD_nSD}=ft_math(cfg,tlock_tTacAlone_nKD_nSD{ll,tt,ss},tlock_tNulAlone_nKD_nSD{ll,tt,ss});
+            tlock_audVSnul_nKD_nSD{subuseind_nKD_nSD}=ft_math(cfg,tlock_tAudAlone_nKD_nSD{ll,tt,ss},tlock_tNulAlone_nKD_nSD{ll,tt,ss});
+            tlock_msVSnul_nKD_nSD{subuseind_nKD_nSD}=ft_math(cfg,tlock_tMSAlone_nKD_nSD{ll,tt,ss},tlock_tNulAlone_nKD_nSD{ll,tt,ss});
+          end
+        end
         if audtacflag
           tlock_tacVSnul_each{subuseind}=ft_math(cfg,tlock_aTacAlone{ll,tt,ss},tlock_aNulAlone{ll,tt,ss});
           tlock_audVSnul_each{subuseind}=ft_math(cfg,tlock_aAudAlone{ll,tt,ss},tlock_aNulAlone{ll,tt,ss});
@@ -404,18 +460,18 @@ for ll=soalist
   end
   
   
-%   if sleep && trialkc==-1 && ss==12 && computetrlkeep  % this is ugly coding practice
-%     for ii=1:size(featind_tacMSpN,1)
-%       [trlkeepKP_tacPaud{ii,ll},trlkeepKP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcPre');
-%       [trlkeepKD_tacPaud{ii,ll},trlkeepKD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcDuring');
-%       [trlkeepKE_tacPaud{ii,ll},trlkeepKE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcEvoked');
-%       [trlkeepSP_tacPaud{ii,ll},trlkeepSP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpPre');
-%       [trlkeepSD_tacPaud{ii,ll},trlkeepSD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpDuring');
-%       [trlkeepSE_tacPaud{ii,ll},trlkeepSE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpEvoked');
-%     end
-%     save([edir 'trlkeep_sleep1.mat'],'trlkeep*','subuseall')
-%     continue % because we're only doing this now for the trlkeep, not for stats
-%   end
+  %   if sleep && trialkc==-1 && ss==12 && computetrlkeep  % this is ugly coding practice
+  %     for ii=1:size(featind_tacMSpN,1)
+  %       [trlkeepKP_tacPaud{ii,ll},trlkeepKP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcPre');
+  %       [trlkeepKD_tacPaud{ii,ll},trlkeepKD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcDuring');
+  %       [trlkeepKE_tacPaud{ii,ll},trlkeepKE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'KcEvoked');
+  %       [trlkeepSP_tacPaud{ii,ll},trlkeepSP_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpPre');
+  %       [trlkeepSD_tacPaud{ii,ll},trlkeepSD_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpDuring');
+  %       [trlkeepSE_tacPaud{ii,ll},trlkeepSE_tacMSpN{ii,ll}]=sleep_trialkeep(featind_tacPaud{ii,ll},featind_tacMSpN{ii,ll},'SpEvoked');
+  %     end
+  %     save([edir 'trlkeep_sleep1.mat'],'trlkeep*','subuseall')
+  %     continue % because we're only doing this now for the trlkeep, not for stats
+  %   end
   
   
   cfg=[];
@@ -431,9 +487,21 @@ for ll=soalist
     grind_tacPaud_nKD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nKD_each{:});
     grind_tacMSpN_nKD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nKD_each{:});
     grind_tacPaud_nSD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nSD_each{:});
-    grind_tacMSpN_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nSD_each{:});    
+    grind_tacMSpN_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nSD_each{:});
     grind_tacPaud_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nKD_nSD_each{:});
     grind_tacMSpN_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nKD_nSD_each{:});
+    grind_tactlock_nKD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_nKD_each{:});
+    grind_audtlock_nKD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_nKD_each{:});
+    grind_nultlock_nKD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_nKD_each{:});
+    grind_MStlock_nKD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_nKD_each{:});
+    grind_tactlock_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_nSD_each{:});
+    grind_audtlock_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_nSD_each{:});
+    grind_nultlock_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_nSD_each{:});
+    grind_MStlock_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_nSD_each{:});
+    grind_tactlock_nKD_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_tactlock_nKD_nSD_each{:});
+    grind_audtlock_nKD_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_audtlock_nKD_nSD_each{:});
+    grind_nultlock_nKD_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_nulttlock_nKD_nSD_each{:});
+    grind_MStlock_nKD_nSD_save{ll,tt,ss}=ft_timelockgrandaverage(cfg,tlock_MStlock_nKD_nSD_each{:});
   end
   if usetr==2
     grind_TPA_MSPN=ft_timelockgrandaverage(cfg,tlock_TPA_MSPN_usetr2{:});
@@ -467,6 +535,18 @@ for ll=soalist
     grave_tacMSpN_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nSD_each{:});
     grave_tacPaud_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacPaud_nKD_nSD_each{:});
     grave_tacMSpN_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tacMSpN_nKD_nSD_each{:});
+    grave_tactlock_nKD=ft_timelockgrandaverage(cfg,tlock_tactlock_nKD_each{:});
+    grave_audtlock_nKD=ft_timelockgrandaverage(cfg,tlock_audtlock_nKD_each{:});
+    grave_nultlock_nKD=ft_timelockgrandaverage(cfg,tlock_nulttlock_nKD_each{:});
+    grave_MStlock_nKD=ft_timelockgrandaverage(cfg,tlock_MStlock_nKD_each{:});
+    grave_tactlock_nSD=ft_timelockgrandaverage(cfg,tlock_tactlock_nSD_each{:});
+    grave_audtlock_nSD=ft_timelockgrandaverage(cfg,tlock_audtlock_nSD_each{:});
+    grave_nultlock_nSD=ft_timelockgrandaverage(cfg,tlock_nulttlock_nSD_each{:});
+    grave_MStlock_nSD=ft_timelockgrandaverage(cfg,tlock_MStlock_nSD_each{:});
+    grave_tactlock_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_tactlock_nKD_nSD_each{:});
+    grave_audtlock_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_audtlock_nKD_nSD_each{:});
+    grave_nultlock_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_nulttlock_nKD_nSD_each{:});
+    grave_MStlock_nKD_nSD=ft_timelockgrandaverage(cfg,tlock_MStlock_nKD_nSD_each{:});
   end
   if synchasynch && ll<5
     grave_tMSsynch=ft_timelockgrandaverage(cfg,tlock_tMSsynch_each{:});
@@ -841,6 +921,82 @@ for ll=soalist
   nsub_nKD=length(tlock_tacMSpN_nKD_each);
   nsub_nSD=length(tlock_tacMSpN_nSD_each);
   nsub_nKD_nSD=length(tlock_tacMSpN_nKD_nSD_each);
+  
+  if sleep  % KLdiv stuff
+    keyboard
+      for nn=1:nsub
+        minATpN(nn,:)=min(squeeze(kcdist{ll,nn}.ATpN.trial));
+        minAT(nn,:)=min(kcdist{ll,nn}.AT.trial);
+        minA(nn,:)=min(kcdist{ll,nn}.A.trial);
+        minT(nn,:)=min(kcdist{ll,nn}.T.trial);
+        minN(nn,:)=min(kcdist{ll,nn}.N.trial);
+        minApT(nn,:)=min(squeeze(kcdist{ll,nn}.ApT.trial));
+        maxATpN(nn,:)=max(squeeze(kcdist{ll,nn}.ATpN.trial));
+        maxAT(nn,:)=max(kcdist{ll,nn}.AT.trial);
+        maxA(nn,:)=max(kcdist{ll,nn}.A.trial);
+        maxT(nn,:)=max(kcdist{ll,nn}.T.trial);
+        maxN(nn,:)=max(kcdist{ll,nn}.N.trial);
+        maxApT(nn,:)=max(squeeze(kcdist{ll,nn}.ApT.trial));
+        %       meanAaud(nn,:)=mean(kcdist{ll,nn}.Aaud.trial);
+      end
+    if minfind==1
+      minATpNandApT(ll,nn,:)=mean([mean(squeeze(kcdist{ll,nn}.ATpN.trial)); mean(squeeze(kcdist{ll,nn}.ApT.trial))]);
+      save([edir 'Kcmintime.mat'],'minATpNandApT');
+      %       minallcond=min([mean(minATpN); mean(minAT); mean(minA); mean(minT); mean(minN); mean(minApT)]);
+      %       maxallcond=max([maxATpN maxAT maxA maxT maxN maxApT]);
+      %       lolim(ll)=10*floor(minallcond(mind(ll))/10);
+      %       hilim(ll)=10*ceil(maxallcond(mind(ll))/10);
+      %       lolim_use=lolim(ll);
+      %       hilim_use=hilim(ll);
+      %       save([edir 'Kclim.mat'],'lol*','hil*','mind');
+      continue
+    elseif minfind==2
+%       [mn,mind(ll)]=min(mean(minATpNandApT,1));  % find time point with minimal value for avg of ATpN and ApT across all subjects
+      load([edir 'Kclim.mat']);
+      lolim_final=min(lolim);
+      hilim_final=max(hilim);
+      lolim_use=lolim_final;
+      hilim_use=hilim_final;
+    end
+    for nn=1:nsub
+      kcdist{ll,nn}.ATpN_ApT_KLdiv=computeAT_KLdiv(kcdist{ll,nn}.ATpN.trial(:,mind(ll)),kcdist{ll,nn}.ApT.trial(:,mind(ll)),lolim_use:10:hilim_use,1e-9);
+      kcdist{ll,nn}.AT_A_KLdiv=computeAT_KLdiv(kcdist{ll,nn}.AT.trial(:,mind(ll)),kcdist{ll,nn}.A.trial(:,mind(ll)),lolim_use:10:hilim_use,1e-9);
+      kcdist{ll,nn}.T_N_KLdiv=computeAT_KLdiv(kcdist{ll,nn}.T.trial(:,mind(ll)),kcdist{ll,nn}.N.trial(:,mind(ll)),lolim_use:10:hilim_use,1e-9);
+      
+      kldivdist_ATpN_ApT(:,nn,ll)=permKLdiv(kcdist{ll,nn}.ATpN.trial(:,mind(ll)),kcdist{ll,nn}.ApT.trial(:,mind(ll)));
+      trueKLpercent_ATpN_ApT(ll,nn)=dsearchn(kldivdist_ATpN_ApT(:,nn,ll)',kcdist{ll,nn}.ATpN_ApT_KLdiv)/length(kldivdist_ATpN_ApT(:,nn,ll))-.5;
+      
+      kldivdist_AT_A(:,nn,ll)=permKLdiv(kcdist{ll,nn}.AT.trial(:,mind(ll)),kcdist{ll,nn}.A.trial(:,mind(ll)));
+      trueKLpercent_AT_A(ll,nn)=dsearchn(kldivdist_AT_A(:,nn,ll)',kcdist{ll,nn}.AT_A_KLdiv)/length(kldivdist_AT_A(:,nn,ll))-.5;
+      
+      kldivdist_T_N(:,nn,ll)=permKLdiv(kcdist{ll,nn}.T.trial(:,mind(ll)),kcdist{ll,nn}.N.trial(:,mind(ll)));
+      trueKLpercent_T_N(ll,nn)=dsearchn(kldivdist_T_N(:,nn,ll)',kcdist{ll,nn}.T_N_KLdiv)/length(kldivdist_T_N(:,nn,ll))-.5;
+    end
+    % 2nd level permutation: flip sign of KLpercent for each subject randomly
+    for np=1:100  % number of permutations
+      permlabel=round(rand(1,nsub));  % generates 0 or 1
+      for nt=1:nsub
+        if permlabel(nt)
+          permtrialvals_ATpN_ApT(nt)=-trueKLpercent_ATpN_ApT(ll,nt);
+          permtrialvals_AT_A(nt)=-trueKLpercent_AT_A(ll,nt);
+          permtrialvals_T_N(nt)=-trueKLpercent_T_N(ll,nt);
+        else
+          permtrialvals_ATpN_ApT(nt)=trueKLpercent_ATpN_ApT(ll,nt);
+          permtrialvals_AT_A(nt)=trueKLpercent_AT_A(ll,nt);
+          permtrialvals_T_N(nt)=trueKLpercent_T_N(ll,nt);
+        end
+      end
+      subjdist_ATpN_ApT(np,ll)=mean(permtrialvals_ATpN_ApT);
+      subjdist_AT_A(np,ll)=mean(permtrialvals_AT_A);
+      subjdist_T_N(np,ll)=mean(permtrialvals_T_N);
+    end
+    pval_KLdiff_group_ATpN_ApT(ll)=dsearchn(subjdist_ATpN_ApT(:,ll),mean(trueKLpercent_ATpN_ApT(ll,:)))/np;
+    pval_KLdiff_group_AT_A(ll)=dsearchn(subjdist_AT_A(:,ll),mean(trueKLpercent_ATpN_ApT(ll,:)))/np;
+    pval_KLdiff_group_T_N(ll)=dsearchn(subjdist_T_N(:,ll),mean(trueKLpercent_ATpN_ApT(ll,:)))/np;
+    
+    % Do qqplot and ecdf further down
+  end
+  
   if statsflag && nsub>1
     load eeg1010_neighb
     
@@ -898,9 +1054,9 @@ for ll=soalist
     cfg.statistic='depsamplesT';
     % cfg.statistic='indepsamplesregrT';
     % cfg.statistic='indepsamplesT';
-%     cfg.design=zeros(2,2*nsub);
-%     cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
-%     cfg.design(2,:)=[1:nsub 1:nsub];
+    %     cfg.design=zeros(2,2*nsub);
+    %     cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub)];
+    %     cfg.design(2,:)=[1:nsub 1:nsub];
     cfg.design=set_cfg_design_depT(nsub);
     cfg.ivar=1;
     cfg.uvar=2;
@@ -930,6 +1086,21 @@ for ll=soalist
       statt_tacmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
       statt_audmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
       statt_msmc_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
+      if sleep && ss==12
+        cfg.design=set_cfg_design_depT(nsub_nKD);
+        statt_tacmc_nKD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nKD_save{ll,tt,ss}, grind_nultlock_nKD_save{ll,tt,ss});
+        statt_audmc_nKD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nKD_save{ll,tt,ss}, grind_nultlock_nKD_save{ll,tt,ss});
+        statt_msmc_nKD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nKD_save{ll,tt,ss},  grind_nultlock_nKD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub_nSD);
+        statt_tacmc_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nSD_save{ll,tt,ss}, grind_nultlock_nSD_save{ll,tt,ss});
+        statt_audmc_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nSD_save{ll,tt,ss}, grind_nultlock_nSD_save{ll,tt,ss});
+        statt_msmc_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nSD_save{ll,tt,ss},  grind_nultlock_nSD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
+        statt_tacmc_nKD_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nKD_nSD_save{ll,tt,ss}, grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        statt_audmc_nKD_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nKD_nSD_save{ll,tt,ss}, grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        statt_msmc_nKD_nSD_early{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nKD_nSD_save{ll,tt,ss},  grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub);
+      end
       save([edir 'tlock_statmc_early_sleep' num2str(sleep) '_ss' num2str(ss) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_statwinorig' num2str(statwinorig) '_ftver' num2str(ftver) 'mcseed' num2str(mcseed) '.mat'],'stat*early');
       %             continue
       %           end
@@ -1058,7 +1229,6 @@ for ll=soalist
       cfg.ivar=1;
       cfg.uvar=2;
       cfg.randomseed=mcseed;
-      disp('test4')
       statt_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud, grind_tacMSpN);
       if sleep && ss==12
         cfg.design=set_cfg_design_depT(nsub_nKD);
@@ -1069,12 +1239,24 @@ for ll=soalist
         statt_allmc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tacPaud_nKD_nSD, grind_tacMSpN_nKD_nSD);
         cfg.design=set_cfg_design_depT(nsub);
       end
-      disp('test5')
       statt_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-      disp('test6')
       statt_audmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
-      disp('test7')
       statt_msmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_save{ll,tt,ss},  grind_nultlock_save{ll,tt,ss});
+      if sleep && ss==12
+        cfg.design=set_cfg_design_depT(nsub_nKD);
+        statt_tacmc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nKD_save{ll,tt,ss}, grind_nultlock_nKD_save{ll,tt,ss});
+        statt_audmc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nKD_save{ll,tt,ss}, grind_nultlock_nKD_save{ll,tt,ss});
+        statt_msmc_nKD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nKD_save{ll,tt,ss},  grind_nultlock_nKD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub_nSD);
+        statt_tacmc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nSD_save{ll,tt,ss}, grind_nultlock_nSD_save{ll,tt,ss});
+        statt_audmc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nSD_save{ll,tt,ss}, grind_nultlock_nSD_save{ll,tt,ss});
+        statt_msmc_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nSD_save{ll,tt,ss},  grind_nultlock_nSD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
+        statt_tacmc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_nKD_nSD_save{ll,tt,ss}, grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        statt_audmc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audtlock_nKD_nSD_save{ll,tt,ss}, grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        statt_msmc_nKD_nSD{ll,tt,ss}=ft_timelockstatistics(cfg, grind_MStlock_nKD_nSD_save{ll,tt,ss},  grind_nultlock_nKD_nSD_save{ll,tt,ss});
+        cfg.design=set_cfg_design_depT(nsub);
+      end
       if audtacflag
         stata_allmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_audPtac, grind_audMSpN);
         stata_tacmc{ll,tt,ss}=ft_timelockstatistics(cfg, grind_tactlock_save{ll,tt,ss}, grind_nultlock_save{ll,tt,ss});
@@ -1135,33 +1317,45 @@ for ll=soalist
       end
     end % usetr
     
-    if sleep  
+    if sleep
       cd(edir)
       for ii=1:subuseind
         load([sub{subuseall(ii)} '/' 'trlfeat_' sub{subuseall(ii)} '_iter' num2str(iteruse) '.mat']);
         [pKpred(ll,ii),pKdiff(ll,ii)]=prob_Kcomplex(mean(featind_nul{ll+50}.KcEvoked),mean(featind_aud{ll+40}.KcEvoked),mean(featind_tac{ll+20}.KcEvoked),mean(featind_tac{ll}.KcEvoked));
       end
-%       for ii=1:subuseind
-%         KcPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcPre);
-%         KcDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcDuring);
-%         KcEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcEvoked);
-%         KcPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcPre);
-%         KcDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcDuring);
-%         KcEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcEvoked);
-%         SpPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpPre);
-%         SpDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpDuring);
-%         SpEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpEvoked);
-%         SpPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpPre);
-%         SpDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpDuring);
-%         SpEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpEvoked);
-%       end
-%       [P_KcPre(ll),H_KcPre(ll),STATS_KcPre{ll}] = signtest(KcPreMSpN_mean(ll,:),KcPreTpA_mean(ll,:));  % no assumptions on distribution using signtest
-%       [P_KcDuring(ll),H_KcDuring(ll),STATS_KcDuring{ll}] = signtest(KcDuringMSpN_mean(ll,:),KcDuringTpA_mean(ll,:));
-%       [P_KcEvoked(ll),H_KcEvoked(ll),STATS_KcEvoked{ll}] = signtest(KcEvokedMSpN_mean(ll,:),KcEvokedTpA_mean(ll,:));
-%       [P_SpPre(ll),H_SpPre(ll),STATS_SpPre{ll}] = signtest(SpPreMSpN_mean(ll,:),SpPreTpA_mean(ll,:));
-%       [P_SpDuring(ll),H_SpDuring(ll),STATS_SpDuring{ll}] = signtest(SpDuringMSpN_mean(ll,:),SpDuringTpA_mean(ll,:));
-%       [P_SpEvoked(ll),H_SpEvoked(ll),STATS_SpEvoked{ll}] = signtest(SpEvokedMSpN_mean(ll,:),SpEvokedTpA_mean(ll,:));
+      %       for ii=1:subuseind
+      %         KcPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcPre);
+      %         KcDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcDuring);
+      %         KcEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.KcEvoked);
+      %         KcPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcPre);
+      %         KcDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcDuring);
+      %         KcEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.KcEvoked);
+      %         SpPreMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpPre);
+      %         SpDuringMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpDuring);
+      %         SpEvokedMSpN_mean(ll,ii)=mean(featind_tacMSpN{ii,ll}.SpEvoked);
+      %         SpPreTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpPre);
+      %         SpDuringTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpDuring);
+      %         SpEvokedTpA_mean(ll,ii)=mean(featind_tacPaud{ii,ll}.SpEvoked);
+      %       end
+      %       [P_KcPre(ll),H_KcPre(ll),STATS_KcPre{ll}] = signtest(KcPreMSpN_mean(ll,:),KcPreTpA_mean(ll,:));  % no assumptions on distribution using signtest
+      %       [P_KcDuring(ll),H_KcDuring(ll),STATS_KcDuring{ll}] = signtest(KcDuringMSpN_mean(ll,:),KcDuringTpA_mean(ll,:));
+      %       [P_KcEvoked(ll),H_KcEvoked(ll),STATS_KcEvoked{ll}] = signtest(KcEvokedMSpN_mean(ll,:),KcEvokedTpA_mean(ll,:));
+      %       [P_SpPre(ll),H_SpPre(ll),STATS_SpPre{ll}] = signtest(SpPreMSpN_mean(ll,:),SpPreTpA_mean(ll,:));
+      %       [P_SpDuring(ll),H_SpDuring(ll),STATS_SpDuring{ll}] = signtest(SpDuringMSpN_mean(ll,:),SpDuringTpA_mean(ll,:));
+      %       [P_SpEvoked(ll),H_SpEvoked(ll),STATS_SpEvoked{ll}] = signtest(SpEvokedMSpN_mean(ll,:),SpEvokedTpA_mean(ll,:));
+      
+      
+      % figure;cdfplot(squeeze(tlock_audKcaud{49}.trial(:,1,50)));hold on;cdfplot(squeeze(tlock_tacKcaud{9}.trial(:,1,50)));hold on;cdfplot(squeeze(tlock_nulKcaud{59}.trial(:,1,50)));hold on;cdfplot(squeeze(tlock_tacKcaud{29}.trial(:,1,50)));
+      % figure;cdfplot(squeeze(tlock_audKcaud{49}.trial(:,1,50)));hold on;cdfplot(squeeze(tlock_tacKcaud{9}.trial(:,1,50)))
+      % figure;qqplot(squeeze(tlock_audKcaud{49}.trial(:,1,50)),squeeze(tlock_tacKcaud{9}.trial(:,1,50)));
+      % figure;qqplot(squeeze(tlock_nulKcaud{59}.trial(:,1,50)),squeeze(tlock_tacKcaud{29}.trial(:,1,50)));
+      % [hh,pp]=kstest2(squeeze(tlock_audKcaud{49}.trial(:,1,150)),squeeze(tlock_tacKcaud{9}.trial(:,1,150)));
+      
+      
+      
     end
+    
+    
     
     
     %   save([edir 'tlock_statmc.mat'],'stat*','grave*'); % no point, as grave* isn't ll,tt,ss dependent
