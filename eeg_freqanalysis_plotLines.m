@@ -1,9 +1,11 @@
 
 %%  Plotting band-specific line plots results
+stim2nd= [  0 nan    0    0 0 .02 .07 nan .5];
+clear chanplot
 chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
 chanplot{2}={'CP5' 'POz' 'Pz' 'P3' 'P4' 'C4' 'O1' 'O2' 'P7' 'PO7'}; % occipital; % same as for ERP
-chanplot{3}={'C1' 'Cz' 'C2' 'CP1' 'CPz' 'CP2' 'P1' 'Pz' 'P2'}; % Centred on CPz
-chanplot{4}={'P3' 'P1' 'Pz' 'P2' 'P4' 'PO3' 'POz' 'PO4' 'O1' 'O2' 'Oz'};
+% chanplot{3}={'C1' 'Cz' 'C2' 'CP1' 'CPz' 'CP2' 'P1' 'Pz' 'P2'}; % Centred on CPz
+% chanplot{4}={'P3' 'P1' 'Pz' 'P2' 'P4' 'PO3' 'POz' 'PO4' 'O1' 'O2' 'Oz'};
 chanlabel{1}='Frontocentral electrodes';
 chanlabel{2}='Occipital-parietal electrodes';
 soalist=[1 3 4 5 6 7 9];
@@ -269,7 +271,37 @@ print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
 
 
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Multisensory interaction
 
+load(['freqstat_sleep' num2str(sleep) '.mat']);  % see eeg_freqanalysis_ANOVA.m
+
+mask_use=freqstat_TPA_MSPN_1wayANOVA_theta.mask;
+mask_use(:,1:10)=0;
+mask_use(:,39:end)=0;  % see thetaTFP_anova_twall in eeg_freqanalysis_ANOVA.m
+freqstat_TPA_MSPN_1wayANOVA_theta.stat_tw1=freqstat_TPA_MSPN_1wayANOVA_theta.stat.*mask_use;
+freqstat_TPA_MSPN_1wayANOVA_theta.mask_tw1=mask_use;
+
+mask_use=freqstat_TPA_MSPN_1wayANOVA_beta.mask;
+mask_use(:,23:end)=0;
+freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw1=freqstat_TPA_MSPN_1wayANOVA_beta.stat.*mask_use;
+freqstat_TPA_MSPN_1wayANOVA_beta.mask_tw1=mask_use;
+mask_use=freqstat_TPA_MSPN_1wayANOVA_beta.mask;
+mask_use(:,1:22)=0;
+freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw2=freqstat_TPA_MSPN_1wayANOVA_beta.stat.*mask_use;
+freqstat_TPA_MSPN_1wayANOVA_beta.mask_tw2=mask_use;
+
+mask_use=plvstat_TPA_MSPN_1wayANOVA_theta.mask;
+mask_use(:,46:end)=0;  % see thetaITC_anova_twall in eeg_freqanalysis_ANOVA.m
+plvstat_TPA_MSPN_1wayANOVA_theta.stat_tw1=plvstat_TPA_MSPN_1wayANOVA_theta.stat.*mask_use;
+plvstat_TPA_MSPN_1wayANOVA_theta.mask_tw1=mask_use;
+
+chanplot_theta{1}=freqstat_TPA_MSPN_1wayANOVA_theta.label(find(mean(freqstat_TPA_MSPN_1wayANOVA_theta.mask,3)));
+
+chanplot_beta{1}=freqstat_TPA_MSPN_1wayANOVA_beta.label(find(mean(freqstat_TPA_MSPN_1wayANOVA_beta.mask,3)));
+chanplot_beta{2}=freqstat_TPA_MSPN_1wayANOVA_beta.label(find(mean(freqstat_TPA_MSPN_1wayANOVA_beta.mask_tw1,3)));
+chanplot_beta{3}=freqstat_TPA_MSPN_1wayANOVA_beta.label(find(mean(freqstat_TPA_MSPN_1wayANOVA_beta.mask_tw2,3)));
+
+chanplot_theta_itc{1}=plvstat_TPA_MSPN_1wayANOVA_theta.label(find(mean(plvstat_TPA_MSPN_1wayANOVA_theta.mask,3)));
 
 for ll=soalist
 % for ll=[1 3 4 5 6]
@@ -298,24 +330,44 @@ for ll=soalist
   gravelo_TPA_MSPN_comb1_beta=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
 
   
-  for xlimind=1:2
-    if xlimind==1
-      xlimxlim=[-.1 1.15];
-      purpose='ica'; % main figure alongside ICA
-    elseif xlimind==2
-      xlimxlim=[-.6 1.8];
-      purpose='within';  % supplemntary figure
+  if 0
+    for xlimind=1:2
+      if xlimind==1
+        xlimxlim=[-.1 1.15];
+        purpose='ica'; % main figure alongside ICA
+      elseif xlimind==2
+        xlimxlim=[-.6 1.8];
+        purpose='within';  % supplemntary figure
+      end
+      % Plotting Power
+      tfrsaveOT{ll} = plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,stattl_mc_comb1_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask');
+      plottfr(gravelo_TPA_MSPN_comb1_alpha,gravelo_tacPaud_comb1_alpha,gravelo_tacMSpN_comb1_alpha,xlimxlim,purpose,stattl_mc_comb1_alpha,'alpha','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask')
+      tfrsaveOB{ll} = plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,stattl_mc_comb1_beta, 'beta', 'powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask');
+      
+      % Plotting PLV
+      tfrsaveLT{ll} = plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,stattl_mc_comb1plvabsDepT_theta,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask');
+      plottfr(gravelo_TPA_MSPN_comb1_alpha,gravelo_tacPaud_comb1_alpha,gravelo_tacMSpN_comb1_alpha,xlimxlim,purpose,stattl_mc_comb1plvabsDepT_alpha,'alpha','plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask')
+      plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,stattl_mc_comb1plvabsDepT_beta, 'beta', 'plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask')
     end
-    % Plotting Power
-    tfrsaveOT{ll} = plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,stattl_mc_comb1_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir);
-    plottfr(gravelo_TPA_MSPN_comb1_alpha,gravelo_tacPaud_comb1_alpha,gravelo_tacMSpN_comb1_alpha,xlimxlim,purpose,stattl_mc_comb1_alpha,'alpha','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
-    tfrsaveOB{ll} = plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,stattl_mc_comb1_beta, 'beta', 'powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir);
-    
-    % Plotting PLV
-    tfrsaveLT{ll} = plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,stattl_mc_comb1plvabsDepT_theta,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir);
-    plottfr(gravelo_TPA_MSPN_comb1_alpha,gravelo_tacPaud_comb1_alpha,gravelo_tacMSpN_comb1_alpha,xlimxlim,purpose,stattl_mc_comb1plvabsDepT_alpha,'alpha','plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
-    plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,stattl_mc_comb1plvabsDepT_beta, 'beta', 'plvabs',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
   end
+  
+  purpose='anova';
+  xlimxlim=[-.1 1.15];
+  statstructuse=freqstat_TPA_MSPN_1wayANOVA_theta;
+  statstructuse.time=statstructuse.time+stim2nd(ll);
+  plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot_theta,stattimwin,soades,fdir,'mask');
+  plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot_theta,stattimwin,soades,fdir,'mask_tw1');
+  
+  statstructuse=freqstat_TPA_MSPN_1wayANOVA_beta;
+  statstructuse.time=statstructuse.time+stim2nd(ll);
+  plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,statstructuse, 'beta', 'powspctrm',ll,tacbasemax,plotallmask,chanplot_beta,stattimwin,soades,fdir,'mask');
+  plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,statstructuse, 'beta', 'powspctrm',ll,tacbasemax,plotallmask,chanplot_beta,stattimwin,soades,fdir,'mask_tw1');
+  plottfr(gravelo_TPA_MSPN_comb1_beta, gravelo_tacPaud_comb1_beta, gravelo_tacMSpN_comb1_beta, xlimxlim,purpose,statstructuse, 'beta', 'powspctrm',ll,tacbasemax,plotallmask,chanplot_beta,stattimwin,soades,fdir,'mask_tw2');
+  
+  statstructuse=plvstat_TPA_MSPN_1wayANOVA_theta;
+  statstructuse.time=statstructuse.time+stim2nd(ll);
+  plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot_theta_itc,stattimwin,soades,fdir,'mask');
+  plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot_theta_itc,stattimwin,soades,fdir,'mask_tw1');
   
     % power
   if plottfrflag

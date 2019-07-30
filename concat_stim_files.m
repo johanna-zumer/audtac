@@ -6,6 +6,7 @@ close all
 if ispc
   edir='D:\audtac\eeg_data\';
   ddir='D:\audtac\legomagic\diaries\';
+  fdir='D:\audtac\figs\';
 else
   edir='/mnt/hgfs/D/audtac/eeg_data/';
   ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
@@ -65,7 +66,7 @@ cd([ddir ])
 sfiles=dir([ddir sub{ii} '_*s.mat']);
 bfiles=dir([ddir sub{ii} '_*b.mat']);
 rfiles=dir([ddir sub{ii} '_*r.mat']);
-dosfiles=0;
+dosfiles=1;
 dobfiles=0;
 
 stime_touch=[];
@@ -284,6 +285,8 @@ for ll=1:length(sfiles)
     %     figure;plot(sstim{ll}.info.time_touch(sstim{ll}.info.time_touch>0));axis([-inf inf .17 .25])
     figure(figind-2);subplot(2,1,2);plot(time_touch1);axis([-inf inf .17 .25])
   end
+  figure(100); plot(sstim{ll}.info.lighttime{ind},sstim{ll}.info.lightsensor{ind})
+  print(100,[fdir 'touch_light_example_e' num2str(ii) '.eps'],'-depsc') 
 end
 end
 
