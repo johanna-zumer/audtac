@@ -1,4 +1,4 @@
-function featind = feat_pre_during_evoked_individual(data,ll)
+function featind = feat_pre_during_evoked_individual(data,llin)
 % function featind = feat_pre_during_evoked(data,ll)
 %
 % ll: refers to asynchrony index, or =0 for always using time=0ms.
@@ -21,6 +21,10 @@ featind.KcDuring=zeros(1,numtr);
 featind.KcEvoked=zeros(1,numtr);
 featind.SpDuring=zeros(1,numtr);
 featind.SpEvoked=zeros(1,numtr);
+featind.KcSmDuring=zeros(1,numtr);
+featind.KcSmEvoked=zeros(1,numtr);
+
+ll=rem(llin,10);
 
 for kk=1:numtr
   numKc=length(data.kc{kk});
@@ -39,6 +43,15 @@ for kk=1:numtr
     end
     if data.sw{kk}(nk).negmax<0.75+stim2nd(ll) && data.sw{kk}(nk).negmax>0.4+stim2nd(ll)
       featind.KcEvoked(kk)=1;
+    end
+  end % nk
+  numKc=length(data.delta{kk});
+  for nk=1:numKc
+    if [data.delta{kk}(nk).down<(.75+stim2nd(ll)) && data.delta{kk}(nk).down>(-.5+stim1st(ll))] || [data.delta{kk}(nk).upend<(.75+stim2nd(ll)) && data.delta{kk}(nk).upend>(-.5+stim1st(ll))]
+      featind.KcSmDuring(kk)=1;
+    end
+    if data.delta{kk}(nk).negmax<0.75+stim2nd(ll) && data.delta{kk}(nk).negmax>0.4+stim2nd(ll)
+      featind.KcSmEvoked(kk)=1;
     end
   end % nk
   
@@ -62,7 +75,15 @@ for kk=1:numtr
   end % nk
 end  % kk
 
-
+figure(llin);
+plot(data.time,squeeze(mean(data.trial(setdiff(1:numtr,unique([find(featind.KcDuring) find(featind.KcSmDuring)])),17,:),1))');hold on;
+plot(data.time,squeeze(mean(data.trial(setdiff(1:numtr,find(featind.KcDuring)),17,:),1))');hold on;
+plot(data.time,squeeze(mean(data.trial(:,17,:),1))');hold on;
+plot(data.time,squeeze(mean(data.trial(find(featind.KcSmDuring),17,:),1))');hold on;
+plot(data.time,squeeze(mean(data.trial(unique([find(featind.KcDuring) find(featind.KcSmDuring)]),17,:),1))');hold on;
+plot(data.time,squeeze(mean(data.trial(find(featind.KcDuring),17,:),1))');hold on;
+ylim([-50 20])
+print(llin,['compare_nKD_ll' num2str(llin) '.eps'],'-depsc')
 
 end
 
