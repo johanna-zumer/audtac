@@ -34,9 +34,9 @@ else
   iteruse=27; % final use; keep it simple
   trialkc=-1;
 end
-for ii=iiuse;
-  % for ii=setdiff(iiuse,1:8)
-%   for ii=8
+% for ii=iiuse;
+for ii=setdiff(iiuse,1:17)
+  %   for ii=8
   cd([edir sub{ii} ])
   clearvars -except ii sub *dir ii*use sleep minnumcomb hostname timestep* soades dofftadd statst use* synchasynch iteruse trialkc phaset0 toibeg toiend  subuseall trlkeep*
   [raw_tac, raw_aud, raw_nul, artflag]=eeg_legomagic_epoching2(ii,sleep,1,0); % featfull=1, saveflag =0;
@@ -66,10 +66,10 @@ for ii=iiuse;
       if use23
         ssuse=[tr.stageuse+10 23];
       else
-%         ssuse=[tr.stageuse+10];
+        %         ssuse=[tr.stageuse+10];
         ssuse=12;
       end
-      load(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat']);      
+      load(['trlfeat_' sub{ii} '_iter' num2str(iteruse) '.mat']);
     else
       tlock_aud{10,tt,12}=[];
       tlock_aud{10,tt,13}=[];
@@ -972,24 +972,76 @@ for ii=iiuse;
           cfg.t_ftimwin=4./cfg.foi;
           %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
           cfg.output='fourier';
-          freqlo_tTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
-          freqlo_tAudAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
-          freqlo_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
-          freqlo_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          freqlo_tTacAlone_comb{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+          freqlo_tAudAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+          freqlo_tMSAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+          freqlo_tNulAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          if sleep && ss==12
+            if min_nKD(ll)>20
+              cfg.trials=trlkeep_tac_nKD{ll+20,ii};
+              freqlo_tTacAlone_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nKD{ll+40,ii};
+              freqlo_tAudAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nKD{ll,ii};
+              freqlo_tMSAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nKD{ll+50,ii};
+              freqlo_tNulAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqlo_tTacAlone_nKD{ll,tt,ss}= [];
+              freqlo_tAudAlone_nKD{ll,tt,ss}= [];
+              freqlo_tMSAlone_nKD{ll,tt,ss}= [];
+              freqlo_tNulAlone_nKD{ll,tt,ss}= [];
+            end
+            if min_nSD(ll)>20
+              cfg.trials=trlkeep_tac_nSD{ll+20,ii};
+              freqlo_tTacAlone_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nSD{ll+40,ii};
+              freqlo_tAudAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nSD{ll,ii};
+              freqlo_tMSAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nSD{ll+50,ii};
+              freqlo_tNulAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqlo_tTacAlone_nSD{ll,tt,ss}= [];
+              freqlo_tAudAlone_nSD{ll,tt,ss}= [];
+              freqlo_tMSAlone_nSD{ll,tt,ss}= [];
+              freqlo_tNulAlone_nSD{ll,tt,ss}= [];
+            end
+            if min_nKD_nSD(ll)>20
+              cfg.trials=trlkeep_tac_nKD_nSD{ll+20,ii};
+              freqlo_tTacAlone_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nKD_nSD{ll+40,ii};
+              freqlo_tAudAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nKD_nSD{ll,ii};
+              freqlo_tMSAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nKD_nSD{ll+50,ii};
+              freqlo_tNulAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqlo_tTacAlone_nKD_nSD{ll,tt,ss}= [];
+              freqlo_tAudAlone_nKD_nSD{ll,tt,ss}= [];
+              freqlo_tMSAlone_nKD_nSD{ll,tt,ss}= [];
+              freqlo_tNulAlone_nKD_nSD{ll,tt,ss}= [];
+            end
+            cfg.trials='all';
+          end
           
-          %           disp('study getplv'), keyboard
-          freqlo_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqlo_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqlo_tTacAlone_comb{ll,tt,ss}=rmfield(freqlo_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqlo_tAudAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tAudAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqlo_tAudAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tAudAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqlo_tAudAlone_comb{ll,tt,ss}=rmfield(freqlo_tAudAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqlo_tMSAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tMSAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqlo_tMSAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tMSAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqlo_tMSAlone_comb{ll,tt,ss}=rmfield(freqlo_tMSAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqlo_tNulAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tNulAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqlo_tNulAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tNulAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqlo_tNulAlone_comb{ll,tt,ss}=rmfield(freqlo_tNulAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqlo_tTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+          %           freqlo_tAudAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+          %           freqlo_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+          %           freqlo_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          %           %           disp('study getplv'), keyboard
+          %           freqlo_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqlo_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqlo_tTacAlone_comb{ll,tt,ss}=rmfield(freqlo_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqlo_tAudAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tAudAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqlo_tAudAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tAudAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqlo_tAudAlone_comb{ll,tt,ss}=rmfield(freqlo_tAudAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqlo_tMSAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tMSAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqlo_tMSAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tMSAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqlo_tMSAlone_comb{ll,tt,ss}=rmfield(freqlo_tMSAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqlo_tNulAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqlo_tNulAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqlo_tNulAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqlo_tNulAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqlo_tNulAlone_comb{ll,tt,ss}=rmfield(freqlo_tNulAlone_comb{ll,tt,ss},'fourierspctrm');
           
           if synchasynch && ll<5
             freqlo_tacMSshift1_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tacMSshift1{ll,tt,ss});
@@ -1019,23 +1071,75 @@ for ii=iiuse;
           cfg.toi=toibeg(ll):timestepplv:toiend(ll);
           cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
           cfg.output='fourier';
-          freqhi_tTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
-          freqhi_tAudAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
-          freqhi_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
-          freqhi_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          freqhi_tTacAlone_comb{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+          freqhi_tAudAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+          freqhi_tMSAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+          freqhi_tNulAlone_comb{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          if sleep && ss==12
+            if min_nKD(ll)>20
+              cfg.trials=trlkeep_tac_nKD{ll+20,ii};
+              freqhi_tTacAlone_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nKD{ll+40,ii};
+              freqhi_tAudAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nKD{ll,ii};
+              freqhi_tMSAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nKD{ll+50,ii};
+              freqhi_tNulAlone_nKD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqhi_tTacAlone_nKD{ll,tt,ss}= [];
+              freqhi_tAudAlone_nKD{ll,tt,ss}= [];
+              freqhi_tMSAlone_nKD{ll,tt,ss}= [];
+              freqhi_tNulAlone_nKD{ll,tt,ss}= [];
+            end
+            if min_nSD(ll)>20
+              cfg.trials=trlkeep_tac_nSD{ll+20,ii};
+              freqhi_tTacAlone_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nSD{ll+40,ii};
+              freqhi_tAudAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nSD{ll,ii};
+              freqhi_tMSAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nSD{ll+50,ii};
+              freqhi_tNulAlone_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqhi_tTacAlone_nSD{ll,tt,ss}= [];
+              freqhi_tAudAlone_nSD{ll,tt,ss}= [];
+              freqhi_tMSAlone_nSD{ll,tt,ss}= [];
+              freqhi_tNulAlone_nSD{ll,tt,ss}= [];
+            end
+            if min_nKD_nSD(ll)>20
+              cfg.trials=trlkeep_tac_nKD_nSD{ll+20,ii};
+              freqhi_tTacAlone_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+              cfg.trials=trlkeep_aud_nKD_nSD{ll+40,ii};
+              freqhi_tAudAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+              cfg.trials=trlkeep_tac_nKD_nSD{ll,ii};
+              freqhi_tMSAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+              cfg.trials=trlkeep_nul_nKD_nSD{ll+50,ii};
+              freqhi_tNulAlone_nKD_nSD{ll,tt,ss}=powNplv_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+            else
+              freqhi_tTacAlone_nKD_nSD{ll,tt,ss}= [];
+              freqhi_tAudAlone_nKD_nSD{ll,tt,ss}= [];
+              freqhi_tMSAlone_nKD_nSD{ll,tt,ss}= [];
+              freqhi_tNulAlone_nKD_nSD{ll,tt,ss}= [];
+            end
+            cfg.trials='all';
+          end
           
-          freqhi_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqhi_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqhi_tTacAlone_comb{ll,tt,ss}=rmfield(freqhi_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqhi_tAudAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tAudAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqhi_tAudAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tAudAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqhi_tAudAlone_comb{ll,tt,ss}=rmfield(freqhi_tAudAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqhi_tMSAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tMSAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqhi_tMSAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tMSAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqhi_tMSAlone_comb{ll,tt,ss}=rmfield(freqhi_tMSAlone_comb{ll,tt,ss},'fourierspctrm');
-          freqhi_tNulAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tNulAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
-          freqhi_tNulAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tNulAlone_comb{ll,tt,ss}.fourierspctrm);
-          freqhi_tNulAlone_comb{ll,tt,ss}=rmfield(freqhi_tNulAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqhi_tTacAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll+20,tt,ss});
+          %           freqhi_tAudAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_aud{ll+40,tt,ss});
+          %           freqhi_tMSAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tac{ll,tt,ss});
+          %           freqhi_tNulAlone_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_nul{ll+50,tt,ss});
+          %           freqhi_tTacAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tTacAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqhi_tTacAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tTacAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqhi_tTacAlone_comb{ll,tt,ss}=rmfield(freqhi_tTacAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqhi_tAudAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tAudAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqhi_tAudAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tAudAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqhi_tAudAlone_comb{ll,tt,ss}=rmfield(freqhi_tAudAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqhi_tMSAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tMSAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqhi_tMSAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tMSAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqhi_tMSAlone_comb{ll,tt,ss}=rmfield(freqhi_tMSAlone_comb{ll,tt,ss},'fourierspctrm');
+          %           freqhi_tNulAlone_comb{ll,tt,ss}.powspctrm=squeeze(mean(abs(freqhi_tNulAlone_comb{ll,tt,ss}.fourierspctrm).^2,1));
+          %           freqhi_tNulAlone_comb{ll,tt,ss}.plvspctrm=getplv(freqhi_tNulAlone_comb{ll,tt,ss}.fourierspctrm);
+          %           freqhi_tNulAlone_comb{ll,tt,ss}=rmfield(freqhi_tNulAlone_comb{ll,tt,ss},'fourierspctrm');
           
           if synchasynch && ll<5
             freqhi_tacMSshift1_comb{ll,tt,ss}=ft_freqanalysis(cfg,tlock_tacMSshift1{ll,tt,ss});
@@ -1063,7 +1167,6 @@ for ii=iiuse;
           %             combindex=reshape(1:numcomb,numt_trials(ll,tt,ss),numt_trials(ll,tt,ss));
           freqlo_tacPaud_tmp{1}=[];
           freqhi_tacPaud_tmp{1}=[];
-          keyboard
           cfg=[];cfg.randomseed=13;ft_preamble randomseed
           for cc=1:numtests
             %               tmp=Shuffle(combindex(:));
@@ -1073,35 +1176,49 @@ for ii=iiuse;
             
             if cc==1
               tlock_fake=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},allnumtr,allnumtr);
-              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD{ll+20,ii},trlkeep_aud_nKD{ll+40,ii});
-              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nSD{ll+20,ii},trlkeep_aud_nSD{ll+40,ii});
-              tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD_nSD{ll+20,ii},trlkeep_aud_nKD_nSD{ll+40,ii});
+              if sleep
+                if min_nKD(ll)>20
+                  tlock_fake_nKD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD{ll+20,ii},trlkeep_aud_nKD{ll+40,ii});
+                else
+                  tlock_fake_nKD=[];
+                end
+                if min_nSD(ll)>20
+                  tlock_fake_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nSD{ll+20,ii},trlkeep_aud_nSD{ll+40,ii});
+                else
+                  tlock_fake_nSD=[];
+                end
+                if min_nKD_nSD(ll)>20
+                  tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},trlkeep_tac_nKD_nSD{ll+20,ii},trlkeep_aud_nKD_nSD{ll+40,ii});
+                else
+                  tlock_fake_nKD_nSD=[];
+                end
+              end
             else
               tlock_fake=addbeforeFFT(tlock_tac{ll+20,tt,ss},tlock_aud{ll+40,tt,ss},allnumtr,combuse);
             end
-%             for at=1:numt_trials(ll,tt,ss)
-%               if cc==1  % do it as 'normal'
-%                 tind=at;aind=at;
-%               else
-%                 %                   [tind,aind]=find(combindex==combuse(at));
-%                 tind=at;
-%                 aind=combuse(at);
-%                 %                   [tind,aind]=find(combindex==combuse(at));
-%               end
-%               cfg=[];
-%               cfg.trials=tind;
-%               tmpt=ft_selectdata(cfg,tlock_tac{ll+20,tt,ss});
-%               cfg.trials=aind;
-%               tmpa=ft_selectdata(cfg,tlock_aud{ll+40,tt,ss});
-%               cfg=[];
-%               cfg.operation='add';
-%               cfg.parameter='trial';
-%               tmpsum=ft_math(cfg,tmpt,tmpa);
-%               if at==1
-%                 tlock_fake=tmpsum;
-%               end
-%               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
-%             end
+            %             for at=1:numt_trials(ll,tt,ss)
+            %               if cc==1  % do it as 'normal'
+            %                 tind=at;aind=at;
+            %               else
+            %                 %                   [tind,aind]=find(combindex==combuse(at));
+            %                 tind=at;
+            %                 aind=combuse(at);
+            %                 %                   [tind,aind]=find(combindex==combuse(at));
+            %               end
+            %               cfg=[];
+            %               cfg.trials=tind;
+            %               tmpt=ft_selectdata(cfg,tlock_tac{ll+20,tt,ss});
+            %               cfg.trials=aind;
+            %               tmpa=ft_selectdata(cfg,tlock_aud{ll+40,tt,ss});
+            %               cfg=[];
+            %               cfg.operation='add';
+            %               cfg.parameter='trial';
+            %               tmpsum=ft_math(cfg,tmpt,tmpa);
+            %               if at==1
+            %                 tlock_fake=tmpsum;
+            %               end
+            %               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
+            %             end
             
             cfg=[];
             cfg.method='mtmconvol';
@@ -1113,11 +1230,23 @@ for ii=iiuse;
             %         cfg.keeptrials='yes';  % not necessary at this stage for keeping trials (yes later for source analysis and phase resetting)
             cfg.output='fourier';
             freqlo_tacPaud_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
-            if cc==1
-              freqlo_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqlo_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqlo_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
-            end            
+            if cc==1 && sleep
+              if min_nKD(ll)>20
+                freqlo_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
+              else
+                freqlo_tacPaud_nKD{ll,tt,ss}=[];
+              end
+              if min_nSD(ll)>20
+                freqlo_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
+              else
+                freqlo_tacPaud_nSD{ll,tt,ss}=[];
+              end
+              if min_nKD_nSD(ll)>20
+                freqlo_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+              else
+                freqlo_tacPaud_nKD_nSD{ll,tt,ss}=[];
+              end
+            end
             
             cfg=[];
             cfg.method='mtmconvol';
@@ -1129,12 +1258,24 @@ for ii=iiuse;
             cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
             cfg.output='fourier';
             freqhi_tacPaud_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
-            if cc==1
-              freqhi_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqhi_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqhi_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
-            end            
-
+            if cc==1 && sleep
+              if min_nKD(ll)>20
+                freqhi_tacPaud_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
+              else
+                freqhi_tacPaud_nKD{ll,tt,ss}=[];
+              end
+              if min_nSD(ll)>20
+                freqhi_tacPaud_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
+              else
+                freqhi_tacPaud_nSD{ll,tt,ss}=[];
+              end
+              if min_nKD_nSD(ll)>20
+                freqhi_tacPaud_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+              else
+                freqhi_tacPaud_nKD_nSD{ll,tt,ss}=[];
+              end
+            end
+            
             disp(['tacPaud cc ' num2str(cc)]),toc
           end % cc
           freqlo_tacPaud_comb{ll,tt,ss,1}=freqlo_tacPaud_tmp{1};
@@ -1224,36 +1365,50 @@ for ii=iiuse;
             
             if cc==1
               tlock_fake=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},allnumtr,allnumtr);
-              tlock_fake_nKD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD{ll,ii},trlkeep_nul_nKD{ll+50,ii});
-              tlock_fake_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nSD{ll,ii},trlkeep_nul_nSD{ll+50,ii});
-              tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD_nSD{ll,ii},trlkeep_nul_nKD_nSD{ll+50,ii});
+              if sleep
+              if min_nKD(ll)>20
+                tlock_fake_nKD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD{ll,ii},trlkeep_nul_nKD{ll+50,ii});
+              else
+                tlock_fake_nKD=[];
+              end
+              if min_nSD(ll)>20
+                tlock_fake_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nSD{ll,ii},trlkeep_nul_nSD{ll+50,ii});
+              else
+                tlock_fake_nSD=[];
+              end
+              if min_nKD_nSD(ll)>20
+                tlock_fake_nKD_nSD=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},trlkeep_tac_nKD_nSD{ll,ii},trlkeep_nul_nKD_nSD{ll+50,ii});
+              else
+                tlock_fake_nKD_nSD=[];
+              end
+              end
             else
               tlock_fake=addbeforeFFT(tlock_tac{ll,tt,ss},tlock_nul{ll+50,tt,ss},allnumtr,combuse);
             end
             
-%             for at=1:numt_trials(ll,tt,ss)
-%               if cc==1  % do it as 'normal'
-%                 tind=at;aind=at;
-%               else
-%                 %                   [tind,aind]=find(combindex==combuse(at));
-%                 tind=at;
-%                 aind=combuse(at);
-%               end
-%               cfg=[];
-%               cfg.trials=tind;
-%               tmpt=ft_selectdata(cfg,tlock_tac{ll,tt,ss});
-%               cfg.trials=aind;
-%               tmpa=ft_selectdata(cfg,tlock_nul{ll+50,tt,ss});
-%               cfg=[];
-%               cfg.operation='add';
-%               cfg.parameter='trial';
-%               tmpsum=ft_math(cfg,tmpt,tmpa);
-%               if at==1
-%                 tlock_fake=tmpsum;
-%               end
-%               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
-%               %           tlock_fake.trial(at,:,:)=tlock_tac{ll,tt,ss}.trial(tind,:,:)+tlock_nul{ll+50,tt,ss}.trial(aind,:,:);
-%             end
+            %             for at=1:numt_trials(ll,tt,ss)
+            %               if cc==1  % do it as 'normal'
+            %                 tind=at;aind=at;
+            %               else
+            %                 %                   [tind,aind]=find(combindex==combuse(at));
+            %                 tind=at;
+            %                 aind=combuse(at);
+            %               end
+            %               cfg=[];
+            %               cfg.trials=tind;
+            %               tmpt=ft_selectdata(cfg,tlock_tac{ll,tt,ss});
+            %               cfg.trials=aind;
+            %               tmpa=ft_selectdata(cfg,tlock_nul{ll+50,tt,ss});
+            %               cfg=[];
+            %               cfg.operation='add';
+            %               cfg.parameter='trial';
+            %               tmpsum=ft_math(cfg,tmpt,tmpa);
+            %               if at==1
+            %                 tlock_fake=tmpsum;
+            %               end
+            %               tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
+            %               %           tlock_fake.trial(at,:,:)=tlock_tac{ll,tt,ss}.trial(tind,:,:)+tlock_nul{ll+50,tt,ss}.trial(aind,:,:);
+            %             end
             
             cfg=[];
             cfg.method='mtmconvol';
@@ -1266,10 +1421,22 @@ for ii=iiuse;
             cfg.output='fourier'; % this forces keeptrials to be 'yes'
             
             freqlo_tacMSpN_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
-            if cc==1
-              freqlo_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqlo_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqlo_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+            if cc==1 && sleep
+              if min_nKD(ll)>20
+                freqlo_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
+              else
+                freqlo_tacMSpN_nKD{ll,tt,ss}=[];
+              end
+              if min_nSD(ll)>20
+                freqlo_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
+              else
+                freqlo_tacMSpN_nSD{ll,tt,ss}=[];
+              end
+              if min_nKD_nSD(ll)>20
+                freqlo_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+              else
+                freqlo_tacMSpN_nKD_nSD{ll,tt,ss}=[];
+              end
             end
             
             cfg=[];
@@ -1282,10 +1449,22 @@ for ii=iiuse;
             cfg.t_ftimwin=.2*ones(1,length(cfg.foi));
             cfg.output='fourier';
             freqhi_tacMSpN_tmp{cc}= powNplv_freqanalysis(cfg,tlock_fake);
-            if cc==1
-              freqhi_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
-              freqhi_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
-              freqhi_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+            if cc==1 && sleep
+              if min_nKD(ll)>20
+                freqhi_tacMSpN_nKD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD);
+              else
+                freqhi_tacMSpN_nKD{ll,tt,ss}=[];
+              end
+              if min_nSD(ll)>20
+                freqhi_tacMSpN_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nSD);
+              else
+                freqhi_tacMSpN_nSD{ll,tt,ss}=[];
+              end
+              if min_nKD_nSD(ll)>20
+                freqhi_tacMSpN_nKD_nSD{ll,tt,ss}= powNplv_freqanalysis(cfg,tlock_fake_nKD_nSD);
+              else
+                freqhi_tacMSpN_nKD_nSD{ll,tt,ss}=[];
+              end
             end
           end
           freqlo_tacMSpN_comb{ll,tt,ss,1}=freqlo_tacMSpN_tmp{1};
