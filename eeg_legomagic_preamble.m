@@ -1,16 +1,27 @@
 clear all
 close all
+[~,hostname]=system('hostname');
 if ispc
-  edir='D:\audtac\eeg_data\';
-  esdir='D:\audtac\source_data\';
-  ddir='D:\audtac\legomagic\diaries\';
-  bdir='D:\audtac\behav_data\';
-  sdir='D:\audtac\spss_stuff\';
-  fdir='D:\audtac\figs\';
-  mdir='D:\audtac\structural_MRI\';
-  pdir='D:\audtac\polhemus\';
+  if ~isempty(strfind(hostname,'12807'))  % COLLES-12807
+    edir='C:\D_132432\audtac\eeg_data\';
+    esdir='C:\D_132432\audtac\source_data\';
+    ddir='C:\D_132432\audtac\legomagic\diaries\';
+    bdir='C:\D_132432\audtac\behav_data\';
+    sdir='C:\D_132432\audtac\spss_stuff\';
+    fdir='C:\D_132432\audtac\figs\';
+    mdir='C:\D_132432\audtac\structural_MRI\';
+    pdir='C:\D_132432\audtac\polhemus\';
+  else
+    edir='D:\audtac\eeg_data\';
+    esdir='D:\audtac\source_data\';
+    ddir='D:\audtac\legomagic\diaries\';
+    bdir='D:\audtac\behav_data\';
+    sdir='D:\audtac\spss_stuff\';
+    fdir='D:\audtac\figs\';
+    mdir='D:\audtac\structural_MRI\';
+    pdir='D:\audtac\polhemus\';
+  end
 else
-  [~,hostname]=system('hostname');
   if ~isempty(strfind(hostname,'151401')) % COLLES-151401
     edir='/home/adf/zumerj/audtac/eeg_data/';
     esdir='/home/adf/zumerj/audtac/source_data/';
@@ -79,11 +90,20 @@ sub{32}='e32';
 
 if ispc
   warning off
-  rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
-  rmpath(genpath('D:\fieldtrip_svn\'))
-  rmpath(genpath('D:\fieldtrip_git\'))
-  warning on
-  addpath('D:\fieldtrip_git\')
+  if ~isempty(strfind(hostname,'12807'))  % COLLES-12807
+    rmpath(genpath('C:\D_132432\Matlab\spm12b\external\fieldtrip\'))
+    rmpath(genpath('C:\D_132432\Matlab\spm12b\external\mne\'))
+%     rmpath(genpath('D:\fieldtrip_svn\'))
+    rmpath(genpath('C:\Users\zumerj\fieldtrip_git\'))
+    warning on
+    addpath('C:\Users\zumerj\fieldtrip_git\')
+  else
+    rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
+    rmpath(genpath('D:\fieldtrip_svn\'))
+    rmpath(genpath('D:\fieldtrip_git\'))
+    warning on
+    addpath('D:\fieldtrip_git\')
+  end
 else
   if ~isempty(strfind(hostname,'LES')) | ~isempty(strfind(hostname,'les'))
     warning off
@@ -101,7 +121,7 @@ else
     addpath('/mnt/hgfs/D/fieldtrip_git/')
   end
 end
-which ft_defaults.m
+which ft_defaults.m -ALL
 ft_defaults;
 load([edir 'iikeep.mat'])
 soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
