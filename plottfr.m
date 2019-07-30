@@ -1,5 +1,7 @@
-function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
-% function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
+function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,statuse)
+% function tfrsave = plottfr(tfr_diff,tfr_tpa,tfr_mspn,xlimlim,purpose,stat,band,param,ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,statuse)
+
+close all
 
 colorblindD  =[204 101 0]/256;
 colorblindApT=[5 165 255]/256;
@@ -12,13 +14,13 @@ colorblindN  =[128 128 128]/256;
 cfg=[];
 tmpA=ft_selectdata(cfg,tfr_diff);
 tmpA.mask=logical(zeros(size(tmpA.powspctrm)));
-tmpA.mask(:,:,dsearchn(tmpA.time',stat.time(1)):dsearchn(tmpA.time',stat.time(end)))=stat.mask;
+tmpA.mask(:,:,dsearchn(tmpA.time',stat.time(1)):dsearchn(tmpA.time',stat.time(end)))=stat.(statuse);
 tmpsA=ft_selectdata(cfg,tfr_mspn);
 tmpsA.mask=logical(zeros(size(tmpsA.powspctrm)));
-tmpsA.mask(:,:,dsearchn(tmpsA.time',stat.time(1)):dsearchn(tmpsA.time',stat.time(end)))=stat.mask;
+tmpsA.mask(:,:,dsearchn(tmpsA.time',stat.time(1)):dsearchn(tmpsA.time',stat.time(end)))=stat.(statuse);
 tmpuA=ft_selectdata(cfg,tfr_tpa);
 tmpuA.mask=logical(zeros(size(tmpuA.powspctrm)));
-tmpuA.mask(:,:,dsearchn(tmpuA.time',stat.time(1)):dsearchn(tmpuA.time',stat.time(end)))=stat.mask;
+tmpuA.mask(:,:,dsearchn(tmpuA.time',stat.time(1)):dsearchn(tmpuA.time',stat.time(end)))=stat.(statuse);
 
 pow{1}=tmpuA;
 pow{2}=tmpsA;
@@ -65,24 +67,25 @@ for pp=1:3
   end
 end % pp
 
-% for cg=1:length(chanplot)
-for cg=1:2
+for cg=1:length(chanplot)
+% for cg=1:2
   cfg=[];
   cfg.parameter='avg';
   cfg.layout='elec1010.lay';
-  switch param
-    case 'powspctrm'
-      switch band
-        case 'theta'
-          cfg.ylim=[-2.5 2.5];
-        case 'alpha'
-          cfg.ylim=[-4.5 4.5];
-        case 'beta'
-          cfg.ylim=[-.8 .8];
-      end
-    case 'plvabs'
-      cfg.ylim=[-.1 .4];
-  end
+  cfg.ylim='maxabs';
+%   switch param
+%     case 'powspctrm'
+%       switch band
+%         case 'theta'
+%           cfg.ylim=[-2.5 2.5];
+%         case 'alpha'
+%           cfg.ylim=[-4.5 4.5];
+%         case 'beta'
+%           cfg.ylim=[-.8 .8];
+%       end
+%     case 'plvabs'
+%       cfg.ylim=[-.1 .4];
+%   end
   cfg.linewidth=3;
   cfg.xlim=xlimlim;
   cfg.channel=chanplot{cg};
@@ -93,6 +96,7 @@ for cg=1:2
   figure(ll+10*(cg+1))
   cfg = ft_singleplotER(cfg,powb{1},powb{2},powb{3});
   hold on;plot(powb{1}.time,0,'k');
+  cfg.ylim=get(gca,'YLim');
   set(gca,'XTick',[-.6:.1:1.8])
   set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
   set(gca,'FontSize',30)
@@ -108,26 +112,42 @@ for cg=1:2
   end
 end % cg
 
-print(ll+20,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_FC_' num2str(ll) band '.png'],'-dpng')
-print(ll+30,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_OP_' num2str(ll) band '.png'],'-dpng')
-print(ll+20,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_FC_' num2str(ll) band '.eps'],'-depsc')
-print(ll+30,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_OP_' num2str(ll) band '.eps'],'-depsc')
+
+print(ll+20,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan1_' num2str(ll) band '_' statuse '.png'],'-dpng')
+try 
+  print(ll+30,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan2_' num2str(ll) band '_' statuse '.png'],'-dpng')
+end
+try 
+  print(ll+40,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan3_' num2str(ll) band '_' statuse '.png'],'-dpng')
+end
+print(ll+20,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan1_' num2str(ll) band '_' statuse '.eps'],'-depsc')
+try
+  print(ll+30,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan2_' num2str(ll) band '_' statuse '.eps'],'-depsc')
+end
+try
+  print(ll+40,[fdir purpose '_tfr_' param '_tacPaud_MSpN_diff_chan3_' num2str(ll) band '_' statuse '.eps'],'-depsc')
+end
+
+
 
 
 selchan1 = match_str(powb{3}.label, chanplot{1});
-selchan2 = match_str(powb{3}.label, chanplot{2});
 tfrsave.time=powb{3}.time(nearest(powb{3}.time, xlimlim(1)):nearest(powb{3}.time, xlimlim(2)));
 tfrsave.courseFC=mean(powb{3}.avg(selchan1,nearest(powb{3}.time,xlimlim(1)):nearest(powb{3}.time, xlimlim(2))),1);
-tfrsave.courseOP=mean(powb{3}.avg(selchan2,nearest(powb{3}.time,xlimlim(1)):nearest(powb{3}.time, xlimlim(2))),1);
+try
+  selchan2 = match_str(powb{3}.label, chanplot{2});
+  tfrsave.courseOP=mean(powb{3}.avg(selchan2,nearest(powb{3}.time,xlimlim(1)):nearest(powb{3}.time, xlimlim(2))),1);
+end
+
 
 cfg=[];
 cfg.parameter=param;
 cfg.layout='elec1010.lay';
 cfg.maskalpha=0.5;
 cfg.highlight='on';
-cfg.comment='no';
-masktime_tmp=find(squeeze(any(mean(stat.mask(:,1,:),2),1)));
-difftimes=diff(find(squeeze(any(mean(stat.mask(:,1,:),2),1))));
+cfg.comment='auto';
+masktime_tmp=find(squeeze(any(mean(stat.(statuse)(:,1,:),2),1)));
+difftimes=diff(find(squeeze(any(mean(stat.(statuse)(:,1,:),2),1))));
 clear masktime
 if any(difftimes>1)
   finddifftimes=find(difftimes>1);
@@ -148,10 +168,13 @@ if ll==1
     case 'theta'
       switch param
         case 'powspctrm'
-          masktime_tmp=masktime{1};
-          clear masktime
-          masktime{1}=masktime_tmp(1:45);
-          masktime{2}=masktime_tmp(46:end);
+          switch purpose
+            case {'ica' 'within'}
+              masktime_tmp=masktime{1};
+              clear masktime
+              masktime{1}=masktime_tmp(1:45);
+              masktime{2}=masktime_tmp(46:end);
+          end
       end
   end
 end
@@ -163,7 +186,7 @@ end
 for dd=1:length(masktime)
   if ~isempty(masktime{dd})
     cfg.xlim=[stat.time(masktime{dd}(1)) stat.time(masktime{dd}(end))];
-    cfg.highlightchannel=stat.label(find(ceil(mean(mean(stat.mask(:,1,dsearchn(stat.time',cfg.xlim(1)):dsearchn(stat.time',cfg.xlim(2)) ),2),3))));
+    cfg.highlightchannel=stat.label(find(ceil(mean(mean(stat.(statuse)(:,1,dsearchn(stat.time',cfg.xlim(1)):dsearchn(stat.time',cfg.xlim(2)) ),2),3))));
     cfg.baseline=baseline2;
     cfg.highlightsize=25;
     cfg.highlightsymbol='.';
@@ -189,8 +212,8 @@ for dd=1:length(masktime)
     end
     figure(10*ll+4);
     ft_topoplotTFR(cfg,tmpA);
-    print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
-    print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
+    print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.eps'],'-depsc2')
+    print(10*ll+4,[fdir 'topoDiff_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.png'],'-dpng')
     tfrsave.topo{dd}=mean(tmpA.(param)(:,1,nearest(tmpA.time,cfg.xlim(1)):nearest(tmpA.time,cfg.xlim(2))),3);
     switch purpose
       case 'within'
@@ -216,13 +239,13 @@ for dd=1:length(masktime)
         end
         figure(10*ll+4+100);
         ft_topoplotTFR(cfg,tmpuA);
-        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
-        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
+        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.eps'],'-depsc2')
+        print(10*ll+4+100,[fdir 'topoU_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.png'],'-dpng')
         tfrsave.topoU{dd}=mean(tmpuA.(param)(:,1,nearest(tmpuA.time,cfg.xlim(1)):nearest(tmpuA.time,cfg.xlim(2))),3);
         figure(10*ll+4+200);
         ft_topoplotTFR(cfg,tmpsA);
-        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.eps'],'-depsc2')
-        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '.png'],'-dpng')
+        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.eps'],'-depsc2')
+        print(10*ll+4+200,[fdir 'topoM_' param '_' band '_' num2str(ll) '_time' num2str(dd) '_' statuse '.png'],'-dpng')
         tfrsave.topoM{dd}=mean(tmpsA.(param)(:,1,nearest(tmpsA.time,cfg.xlim(1)):nearest(tmpsA.time,cfg.xlim(2))),3);
     end
   end
