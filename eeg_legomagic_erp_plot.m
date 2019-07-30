@@ -7,6 +7,8 @@ eeg_legomagic_preamble
 % Below, plotting conditions on their own.
 
 clearvars -except sub *dir
+
+
 % chanplot{1}={'Fz' 'Cz' 'F1' 'F2' 'FC1' 'FC2' 'C1' 'C2'}; % frontocentral
 % chanplot{2}={'CP5' 'P5' 'PO3' 'POz' 'PO4' 'P6' 'CP6' 'Pz' 'P3' 'P4'}; % occipital
 % chanplot{3}={'FC6' 'FC4' 'F4' 'F6' 'F8' 'FT8' 'T8' 'C6' 'C4'}; % right frontotemporal
@@ -28,6 +30,9 @@ mcseed=13;
 usetr=0;
 plotallmask=1; % =0 means each subplot will use significane mask relevant for those sensors & time plotted only
 % =1 means each subplot will use mask relevant for all sensors even those not plotted.
+
+stim1st= [-.5 nan -.07 -.02 0   0   0 nan  0];
+stim2nd= [  0 nan    0    0 0 .02 .07 nan .5];
 
 if sleep
   iter=11;
@@ -114,10 +119,18 @@ if incondflag==1 % for within-condition
   timwin=[-0.5 1];
   topozlim=[-5 5];
   topozlimdiff=[-5 5];
-else % for across-condition (only showing <=70)
+  lineylim=[-5 8];
+elseif incondflag==2
+  load ANOVA_sleep0_ERP.mat
+  timwin=[-0.5 1];
+  topozlim=[-5 5];
+  topozlimdiff=[-3 3];
+  lineylim=[-5 8];
+elseif incondflag==0 % for across-condition (only showing <=70)
   timwin=[-0.05 .57];  % this will cause an error for ll=9, but not a problem as we don't need that one for ICA
   topozlim=[-5 5];
   topozlimdiff=[-3 3];
+  lineylim='maxabs';
 end
 
 timeadd=max(0,soades);
@@ -328,7 +341,7 @@ for ll=soalist
     cfg=[];
     cfg.parameter='avg';
     cfg.layout='elec1010.lay';
-    cfg.ylim=[-5 8];
+    cfg.ylim=lineylim;
     cfg.linewidth=3;
     cfg.xlim=[timwin(1)+timeadd(ll)-.05 timwin(2)+timeadd(ll)+.05]; 
     if cg>length(chanplot)
@@ -350,14 +363,15 @@ for ll=soalist
     set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0' ' '})
     set(gca,'FontSize',30)
     title([])
-    plot([stattimwin(1) stattimwin(1)],cfg.ylim,'k--','LineWidth',6)
-    plot([stattimwin(2) stattimwin(2)],cfg.ylim,'k--','LineWidth',6)
+    ylimuse=get(gca,'YLim');
+    plot([stattimwin(1) stattimwin(1)],ylimuse,'k--','LineWidth',6)
+    plot([stattimwin(2) stattimwin(2)],ylimuse,'k--','LineWidth',6)
 %     plot([0 0],cfg.ylim,'Color',coloruse(4,:),'LineWidth',6)
 %     plot([soades(ll) soades(ll)],cfg.ylim,'Color',coloruse(9,:),'LineWidth',6)
-    plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+    plot([0 0],ylimuse,'Color',colorblindT,'LineWidth',6)
+    plot([soades(ll) soades(ll)],ylimuse,'Color',colorblindA,'LineWidth',6)
     plot(cfg.xlim,[0 0],'Color','k')
-    axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+    axis([cfg.xlim(1) cfg.xlim(2) ylimuse(1) ylimuse(2)])
     if cg==3
       legend('mask','A+T','MS+N','Difference')
     end
@@ -503,7 +517,55 @@ for ll=soalist
     %     legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
     %     print(50+ll,[fdir 'erp_tacPaud_MSpN_diff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
   end
+  
+  % For comparing to ANOVA:
+  if sleep==0
+    cfg=[];
+    cfg.parameter='avg';
+    cfg.layout='elec1010.lay';
+    cfg.maskalpha=0.5;
+    cfg.zlim=topozlim;
+    cfg.highlight='on';
+    cfg.highlightsize=12;
+    cfg.comment='no';
+    cfg.zlim=topozlimdiff;
+    
+    cfg.xlim=[erp_anova_tw1(1) erp_anova_tw1(end)]/1000+stim2nd(ll);
+    cfg.highlightchannel=erp_anova_chan1;
+    figure(220+ll);
+    ft_topoplotER(cfg,tmpd5);
+    print(220+ll,[fdir 'erp_topoDiff_ANOVAtw1_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(220+ll,[fdir 'erp_topoDiff_ANOVAtw1_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    
+    cfg.xlim=[erp_anova_tw2(1) erp_anova_tw2(end)]/1000+stim2nd(ll);
+    cfg.highlightchannel=erp_anova_chan2;
+    figure(230+ll);
+    ft_topoplotER(cfg,tmpd5);
+    print(230+ll,[fdir 'erp_topoDiff_ANOVAtw2_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(230+ll,[fdir 'erp_topoDiff_ANOVAtw2_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    
+    cfg.xlim=[erp_anova_tw3(1) erp_anova_tw3(end)]/1000+stim2nd(ll);
+    cfg.highlightchannel=erp_anova_chan3;
+    figure(240+ll);
+    ft_topoplotER(cfg,tmpd5);
+    print(240+ll,[fdir 'erp_topoDiff_ANOVAtw3_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(240+ll,[fdir 'erp_topoDiff_ANOVAtw3_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+
+    cfg.xlim=[erp_anova_tw4(1) erp_anova_tw4(end)]/1000+stim2nd(ll);
+    cfg.highlightchannel=erp_anova_chan4;
+    cfg.highlightchannel=[];
+    figure(250+ll);
+    ft_topoplotER(cfg,tmpd5);
+    print(250+ll,[fdir 'erp_topoDiff_ANOVAtw4_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
+    print(250+ll,[fdir 'erp_topoDiff_ANOVAtw4_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+elseif sleep==1
+    disp('fix me')
+    keyboard
+  end
+
 end
+
+keyboard
 for ll=soalist,erpsave{ll}.label=statt_allmc{ll,tt,ss}.label;end
 save erpsave.mat erpsave*
 
