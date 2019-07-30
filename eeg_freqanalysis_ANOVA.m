@@ -2,32 +2,66 @@ eeg_legomagic_preamble
 
 %% PCA/ICA and ANOVA for awake
 
-if 0
+grsaveloadflag=1;  % =0 compute and save grlo*;   =1 load previously computed grlo*
+statflag=1;  % =0 compute and save freqstat;   =1 load previously computed freqstat
+sleep=0;
+if sleep
+  iter=11;
+  usetr=1;
+else
+  iter=31;
+  usetr=3;
+end
+  
+
+if grsaveloadflag==0
   llind=1;
   for ll=soalist
-    load(['grindTFR_cond' num2str(ll) '_sleep0_iter31_trialkc-1_usetr3_mcseed13_itc.mat'],'*comb1');
+    load(['grindTFR_cond' num2str(ll) '_sleep' num2str(ll) '_iter' num2str(iter) '_trialkc-1_usetr' num2str(usetr) '_mcseed13_itc.mat']);
+    clear *comb2    
+
     cfg=[];
     cfg.operation='subtract';
     cfg.parameter={'powspctrm' 'plvabs'};
     grindlo_TPA_MSPN{llind}=ft_math(cfg,grindlo_tacPaud_comb1,grindlo_tacMSpN_comb1);
+    if sleep
+      grindlo_TPA_MSPN_nKD{llind}=ft_math(cfg,grindlo_tacPaud_nKD,grindlo_tacMSpN_nKD);
+      grindlo_TPA_MSPN_nSD{llind}=ft_math(cfg,grindlo_tacPaud_nSD,grindlo_tacMSpN_nSD);
+      grindlo_TPA_MSPN_nKD_nSD{llind}=ft_math(cfg,grindlo_tacPaud_nKD_nSD,grindlo_tacMSpN_nKD_nSD);
+    end
     if ll>5
       grindlo_TPA_MSPN{llind}.time=grindlo_TPA_MSPN{llind}.time-soades(ll);
+      if sleep
+        grindlo_TPA_MSPN_nKD{llind}.time=grindlo_TPA_MSPN_nKD{llind}.time-soades(ll);
+        grindlo_TPA_MSPN_nSD{llind}.time=grindlo_TPA_MSPN_nSD{llind}.time-soades(ll);
+        grindlo_TPA_MSPN_nKD_nSD{llind}.time=grindlo_TPA_MSPN_nKD_nSD{llind}.time-soades(ll);
+      end
     end
     cfg=[];
-    cfg.latency=[0 1.2];
+    cfg.latency=[0 1.2];  % okay for both sleep and awake
     grindlo_TPA_MSPN_sel{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN{llind});
+    if sleep
+      grindlo_TPA_MSPN_nKD_sel{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD{llind});
+      grindlo_TPA_MSPN_nSD_sel{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nSD{llind});
+      grindlo_TPA_MSPN_nKD_nSD_sel{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_nSD{llind});
+    end
     llind=llind+1;
   end
-  clear grindlo_tacPaud_comb1 grindlo_tacMSpN_comb1 grindlo_TPA_MSPN
+  clear grindlo_tacPaud_* grindlo_tacMSpN_* grindlo_TPA_MSPN*
   cfg=[];
   cfg.avgoverrpt='yes';
   cfg.latency=[0 1.05];
   for llind=1:7
     gravelo_TPA_MSPN_avg{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
+    if sleep
+      gravelo_TPA_MSPN_nKD_avg{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_sel{llind});
+      gravelo_TPA_MSPN_nSD_avg{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nSD_sel{llind});
+      gravelo_TPA_MSPN_nKD_nSD_avg{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_nSD_sel{llind});
+    end
   end
-  save grlo_TPA_MSPN.mat gravelo_TPA_MSPN_avg grindlo_TPA_MSPN_sel
-else
-  load grlo_TPA_MSPN.mat
+  save(['grlo_TPA_MSPN_sleep' num2str(sleep) '.mat'],'gravelo_TPA_MSPN_*avg','grindlo_TPA_MSPN_*sel')
+elseif grsaveloadflag==1
+  load(['grlo_TPA_MSPN_sleep' num2str(sleep) '.mat']);
 end
 
 
@@ -38,24 +72,53 @@ for llind=1:7
   cfg.frequency=[4 6.5];
   gravelo_TPA_MSPN_avg_theta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
   grindlo_TPA_MSPN_sel_theta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
-  cfg.frequency=[8 20];
-  gravelo_TPA_MSPN_avg_alfbet{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
-  grindlo_TPA_MSPN_sel_alfbet{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
+  if sleep
+    gravelo_TPA_MSPN_nKD_avg_theta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_avg{llind});
+    grindlo_TPA_MSPN_nKD_sel_theta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_sel{llind});
+    gravelo_TPA_MSPN_nSD_avg_theta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nSD_avg{llind});
+    grindlo_TPA_MSPN_nSD_sel_theta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nSD_sel{llind});
+    gravelo_TPA_MSPN_nKD_nSD_avg_theta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_nSD_avg{llind});
+    grindlo_TPA_MSPN_nKD_nSD_sel_theta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_nSD_sel{llind});
+  end
   cfg.frequency=[8 12];
   gravelo_TPA_MSPN_avg_alpha{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
   grindlo_TPA_MSPN_sel_alpha{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
+  if sleep
+    gravelo_TPA_MSPN_nKD_avg_alpha{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_avg{llind});
+    grindlo_TPA_MSPN_nKD_sel_alpha{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_sel{llind});
+    gravelo_TPA_MSPN_nSD_avg_alpha{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nSD_avg{llind});
+    grindlo_TPA_MSPN_nSD_sel_alpha{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nSD_sel{llind});
+    gravelo_TPA_MSPN_nKD_nSD_avg_alpha{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_nSD_avg{llind});
+    grindlo_TPA_MSPN_nKD_nSD_sel_alpha{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_nSD_sel{llind});
+  end
   cfg.frequency=[14 30];
   gravelo_TPA_MSPN_avg_beta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
   grindlo_TPA_MSPN_sel_beta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
+  if sleep
+    gravelo_TPA_MSPN_nKD_avg_beta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_avg{llind});
+    grindlo_TPA_MSPN_nKD_sel_beta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_sel{llind});
+    gravelo_TPA_MSPN_nSD_avg_beta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nSD_avg{llind});
+    grindlo_TPA_MSPN_nSD_sel_beta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nSD_sel{llind});
+    gravelo_TPA_MSPN_nKD_nSD_avg_beta{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_nKD_nSD_avg{llind});
+    grindlo_TPA_MSPN_nKD_nSD_sel_beta{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_nKD_nSD_sel{llind});
+  end
+  cfg.frequency=[8 20];
+  gravelo_TPA_MSPN_avg_alfbet{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
+  grindlo_TPA_MSPN_sel_alfbet{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
   cfg.frequency=[14 20];
   gravelo_TPA_MSPN_avg_beta1{llind}=ft_selectdata(cfg,gravelo_TPA_MSPN_avg{llind});
   grindlo_TPA_MSPN_sel_beta1{llind}=ft_selectdata(cfg,grindlo_TPA_MSPN_sel{llind});
 end
 
 nsub=size(grindlo_TPA_MSPN_sel{1}.powspctrm,1);
+if sleep
+  nsub_nKD=size(grindlo_TPA_MSPN_nKD_sel{1}.powspctrm,1);
+  nsub_nSD=size(grindlo_TPA_MSPN_nSD_sel{1}.powspctrm,1);
+  nsub_nKD_nSD=size(grindlo_TPA_MSPN_nKD_nSD_sel{1}.powspctrm,1);
+end
 load eeg1010_neighb
 
-if 0  % need to run stats the first time, after that just load them.
+if statflag==0  % need to run stats the first time, after that just load them.
   % Do band-averaged only.
   cfg=[];
   cfg.latency=[0 1.05];
@@ -68,8 +131,7 @@ if 0  % need to run stats the first time, after that just load them.
   cfg.tail=1; % only 1 makes sense for F-test
   cfg.ivar=1;
   cfg.uvar=2;
-  cfg.design(1,:)=[ones(1,nsub) 2*ones(1,nsub) 3*ones(1,nsub) 4*ones(1,nsub) 5*ones(1,nsub) 6*ones(1,nsub) 7*ones(1,nsub)];
-  cfg.design(2,:)=[1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub 1:nsub];
+  cfg.design=set_cfg_design_depF(nsub);
   cfg.randomseed=13;
   cfg.clusterstatistic='maxsum';
   cfg.statistic='depsamplesFunivariate';
@@ -77,9 +139,9 @@ if 0  % need to run stats the first time, after that just load them.
   cfg.comptueprob='yes';
   % freqstat_TPA_MSPN_1wayANOVA = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0305   0.0995  *
   freqstat_TPA_MSPN_1wayANOVA_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_theta{:}); %  0.0235  0.0995   *
-  freqstat_TPA_MSPN_1wayANOVA_alfbet = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alfbet{:}); % 0.0790
   freqstat_TPA_MSPN_1wayANOVA_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alpha{:}); % 0.2574
   freqstat_TPA_MSPN_1wayANOVA_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_beta{:}); % 0.001 [but 0.1504 if 12-30 Hz]
+  freqstat_TPA_MSPN_1wayANOVA_alfbet = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alfbet{:}); % 0.0790
   freqstat_TPA_MSPN_1wayANOVA_beta1 = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_beta1{:}); % 0.0865
   % cfg.frequency=[4 7];
   % freqstat_TPA_MSPN_1wayANOVA_thetaall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0015   *
@@ -89,14 +151,25 @@ if 0  % need to run stats the first time, after that just load them.
   % freqstat_TPA_MSPN_1wayANOVA_alfbetall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0785
   % cfg.frequency=[14 30];
   % freqstat_TPA_MSPN_1wayANOVA_betaall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0010   *
+  if sleep
+    freqstat_TPA_MSPN_1wayANOVA_nKD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_theta{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nKD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_alpha{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nKD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_beta{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nSD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_theta{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nSD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_alpha{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nSD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_beta{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nKD_nSD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_theta{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nKD_nSD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_alpha{:}); 
+    freqstat_TPA_MSPN_1wayANOVA_nKD_nSD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_beta{:}); 
+  end
   
   cfg.parameter='plvabs';
   cfg.frequency='all';
   % plvstat_TPA_MSPN_1wayANOVA = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0305   0.0995  *
   plvstat_TPA_MSPN_1wayANOVA_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_theta{:}); % 0.0005**
-  plvstat_TPA_MSPN_1wayANOVA_alfbet = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alfbet{:}); % 0.1624
   plvstat_TPA_MSPN_1wayANOVA_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alpha{:}); % 0.3318
   plvstat_TPA_MSPN_1wayANOVA_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_beta{:}); % 0.3433
+  plvstat_TPA_MSPN_1wayANOVA_alfbet = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_alfbet{:}); % 0.1624
   plvstat_TPA_MSPN_1wayANOVA_beta1 = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel_beta1{:}); % 0.1274
   % cfg.frequency=[4 7];
   % plvstat_TPA_MSPN_1wayANOVA_thetaall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0015   *
@@ -106,10 +179,21 @@ if 0  % need to run stats the first time, after that just load them.
   % plvstat_TPA_MSPN_1wayANOVA_alfbetall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0785
   % cfg.frequency=[14 30];
   % plvstat_TPA_MSPN_1wayANOVA_betaall = ft_freqstatistics(cfg,grindlo_TPA_MSPN_sel{:}); % 0.0010   *
+  if sleep
+    plvstat_TPA_MSPN_1wayANOVA_nKD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_theta{:}); % 0.0005**
+    plvstat_TPA_MSPN_1wayANOVA_nKD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_alpha{:}); % 0.3318
+    plvstat_TPA_MSPN_1wayANOVA_nKD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_sel_beta{:}); % 0.3433
+    plvstat_TPA_MSPN_1wayANOVA_nSD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_theta{:}); % 0.0005**
+    plvstat_TPA_MSPN_1wayANOVA_nSD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_alpha{:}); % 0.3318
+    plvstat_TPA_MSPN_1wayANOVA_nSD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nSD_sel_beta{:}); % 0.3433
+    plvstat_TPA_MSPN_1wayANOVA_nKD_nSD_theta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_theta{:}); % 0.0005**
+    plvstat_TPA_MSPN_1wayANOVA_nKD_nSD_alpha = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_alpha{:}); % 0.3318
+    plvstat_TPA_MSPN_1wayANOVA_nKD_nSD_beta = ft_freqstatistics(cfg,grindlo_TPA_MSPN_nKD_nSD_sel_beta{:}); % 0.3433
+  end
   
-  save freqstat.mat freqstat* plvstat*
-else
-  load freqstat.mat
+  save(['freqstat_sleep' num2str(sleep) '.mat'],'freqstat*','plvstat*')
+elseif statflag==1
+  load(['freqstat_sleep' num2str(sleep) '.mat'])
 end
 
 
@@ -130,7 +214,7 @@ set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' '
 set(gca,'YTick',1:63)
 set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
 set(gca,'YTickMode','auto')
-print(43,[fdir 'PowThetastatANOVA.eps'],'-painters','-depsc')
+print(43,[fdir 'PowThetastatANOVA_sleep' num2str(sleep) '.eps'],'-painters','-depsc')
 figure(44);imagesc(freqstat_TPA_MSPN_1wayANOVA_theta.time,1:63,squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask));
 xlim([-.01 1.051]);
 set(gca,'FontSize',30);
@@ -139,7 +223,7 @@ set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' '
 set(gca,'YTick',1:63)
 set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
 set(gca,'YTickMode','auto')
-print(44,[fdir 'PowBetastatANOVA.eps'],'-painters','-depsc')
+print(44,[fdir 'PowBetastatANOVA_sleep' num2str(sleep) '.eps'],'-painters','-depsc')
 figure(45);imagesc(freqstat_TPA_MSPN_1wayANOVA_theta.time,1:63,squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask));
 xlim([-.01 1.051]);
 set(gca,'FontSize',30);
@@ -148,8 +232,23 @@ set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' '
 set(gca,'YTick',1:63)
 set(gca,'YTickLabel',freqstat_TPA_MSPN_1wayANOVA_theta.label)
 set(gca,'YTickMode','auto')
-print(45,[fdir 'PlvThetastatANOVA.eps'],'-painters','-depsc')
+print(45,[fdir 'PlvThetastatANOVA_sleep' num2str(sleep) '.eps'],'-painters','-depsc')
 
+
+% time window of each to use:
+reltimepoints_thetaTFP=find(mean(squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask))>.1); % note this one requires smaller threshold 
+diffpoints_thetaTFP=find(diff(reltimepoints_thetaTFP)>1)
+thetaTFP_anova_twall=[reltimepoints_thetaTFP(1):reltimepoints_thetaTFP(end)];
+
+reltimepoints_beta=find(mean(squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask))>.2);
+diffpoints_beta=find(diff(reltimepoints_beta)>1)
+betaTFP_anova_twall=[reltimepoints_beta(1):reltimepoints_beta(end)];
+betaTFP_anova_tw1=[reltimepoints_beta(1):reltimepoints_beta(6)];
+betaTFP_anova_tw2=[reltimepoints_beta(7):reltimepoints_beta(end)];
+
+reltimepoints_thetaITC=find(mean(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask))>.2);
+diffpoints_thetaITC=find(diff(reltimepoints_thetaITC)>1)
+thetaITC_anova_twall=[reltimepoints_thetaITC(1):reltimepoints_thetaITC(end)];
 
 
 
@@ -161,26 +260,82 @@ figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.stat.*freqstat_TPA_MSPN
 figure;imagesc(squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.stat.*freqstat_TPA_MSPN_1wayANOVA_beta.mask))
 figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.stat.*plvstat_TPA_MSPN_1wayANOVA_theta.mask))
 
+% since beta might have 2 sub-clusters
+mask_use=freqstat_TPA_MSPN_1wayANOVA_beta.mask;
+mask_use(:,23:end)=0;
+freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw1=freqstat_TPA_MSPN_1wayANOVA_beta.stat.*mask_use;
+
+mask_use=freqstat_TPA_MSPN_1wayANOVA_beta.mask;
+mask_use(:,1:22)=0;
+freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw2=freqstat_TPA_MSPN_1wayANOVA_beta.stat.*mask_use;
+
+
+% cfg=[];
+% cfg.zlim='maxabs';
+% cfg.layout='eeg1010';
+% cfg.highlight          = 'on';
+% cfg.highlightsize = 16;
+% cfg.markersymbol = 'o';
+% 
+% cfg.parameter='stat1';
+% cfg.xlim=[.2 .4]; % time
+% cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
+% figure(1);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_theta)
+% print(1,[fdir 'ANOVA_PowTheta_topo1.eps'],'-painters','-depsc')
+% 
+% cfg.parameter='stat1';
+% cfg.xlim=[.13 .28]; % time
+% cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat1,3)));
+% figure(2);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+% print(2,[fdir 'ANOVA_PowBeta_topoAll.eps'],'-painters','-depsc')
+% cfg.parameter='stat_tw1';
+% cfg.xlim=[.13 .18]; % time
+% cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw1,3)));
+% figure(22);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+% print(22,[fdir 'ANOVA_PowBeta_topo1.eps'],'-painters','-depsc')
+% cfg.parameter='stat_tw2';
+% cfg.xlim=[.25 .28]; % time
+% cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw2,3)));
+% figure(23);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+% print(23,[fdir 'ANOVA_PowBeta_topo2.eps'],'-painters','-depsc')
+% 
+% cfg.parameter='stat1';
+% cfg.xlim=[.05 .3]; % time
+% cfg.highlightchannel   =  plvstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(plvstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
+% figure(3);ft_topoplotTFR(cfg,plvstat_TPA_MSPN_1wayANOVA_theta)
+% print(3,[fdir 'ANOVA_PlvTheta_topo1.eps'],'-painters','-depsc')
+
+
 cfg=[];
-cfg.parameter='stat1';
-cfg.xlim=[.2 .4]; % time
-cfg.zlim='maxabs';
+cfg.zlim='zeromax';
 cfg.layout='eeg1010';
 cfg.highlight          = 'on';
-cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
 cfg.highlightsize = 16;
 cfg.markersymbol = 'o';
+cfg.parameter='stat';
+
+cfg.xlim=[.1 .37]; % reltimepoints_thetaTFP
+cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
 figure(1);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_theta)
-print(1,[fdir 'ANOVA_PowTheta_topo1.eps'],'-painters','-depsc')
-cfg.xlim=[.12 .32]; % time
+print(1,[fdir 'ANOVA_PowTheta_topo1_allF.eps'],'-painters','-depsc')
+
+cfg.xlim=[.13 .28]; % time
 cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat1,3)));
 figure(2);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
-print(2,[fdir 'ANOVA_PowBeta_topo1.eps'],'-painters','-depsc')
-cfg.xlim=[.05 .3]; % time
+print(2,[fdir 'ANOVA_PowBeta_topoAll_allF.eps'],'-painters','-depsc')
+cfg.xlim=[.13 .18]; % time
+cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw1,3)));
+figure(22);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+print(22,[fdir 'ANOVA_PowBeta_topo1_allF.eps'],'-painters','-depsc')
+cfg.xlim=[.25 .28]; % time
+cfg.highlightchannel   =  freqstat_TPA_MSPN_1wayANOVA_beta.label(find(nanmean(freqstat_TPA_MSPN_1wayANOVA_beta.stat_tw2,3)));
+figure(23);ft_topoplotTFR(cfg,freqstat_TPA_MSPN_1wayANOVA_beta)
+print(23,[fdir 'ANOVA_PowBeta_topo2_allF.eps'],'-painters','-depsc')
+
+cfg.xlim=[0 .44]; % time
 cfg.highlightchannel   =  plvstat_TPA_MSPN_1wayANOVA_theta.label(find(nanmean(plvstat_TPA_MSPN_1wayANOVA_theta.stat1,3)));
 figure(3);ft_topoplotTFR(cfg,plvstat_TPA_MSPN_1wayANOVA_theta)
-print(3,[fdir 'ANOVA_PlvTheta_topo1.eps'],'-painters','-depsc')
-
+print(3,[fdir 'ANOVA_PlvTheta_topo1_allF.eps'],'-painters','-depsc')
 
 
 clear fullpow fullplv
@@ -205,21 +360,36 @@ betapow_reshape=reshape(betapow,[7 63*size(gravelo_TPA_MSPN_avg{llind}.powspctrm
 
 
 
-% Masked-PCA Theta power
+% Masked-PCA 
 mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_theta.mask);
 name='PowTheta';
-[aa1,aaa1,vvv1]=pca_masked(mask_use,thetapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+[aa1,aaa1,vvv1,bb1]=pca_masked(mask_use,thetapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name,[1 1]);
+% percent variance explained:
+bb1(1,1)/sum(bb1(:))
 
 mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask);
-name='PowBeta';
-[aa1,aaa1,vvv1]=pca_masked(mask_use,betapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+name='PowBeta_all';
+[aa1,aaa1,vvv1,bb1]=pca_masked(mask_use,betapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name,[1 0]);
+bb1(1,1)/sum(bb1(:))
+
+% mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask);
+% mask_use(:,23:end)=0;
+% name='PowBeta_tw1';
+% [aa1,aaa1,vvv1]=pca_masked(mask_use,betapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+% 
+% mask_use=squeeze(freqstat_TPA_MSPN_1wayANOVA_beta.mask);
+% mask_use(:,1:22)=0;
+% name='PowBeta_tw2';
+% [aa1,aaa1,vvv1]=pca_masked(mask_use,betapow_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+
 
 mask_use=squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask);
 name='PlvTheta';
-[aa1,aaa1,vvv1]=pca_masked(mask_use,thetaplv_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name);
+[aa1,aaa1,vvv1,bb1]=pca_masked(mask_use,thetaplv_reshape,gravelo_TPA_MSPN_avg{llind}.label,1,gravelo_TPA_MSPN_avg{4}.time,[-.1 1.15],fdir,name,[1 1]);
+bb1(1,1)/sum(bb1(:))
 
 
-
+%%
 % [aao,bbo,vvo]=svd(fullpow_reshape,'econ');
 % [aal,bbl,vvl]=svd(fullplv_reshape,'econ');
 [aaoT,bboT,vvoT]=svd(thetapow_reshape,'econ');
@@ -393,6 +563,7 @@ for llind=1:7
 end
 % rho = *0.7132    0.3244    0.4329    0.3616    0.1857    0.2565    0.1867
 
+%%
 % For Methods figure:
 figure;imagesc(squeeze(plvstat_TPA_MSPN_1wayANOVA_theta.mask));colormap gray
 figure;imagesc(runicaPlvT.topo(:,1));caxis([-1.5 1.5])
