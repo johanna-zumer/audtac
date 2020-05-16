@@ -15,3 +15,5 @@ for at=1:length(trlkeep1)
   end
   tlock_fake.trial(at,:,:)=tmpsum.trial(1,:,:);
 end
+
+
