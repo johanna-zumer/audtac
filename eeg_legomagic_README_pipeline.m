@@ -31,6 +31,7 @@ eeg_legomagic_viewFeatures % view stages & features in ft_databrowser
 
 % prepares stimulus information
 concat_stim_files  % updated on 20 March, 2015 to process response-no-EEG session files as well
+% then see eeg_legomagic_brainBehaviourCorrelations for subsequent processing
 
 % epoching and assigning features above to each trial
 % Don't need to call this independently (it will be called by erp_stats and freqanalsysis.
@@ -92,6 +93,7 @@ eeg_legomagic_featurestats_sepTacAud % requires long trials but not save out to 
 feat_pre_during_evoked_individual % calculates for each trial if there is a Kc or spindle 'during' or 'evoked'
 %  feat_pre_during_evoked % obsolete version of above
 prob_Kcomplex % Uta's Boolean Noisy-OR model
+eeg_legomagic_Kcmintime
 
 tac_alone_sleep % looks in to why tactile response lost in N2 (including median split analysis)
 
