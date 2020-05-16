@@ -1,4 +1,4 @@
-
+function [pKpred,pKdiff=prob_Kcomplex(m_n,m_a,m_v,m_av)
 %-------------------------------------------------------------------------
 % Boolean approach: Noisy-Or model
 % -- correct!
@@ -14,8 +14,8 @@
 %      = 1 - (1-m_a)*(1-m_v)/(1-m_n)
 % 
 
-K_pred = 1 - ((1-m_a)*(1-m_v)/(1-m_n));
+pKpred = 1 - ((1-m_a)*(1-m_v)/(1-m_n));
 
-K_diff = m_av-K_pred
+pKdiff = m_av-K_pred;
 
 
