@@ -139,13 +139,14 @@ try
   tfrsave.courseOP=mean(powb{3}.avg(selchan2,nearest(powb{3}.time,xlimlim(1)):nearest(powb{3}.time, xlimlim(2))),1);
 end
 
-
+%% plot topoplot
 cfg=[];
 cfg.parameter=param;
 cfg.layout='elec1010.lay';
 cfg.maskalpha=0.5;
 cfg.highlight='on';
 cfg.comment='auto';
+cfg.colorbar='yes';
 masktime_tmp=find(squeeze(any(mean(stat.(statuse)(:,1,:),2),1)));
 difftimes=diff(find(squeeze(any(mean(stat.(statuse)(:,1,:),2),1))));
 clear masktime
