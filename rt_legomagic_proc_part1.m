@@ -1,14 +1,16 @@
 % processing of RT data from lego-device with chinrest and Notts EarTone
-clear a* r* b* f* h* p* d* s*
-close all
 
-if ispc
-  bdir='D:\audtac\behav_data\';
-  ddir='D:\audtac\legomagic\diaries\';
-else
-  bdir='/mnt/hgfs/D/audtac/behav_data/';
-  ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
-end
+% clear a* r* b* f* h* p* d* s*
+% close all
+% 
+% if ispc
+%   bdir='D:\audtac\behav_data\';
+%   ddir='D:\audtac\legomagic\diaries\';
+% else
+%   bdir='/mnt/hgfs/D/audtac/behav_data/';
+%   ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
+% end
+eeg_legomagic_preamble
 
 cd(bdir)
 
