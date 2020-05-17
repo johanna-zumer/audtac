@@ -63,7 +63,7 @@ statplot.label=labels;
 try 
   close(23)
 end
-figure(23);cfg=[];cfg.latency=1;cfg.layout='eeg1010';cfg.zlim='maxabs';ft_topoplotER(cfg,statplot);
+figure(23);cfg=[];cfg.latency=1;cfg.layout='eeg1010';cfg.zlim='maxabs';cfg.colorbar='yes';ft_topoplotER(cfg,statplot);
 print(23,[fdir 'PC_topo_' name '.eps'],'-painters','-depsc')
 
 try 
