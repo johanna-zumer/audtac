@@ -3,14 +3,14 @@ close all
 [~,hostname]=system('hostname');
 if ispc
   if ~isempty(strfind(hostname,'12807'))  % COLLES-12807
-    edir='C:\D_132432\audtac\eeg_data\';
-    esdir='C:\D_132432\audtac\source_data\';
-    ddir='C:\D_132432\audtac\legomagic\diaries\';
-    bdir='C:\D_132432\audtac\behav_data\';
-    sdir='C:\D_132432\audtac\spss_stuff\';
-    fdir='C:\D_132432\audtac\figs\';
-    mdir='C:\D_132432\audtac\structural_MRI\';
-    pdir='C:\D_132432\audtac\polhemus\';
+    edir='C:\Bham_PSYCHL132432_D\audtac\eeg_data\';
+    esdir='C:\Bham_PSYCHL132432_D\audtac\source_data\';
+    ddir='C:\Bham_PSYCHL132432_D\audtac\legomagic\diaries\';
+    bdir='C:\Bham_PSYCHL132432_D\audtac\behav_data\';
+    sdir='C:\Bham_PSYCHL132432_D\audtac\spss_stuff\';
+    fdir='C:\Bham_PSYCHL132432_D\audtac\figs\';
+    mdir='C:\Bham_PSYCHL132432_D\audtac\structural_MRI\';
+    pdir='C:\Bham_PSYCHL132432_D\audtac\polhemus\';
   else
     edir='D:\audtac\eeg_data\';
     esdir='D:\audtac\source_data\';
