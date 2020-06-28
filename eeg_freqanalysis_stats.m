@@ -19,7 +19,7 @@ itcdepsampflag=1;
 plotflag=0;
 printflag=0;
 audtacflag=0;
-comb2flag=1;
+comb2flag=0;
 fftaddflag=0;
 synchasynch=0;
 mcseed=13;  % montecarlo cfg.randomseed
@@ -58,6 +58,7 @@ figind=1;
 
 
 for ll=soalist
+% for ll=[3 4 5 6 7 9]
   % for ll=[9];
   clearvars -except ll tt sub* *dir ii*use sleep *flag figind soadesc soalist chanuse* ylim* neigh* *basemax synch* mcseed *tr trialkc iter
   
@@ -174,7 +175,7 @@ for ll=soalist
       freqhiall_tMSAlone_comb{subuseind,1}.dimord='chan_freq_time';
       freqloall_tMSAlone_comb{subuseind,1}.dimord='chan_freq_time';
       if sleep
-        if size(freqlo_tacPaud_nKD{ll,tt,ss}.cumtapcnt,1)>20
+        if isfield(freqlo_tacPaud_nKD{ll,tt,ss},'cumtapcnt') && size(freqlo_tacPaud_nKD{ll,tt,ss}.cumtapcnt,1)>20
             subuseind_nKD=subuseind_nKD+1;
             freqloall_tacPaud_nKD{subuseind_nKD}=freqlo_tacPaud_nKD{ll,tt,ss};
             freqloall_tacMSpN_nKD{subuseind_nKD}=freqlo_tacMSpN_nKD{ll,tt,ss};
@@ -201,7 +202,7 @@ for ll=soalist
             freqhiall_tMSAlone_nKD{subuseind_nKD}.dimord='chan_freq_time';
             freqloall_tMSAlone_nKD{subuseind_nKD}.dimord='chan_freq_time';
         end
-        if size(freqlo_tacPaud_nSD{ll,tt,ss}.cumtapcnt,1)>20
+        if isfield(freqlo_tacPaud_nSD{ll,tt,ss},'cumtapcnt') && size(freqlo_tacPaud_nSD{ll,tt,ss}.cumtapcnt,1)>20
             subuseind_nSD=subuseind_nSD+1;
             freqloall_tacPaud_nSD{subuseind_nSD}=freqlo_tacPaud_nSD{ll,tt,ss};
             freqloall_tacMSpN_nSD{subuseind_nSD}=freqlo_tacMSpN_nSD{ll,tt,ss};
@@ -228,7 +229,7 @@ for ll=soalist
             freqhiall_tMSAlone_nSD{subuseind_nSD}.dimord='chan_freq_time';
             freqloall_tMSAlone_nSD{subuseind_nSD}.dimord='chan_freq_time';
         end
-        if size(freqlo_tacPaud_nSD{ll,tt,ss}.cumtapcnt,1)>20
+        if isfield(freqlo_tacPaud_nKD_nSD{ll,tt,ss},'cumtapcnt') && size(freqlo_tacPaud_nKD_nSD{ll,tt,ss}.cumtapcnt,1)>20
             subuseind_nKD_nSD=subuseind_nKD_nSD+1;
             freqloall_tacPaud_nKD_nSD{subuseind_nKD_nSD}=freqlo_tacPaud_nKD_nSD{ll,tt,ss};
             freqloall_tacMSpN_nKD_nSD{subuseind_nKD_nSD}=freqlo_tacMSpN_nKD_nSD{ll,tt,ss};
@@ -1106,7 +1107,7 @@ for ll=soalist
   end
   
   if savegrindflag
-    save([edir 'grindTFR_cond' num2str(ll) '_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat'],'grindlo*');
+    save([edir 'grindTFR_cond' num2str(ll) '_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat'],'grindlo*','grindhi*');
 %     continue   % if want to do stats, then statsflag=1
   end
   
@@ -1847,6 +1848,9 @@ for ll=soalist
     cfg.frequency=[14 30];
     grindlo_tacPaud_comb1_beta=ft_selectdata(cfg,grindlo_tacPaud_comb1);
     grindlo_tacMSpN_comb1_beta=ft_selectdata(cfg,grindlo_tacMSpN_comb1);
+    cfg.frequency=[40 80];
+    grindhi_tacPaud_comb1_gamma=ft_selectdata(cfg,grindhi_tacPaud_comb1);
+    grindhi_tacMSpN_comb1_gamma=ft_selectdata(cfg,grindhi_tacMSpN_comb1);
     if sleep && ss==12
       cfg.frequency=[4 6.5];
       grindlo_tacPaud_nKD_theta=ft_selectdata(cfg,grindlo_tacPaud_nKD);
@@ -1869,6 +1873,13 @@ for ll=soalist
       grindlo_tacMSpN_nSD_beta=ft_selectdata(cfg,grindlo_tacMSpN_nSD);
       grindlo_tacPaud_nKD_nSD_beta=ft_selectdata(cfg,grindlo_tacPaud_nKD_nSD);
       grindlo_tacMSpN_nKD_nSD_beta=ft_selectdata(cfg,grindlo_tacMSpN_nKD_nSD);
+      cfg.frequency=[40 80];
+      grindhi_tacPaud_nKD_gamma=ft_selectdata(cfg,grindhi_tacPaud_nKD);
+      grindhi_tacMSpN_nKD_gamma=ft_selectdata(cfg,grindhi_tacMSpN_nKD);
+      grindhi_tacPaud_nSD_gamma=ft_selectdata(cfg,grindhi_tacPaud_nSD);
+      grindhi_tacMSpN_nSD_gamma=ft_selectdata(cfg,grindhi_tacMSpN_nSD);
+      grindhi_tacPaud_nKD_nSD_gamma=ft_selectdata(cfg,grindhi_tacPaud_nKD_nSD);
+      grindhi_tacMSpN_nKD_nSD_gamma=ft_selectdata(cfg,grindhi_tacMSpN_nKD_nSD);
     end
     if comb2flag
       cfg.frequency=[4 6.5];
@@ -1931,6 +1942,7 @@ for ll=soalist
     stattl_mc_comb1_theta=ft_freqstatistics(cfg, grindlo_tacPaud_comb1_theta, grindlo_tacMSpN_comb1_theta);
     stattl_mc_comb1_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_comb1_alpha, grindlo_tacMSpN_comb1_alpha);
     stattl_mc_comb1_beta =ft_freqstatistics(cfg, grindlo_tacPaud_comb1_beta,  grindlo_tacMSpN_comb1_beta);
+    statth_mc_comb1_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_comb1_gamma,  grindhi_tacMSpN_comb1_gamma);
     if sleep && ss==12
       cfg.design=set_cfg_design_depT(nsub_nKD);
       stattl_mc_nKD=ft_freqstatistics(cfg, grindlo_tacPaud_nKD, grindlo_tacMSpN_nKD);
@@ -1938,18 +1950,21 @@ for ll=soalist
       stattl_mc_nKD_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_theta, grindlo_tacMSpN_nKD_theta);
       stattl_mc_nKD_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_alpha, grindlo_tacMSpN_nKD_alpha);
       stattl_mc_nKD_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nKD_beta,  grindlo_tacMSpN_nKD_beta);
+      statth_mc_nKD_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nKD_gamma,  grindhi_tacMSpN_nKD_gamma);
       cfg.design=set_cfg_design_depT(nsub_nSD);
       stattl_mc_nSD=ft_freqstatistics(cfg, grindlo_tacPaud_nSD, grindlo_tacMSpN_nSD);
       statth_mc_nSD=ft_freqstatistics(cfg, grindhi_tacPaud_nSD, grindhi_tacMSpN_nSD);
       stattl_mc_nSD_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nSD_theta, grindlo_tacMSpN_nSD_theta);
       stattl_mc_nSD_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nSD_alpha, grindlo_tacMSpN_nSD_alpha);
       stattl_mc_nSD_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nSD_beta,  grindlo_tacMSpN_nSD_beta);
-      cfg.design=set_cfg_design_depT(nsub_nKD);
+      statth_mc_nSD_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nSD_gamma,  grindhi_tacMSpN_nSD_gamma);
+      cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
       stattl_mc_nKD_nSD=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD, grindlo_tacMSpN_nKD_nSD);
       statth_mc_nKD_nSD=ft_freqstatistics(cfg, grindhi_tacPaud_nKD_nSD, grindhi_tacMSpN_nKD_nSD);
       stattl_mc_nKD_nSD_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_theta, grindlo_tacMSpN_nKD_nSD_theta);
       stattl_mc_nKD_nSD_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_alpha, grindlo_tacMSpN_nKD_nSD_alpha);
       stattl_mc_nKD_nSD_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_beta,  grindlo_tacMSpN_nKD_nSD_beta);
+      statth_mc_nKD_nSD_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nKD_nSD_gamma,  grindhi_tacMSpN_nKD_nSD_gamma);
       cfg.design=set_cfg_design_depT(nsub);
     end
     if comb2flag
@@ -2029,6 +2044,7 @@ for ll=soalist
       stattl_mc_comb1plvabsDepT_theta=ft_freqstatistics(cfg, grindlo_tacPaud_comb1_theta, grindlo_tacMSpN_comb1_theta);
       stattl_mc_comb1plvabsDepT_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_comb1_alpha, grindlo_tacMSpN_comb1_alpha);
       stattl_mc_comb1plvabsDepT_beta =ft_freqstatistics(cfg, grindlo_tacPaud_comb1_beta,  grindlo_tacMSpN_comb1_beta);
+      statth_mc_comb1plvabsDepT_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_comb1_gamma,  grindhi_tacMSpN_comb1_gamma);
       if sleep && ss==12
         cfg.design=set_cfg_design_depT(nsub_nKD);
         stattl_mc_nKDplvabsDepT=ft_freqstatistics(cfg, grindlo_tacPaud_nKD, grindlo_tacMSpN_nKD);
@@ -2036,18 +2052,22 @@ for ll=soalist
         stattl_mc_nKDplvabsDepT_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_theta, grindlo_tacMSpN_nKD_theta);
         stattl_mc_nKDplvabsDepT_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_alpha, grindlo_tacMSpN_nKD_alpha);
         stattl_mc_nKDplvabsDepT_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nKD_beta,  grindlo_tacMSpN_nKD_beta);
+        statth_mc_nKDplvabsDepT_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nKD_gamma,  grindhi_tacMSpN_nKD_gamma);
         cfg.design=set_cfg_design_depT(nsub_nSD);
         stattl_mc_nSDplvabsDepT=ft_freqstatistics(cfg, grindlo_tacPaud_nSD, grindlo_tacMSpN_nSD);
         statth_mc_nSDplvabsDepT=ft_freqstatistics(cfg, grindhi_tacPaud_nSD, grindhi_tacMSpN_nSD);
         stattl_mc_nSDplvabsDepT_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nSD_theta, grindlo_tacMSpN_nSD_theta);
         stattl_mc_nSDplvabsDepT_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nSD_alpha, grindlo_tacMSpN_nSD_alpha);
         stattl_mc_nSDplvabsDepT_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nSD_beta,  grindlo_tacMSpN_nSD_beta);
+        statth_mc_nSDplvabsDepT_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nSD_gamma,  grindhi_tacMSpN_nSD_gamma);
         cfg.design=set_cfg_design_depT(nsub_nKD_nSD);
         stattl_mc_nKD_nSDplvabsDepT=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD, grindlo_tacMSpN_nKD_nSD);
         statth_mc_nKD_nSDplvabsDepT=ft_freqstatistics(cfg, grindhi_tacPaud_nKD_nSD, grindhi_tacMSpN_nKD_nSD);
         stattl_mc_nKD_nSDplvabsDepT_theta=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_theta, grindlo_tacMSpN_nKD_nSD_theta);
         stattl_mc_nKD_nSDplvabsDepT_alpha=ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_alpha, grindlo_tacMSpN_nKD_nSD_alpha);
         stattl_mc_nKD_nSDplvabsDepT_beta =ft_freqstatistics(cfg, grindlo_tacPaud_nKD_nSD_beta,  grindlo_tacMSpN_nKD_nSD_beta);
+        statth_mc_nKD_nSDplvabsDepT_gamma =ft_freqstatistics(cfg, grindhi_tacPaud_nKD_nSD_gamma,  grindhi_tacMSpN_nKD_nSD_gamma);
+        cfg.design=set_cfg_design_depT(nsub);
       end
       
       if comb2flag
