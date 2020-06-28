@@ -1,3 +1,4 @@
+eeg_legomagic_preamble
 
 %%  Plotting band-specific line plots results
 stim2nd= [  0 nan    0    0 0 .02 .07 nan .5];
@@ -55,222 +56,227 @@ colorblindM  =[0 0 0]/256;
 colorblindN  =[128 128 128]/256;
 
 
-% Do unisensory plotting & peak finding first.
 
-load(['grindTFR_UniMsNul_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'grind*');
-load(['stats_TFR_UniMSNul_sleep0_trialkc-1_itc.mat'])
 
-ll=5;
-cfg=[];
-cfg.avgoverrpt='yes';
-tmp2=ft_selectdata(cfg,grindlo_tNulAlone{5,10});
+%% Do unisensory plotting & peak finding first.
 
-tmp4=ft_selectdata(cfg,grindlo_tTacAlone{5,10});
-tmp4.tfrmaskS=logical(zeros(size(tmp4.powspctrm)));
-tmp4.plvmaskS=logical(zeros(size(tmp4.powspctrm)));
-tmp4.tfrmaskL=logical(zeros(size(tmp4.powspctrm)));
-tmp4.plvmaskL=logical(zeros(size(tmp4.powspctrm)));
-tmp4.tfrmaskS(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(end)))=stattl_mc_TacVsNul_short{ll,ss}.mask;
-tmp4.tfrmaskL(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(end))) =stattl_mc_TacVsNul_long{ll,ss}.mask;
-tmp4.plvmaskS(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.mask;
-tmp4.plvmaskL(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.mask;
-
-tmp9=ft_selectdata(cfg,grindlo_tAudAlone{5,10});
-tmp9.tfrmaskS=logical(zeros(size(tmp9.powspctrm)));
-tmp9.plvmaskS=logical(zeros(size(tmp9.powspctrm)));
-tmp9.tfrmaskL=logical(zeros(size(tmp9.powspctrm)));
-tmp9.plvmaskL=logical(zeros(size(tmp9.powspctrm)));
-tmp9.tfrmaskS(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(end)))=stattl_mc_AudVsNul_short{ll,ss}.mask;
-tmp9.tfrmaskL(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(end))) =stattl_mc_AudVsNul_long{ll,ss}.mask;
-tmp9.plvmaskS(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.mask;
-tmp9.plvmaskL(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.mask;
-
-clear pow*
-pow{1}=tmp2;
-pow{2}=tmp4;
-pow{3}=tmp9;
-
-stattimwinS=[stattl_mc_AudVsNul_short{ll,ss}.time(1) stattl_mc_AudVsNul_short{ll,ss}.time(end)];
-stattimwinL=[stattl_mc_AudVsNul_long{ll,ss}.time(1) stattl_mc_AudVsNul_long{ll,ss}.time(end)];
-
-% average over bands first
-for pp=1:3
-  for ff=1:2 % two diff freq bands
-    cfg=[];
-    if ff==1
-      cfg.frequency   = [4 6.5];
-    elseif ff==2
-      cfg.frequency   = [14 30];
-    elseif ff==3
-      cfg.frequency   = [8 12]; % not used
-    end
-    cfg.avgoverfreq = 'yes';
-    cfg.nanmean     = 'yes';
-    powf{pp,ff}=ft_selectdata(cfg,pow{pp});
-  end
-end
-clear pow
-% baseline correct first, then remove baseline area for plotting
-
-for ff=1:2
-  base=powf{2,ff};
-  base.powspctrm=repmat(nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3),nanmean(powf{3,ff}.powspctrm(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
-  base.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3),nanmean(powf{3,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
-  base.tfrmaskL=repmat(nanmean(powf{2,ff}.tfrmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
-  base.plvmaskL=repmat(nanmean(powf{2,ff}.plvmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+if 0
+  load(['grindTFR_UniMsNul_sleep' num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '.mat'],'grind*');
+  load(['stats_TFR_UniMSNul_sleep0_trialkc-1_itc.mat'])
+  
+  ll=5;
+  cfg=[];
+  cfg.avgoverrpt='yes';
+  tmp2=ft_selectdata(cfg,grindlo_tNulAlone{5,10});
+  
+  tmp4=ft_selectdata(cfg,grindlo_tTacAlone{5,10});
+  tmp4.tfrmaskS=logical(zeros(size(tmp4.powspctrm)));
+  tmp4.plvmaskS=logical(zeros(size(tmp4.powspctrm)));
+  tmp4.tfrmaskL=logical(zeros(size(tmp4.powspctrm)));
+  tmp4.plvmaskL=logical(zeros(size(tmp4.powspctrm)));
+  tmp4.tfrmaskS(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mc_TacVsNul_short{ll,ss}.time(end)))=stattl_mc_TacVsNul_short{ll,ss}.mask;
+  tmp4.tfrmaskL(:,:,dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mc_TacVsNul_long{ll,ss}.time(end))) =stattl_mc_TacVsNul_long{ll,ss}.mask;
+  tmp4.plvmaskS(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp4.time',stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_TacVsNul_short_itcdepT{ll,ss}.mask;
+  tmp4.plvmaskL(:,:,dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp4.time',stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_TacVsNul_long_itcdepT{ll,ss}.mask;
+  
+  tmp9=ft_selectdata(cfg,grindlo_tAudAlone{5,10});
+  tmp9.tfrmaskS=logical(zeros(size(tmp9.powspctrm)));
+  tmp9.plvmaskS=logical(zeros(size(tmp9.powspctrm)));
+  tmp9.tfrmaskL=logical(zeros(size(tmp9.powspctrm)));
+  tmp9.plvmaskL=logical(zeros(size(tmp9.powspctrm)));
+  tmp9.tfrmaskS(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mc_AudVsNul_short{ll,ss}.time(end)))=stattl_mc_AudVsNul_short{ll,ss}.mask;
+  tmp9.tfrmaskL(:,:,dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mc_AudVsNul_long{ll,ss}.time(end))) =stattl_mc_AudVsNul_long{ll,ss}.mask;
+  tmp9.plvmaskS(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(1)):dsearchn(tmp9.time',stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.time(end)))=stattl_mcplv_AudVsNul_short_itcdepT{ll,ss}.mask;
+  tmp9.plvmaskL(:,:,dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(1)): dsearchn(tmp9.time',stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.time(end))) =stattl_mcplv_AudVsNul_long_itcdepT{ll,ss}.mask;
+  
+  clear pow*
+  pow{1}=tmp2;
+  pow{2}=tmp4;
+  pow{3}=tmp9;
+  
+  stattimwinS=[stattl_mc_AudVsNul_short{ll,ss}.time(1) stattl_mc_AudVsNul_short{ll,ss}.time(end)];
+  stattimwinL=[stattl_mc_AudVsNul_long{ll,ss}.time(1) stattl_mc_AudVsNul_long{ll,ss}.time(end)];
+  
+  % average over bands first
   for pp=1:3
-    cfg=[];
-    if pp>1
-      cfg.parameter={'powspctrm' 'plvabs' 'tfrmaskL' 'plvmaskL'};
-    else
-      cfg.parameter={'powspctrm' 'plvabs'};
-    end
-    cfg.operation='subtract';
-    powfb{pp,ff}=ft_math(cfg,powf{pp,ff},base)
-    
-    
-    cfg=[];
-    cfg.latency=[tacbasemax(ll) 1.3];
-    powfb{pp,ff}=ft_selectdata(cfg,powfb{pp,ff});
-    
-    powfb{pp,ff}.tfravg=squeeze(powfb{pp,ff}.powspctrm);
-    powfb{pp,ff}.plvavg=squeeze(powfb{pp,ff}.plvabs);
-    if pp>1
-      powfb{pp,ff}.tfrmaskL=squeeze(powfb{pp,ff}.tfrmaskL);
-      powfb{pp,ff}.plvmaskL=squeeze(powfb{pp,ff}.plvmaskL);
-    end
-    powfb{pp,ff}.dimord='chan_time';
-    powfb{pp,ff}=rmfield(powfb{pp,ff},'freq');
-    powfb{pp,ff}=rmfield(powfb{pp,ff},'powspctrm');
-    powfb{pp,ff}=rmfield(powfb{pp,ff},'plvabs');
-    if plotallmask && pp>1
-      powfb{pp,ff}.tfrmaskL=repmat(ceil(mean(powfb{pp,ff}.tfrmaskL,1)),[size(powfb{pp,ff}.tfrmaskL,1) 1]);
-      powfb{pp,ff}.plvmaskL=repmat(ceil(mean(powfb{pp,ff}.plvmaskL,1)),[size(powfb{pp,ff}.plvmaskL,1) 1]);
+    for ff=1:2 % two diff freq bands
+      cfg=[];
+      if ff==1
+        cfg.frequency   = [4 6.5];
+      elseif ff==2
+        cfg.frequency   = [14 30];
+      elseif ff==3
+        cfg.frequency   = [8 12]; % not used
+      end
+      cfg.avgoverfreq = 'yes';
+      cfg.nanmean     = 'yes';
+      powf{pp,ff}=ft_selectdata(cfg,pow{pp});
     end
   end
+  clear pow
+  % baseline correct first, then remove baseline area for plotting
+  
+  for ff=1:2
+    base=powf{2,ff};
+    base.powspctrm=repmat(nanmean(cat(3,nanmean(powf{1,ff}.powspctrm(:,:,49:53),3),nanmean(powf{2,ff}.powspctrm(:,:,49:53),3),nanmean(powf{3,ff}.powspctrm(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+    base.plvabs=repmat(nanmean(cat(3,nanmean(powf{1,ff}.plvabs(:,:,49:53),3),nanmean(powf{2,ff}.plvabs(:,:,49:53),3),nanmean(powf{3,ff}.plvabs(:,:,49:53),3)),3),[1 1 length(powf{1,ff}.time)]);
+    base.tfrmaskL=repmat(nanmean(powf{2,ff}.tfrmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+    base.plvmaskL=repmat(nanmean(powf{2,ff}.plvmaskL(:,:,49:53),3),[1 1 length(powf{1,ff}.time)]);  % use 'nul' as baseline for all three conditions for plotting
+    for pp=1:3
+      cfg=[];
+      if pp>1
+        cfg.parameter={'powspctrm' 'plvabs' 'tfrmaskL' 'plvmaskL'};
+      else
+        cfg.parameter={'powspctrm' 'plvabs'};
+      end
+      cfg.operation='subtract';
+      powfb{pp,ff}=ft_math(cfg,powf{pp,ff},base)
+      
+      
+      cfg=[];
+      cfg.latency=[tacbasemax(ll) 1.3];
+      powfb{pp,ff}=ft_selectdata(cfg,powfb{pp,ff});
+      
+      powfb{pp,ff}.tfravg=squeeze(powfb{pp,ff}.powspctrm);
+      powfb{pp,ff}.plvavg=squeeze(powfb{pp,ff}.plvabs);
+      if pp>1
+        powfb{pp,ff}.tfrmaskL=squeeze(powfb{pp,ff}.tfrmaskL);
+        powfb{pp,ff}.plvmaskL=squeeze(powfb{pp,ff}.plvmaskL);
+      end
+      powfb{pp,ff}.dimord='chan_time';
+      powfb{pp,ff}=rmfield(powfb{pp,ff},'freq');
+      powfb{pp,ff}=rmfield(powfb{pp,ff},'powspctrm');
+      powfb{pp,ff}=rmfield(powfb{pp,ff},'plvabs');
+      if plotallmask && pp>1
+        powfb{pp,ff}.tfrmaskL=repmat(ceil(mean(powfb{pp,ff}.tfrmaskL,1)),[size(powfb{pp,ff}.tfrmaskL,1) 1]);
+        powfb{pp,ff}.plvmaskL=repmat(ceil(mean(powfb{pp,ff}.plvmaskL,1)),[size(powfb{pp,ff}.plvmaskL,1) 1]);
+      end
+    end
+  end
+  
+  % peak finding
+  chpl{1}=match_str(powfb{2,1}.label,chanplot{1});
+  chpl{2}=match_str(powfb{2,1}.label,chanplot{2});
+  [mx,mind]=max(nanmean(powfb{2,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
+  timeTacThetaTfr=powfb{2,1}.time(mind); % 0.21
+  [mx,mind]=max(nanmean(powfb{3,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
+  timeAudThetaTfr=powfb{3,1}.time(mind); % 0.16
+  [mx,mind]=max(nanmean(powfb{2,2}.tfravg(chpl{2},:),1));   % Tactile alpha beta OP
+  timeTacAlpbetTfr=powfb{2,2}.time(mind); % 0.94
+  %plv
+  [mx,mind]=max(nanmean(powfb{2,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
+  timeTacThetaPlv=powfb{2,1}.time(mind); % 0.14
+  [mx,mind]=max(nanmean(powfb{3,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
+  timeAudThetaPlv=powfb{3,1}.time(mind); % 0.13
+  
+  
+  for cg=1:length(chanplot)
+    for ff=1:2
+      cfg=[];
+      cfg.layout='elec1010.lay';
+      if ff==1
+        cfg.ylim=[-2.5 2.5];  % or [1 2.5]?
+      elseif ff==2 % beta
+        cfg.ylim=[-1 1];
+      elseif ff==3 % alpha
+        cfg.ylim=[-2.5 2.5];
+      end
+      cfg.linewidth=3;
+      cfg.xlim=[-.6 1.8];
+      cfg.channel=chanplot{cg};
+      cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
+      cfg.interactive='no';
+      cfg.parameter='tfravg';
+      figure(10*(cg+1)+(ff-1)*100)
+      ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+      hold on;plot(powfb{1,ff}.time,0,'k');
+      set(gca,'XTick',[-.6:.1:1.8])
+      set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+      set(gca,'FontSize',30)
+      title([])
+      plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
+      plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+      plot(cfg.xlim,[0 0],'Color','k')
+      for pp=2:3
+        highlight=logical(powfb{pp,ff}.tfrmaskL(17,:));
+        begsample = find(diff([0 highlight 0])== 1);
+        endsample = find(diff([0 highlight 0])==-1)-1;
+        for ii=1:length(begsample)
+          begx=powfb{pp,ff}.time(begsample(ii));
+          begy=powfb{pp,ff}.time(endsample(ii));
+          if pp==2
+            plot([begx begy], [cfg.ylim(2)-.5 cfg.ylim(2)-.5],'Color',colorblindT,'LineWidth',6)
+          elseif pp==3
+            plot([begx begy], [cfg.ylim(2)-.3 cfg.ylim(2)-.3],'Color',colorblindA,'LineWidth',6)
+          end
+        end
+      end % pp
+      axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+      %     legend('Null','Tactile','Auditory')
+    end % ff
+  end % cg
+  print(20,[fdir 'tfr_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
+  print(20+100,[fdir 'tfr_UniNul_FC_' num2str(ll) '_beta' '.eps'],'-depsc2')
+  print(30,[fdir 'tfr_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
+  print(30+100,[fdir 'tfr_UniNul_OP_' num2str(ll) '_beta' '.eps'],'-depsc2')
+  
+  
+  for cg=1:length(chanplot)
+    for ff=1:2
+      cfg=[];
+      cfg.layout='elec1010.lay';
+      if ff==1
+        cfg.ylim=[-.1 .4];  % or [1 2.5]?
+      elseif ff==2
+        cfg.ylim=[-.1 .4];
+      end
+      cfg.linewidth=3;
+      cfg.xlim=[-.6 1.8];
+      cfg.channel=chanplot{cg};
+      cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
+      cfg.interactive='no';
+      cfg.parameter='plvavg';
+      figure(10*(cg+3)+(ff-1)*100)
+      ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
+      hold on;plot(powfb{1,ff}.time,0,'k');
+      set(gca,'XTick',[-.6:.1:1.8])
+      set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
+      set(gca,'FontSize',30)
+      title([])
+      plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
+      plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
+      plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
+      plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
+      plot(cfg.xlim,[0 0],'Color','k')
+      for pp=2:3
+        highlight=logical(powfb{pp,ff}.plvmaskL(17,:));
+        begsample = find(diff([0 highlight 0])== 1);
+        endsample = find(diff([0 highlight 0])==-1)-1;
+        for ii=1:length(begsample)
+          begx=powfb{pp,ff}.time(begsample(ii));
+          begy=powfb{pp,ff}.time(endsample(ii));
+          if pp==2
+            plot([begx begy], [cfg.ylim(2)-.04 cfg.ylim(2)-.04],'Color',colorblindT,'LineWidth',6)
+          elseif pp==3
+            plot([begx begy], [cfg.ylim(2)-.02 cfg.ylim(2)-.02],'Color',colorblindA,'LineWidth',6)
+          end
+        end
+      end % pp
+      axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
+      %     legend('Null','Tactile','Auditory')
+    end % ff
+  end % cg
+  print(40,[fdir 'plv_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
+  print(40+100,[fdir 'plv_UniNul_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+  print(50,[fdir 'plv_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
+  print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
+  
 end
 
-% peak finding
-chpl{1}=match_str(powfb{2,1}.label,chanplot{1});
-chpl{2}=match_str(powfb{2,1}.label,chanplot{2});
-[mx,mind]=max(nanmean(powfb{2,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
-timeTacThetaTfr=powfb{2,1}.time(mind); % 0.21
-[mx,mind]=max(nanmean(powfb{3,1}.tfravg(chpl{1},:),1));   % Tactile theta FC
-timeAudThetaTfr=powfb{3,1}.time(mind); % 0.16
-[mx,mind]=max(nanmean(powfb{2,2}.tfravg(chpl{2},:),1));   % Tactile alpha beta OP
-timeTacAlpbetTfr=powfb{2,2}.time(mind); % 0.94
-%plv
-[mx,mind]=max(nanmean(powfb{2,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
-timeTacThetaPlv=powfb{2,1}.time(mind); % 0.14
-[mx,mind]=max(nanmean(powfb{3,1}.plvavg(chpl{1},:),1));   % Tactile theta FC
-timeAudThetaPlv=powfb{3,1}.time(mind); % 0.13
 
-
-for cg=1:length(chanplot)
-  for ff=1:2
-    cfg=[];
-    cfg.layout='elec1010.lay';
-    if ff==1
-      cfg.ylim=[-2.5 2.5];  % or [1 2.5]?
-    elseif ff==2 % beta
-      cfg.ylim=[-1 1];
-    elseif ff==3 % alpha
-      cfg.ylim=[-2.5 2.5];
-    end
-    cfg.linewidth=3;
-    cfg.xlim=[-.6 1.8];
-    cfg.channel=chanplot{cg};
-    cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
-    cfg.interactive='no';
-    cfg.parameter='tfravg';
-    figure(10*(cg+1)+(ff-1)*100)
-    ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
-    hold on;plot(powfb{1,ff}.time,0,'k');
-    set(gca,'XTick',[-.6:.1:1.8])
-    set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
-    set(gca,'FontSize',30)
-    title([])
-    plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
-    plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
-    plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
-    plot(cfg.xlim,[0 0],'Color','k')
-    for pp=2:3
-      highlight=logical(powfb{pp,ff}.tfrmaskL(17,:));
-      begsample = find(diff([0 highlight 0])== 1);
-      endsample = find(diff([0 highlight 0])==-1)-1;
-      for ii=1:length(begsample)
-        begx=powfb{pp,ff}.time(begsample(ii));
-        begy=powfb{pp,ff}.time(endsample(ii));
-        if pp==2
-          plot([begx begy], [cfg.ylim(2)-.5 cfg.ylim(2)-.5],'Color',colorblindT,'LineWidth',6)
-        elseif pp==3
-          plot([begx begy], [cfg.ylim(2)-.3 cfg.ylim(2)-.3],'Color',colorblindA,'LineWidth',6)
-        end
-      end
-    end % pp
-    axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
-    %     legend('Null','Tactile','Auditory')
-  end % ff
-end % cg
-print(20,[fdir 'tfr_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(20+100,[fdir 'tfr_UniNul_FC_' num2str(ll) '_beta' '.eps'],'-depsc2')
-print(30,[fdir 'tfr_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(30+100,[fdir 'tfr_UniNul_OP_' num2str(ll) '_beta' '.eps'],'-depsc2')
-
-
-for cg=1:length(chanplot)
-  for ff=1:2
-    cfg=[];
-    cfg.layout='elec1010.lay';
-    if ff==1
-      cfg.ylim=[-.1 .4];  % or [1 2.5]?
-    elseif ff==2
-      cfg.ylim=[-.1 .4];
-    end
-    cfg.linewidth=3;
-    cfg.xlim=[-.6 1.8];
-    cfg.channel=chanplot{cg};
-    cfg.graphcolor=[colorblindN; colorblindT; colorblindA];
-    cfg.interactive='no';
-    cfg.parameter='plvavg';
-    figure(10*(cg+3)+(ff-1)*100)
-    ft_singleplotER(cfg,powfb{1,ff},powfb{2,ff},powfb{3,ff});
-    hold on;plot(powfb{1,ff}.time,0,'k');
-    set(gca,'XTick',[-.6:.1:1.8])
-    set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0'  '' ' ' ''  ' ' '1.5' '' ' ' '' })
-    set(gca,'FontSize',30)
-    title([])
-    plot([stattimwinL(1) stattimwinL(1)],cfg.ylim,'k--','LineWidth',6)
-    plot([stattimwinL(2) stattimwinL(2)],cfg.ylim,'k--','LineWidth',6)
-    plot([0 0],cfg.ylim,'Color',colorblindT,'LineWidth',6)
-    plot([soades(ll) soades(ll)],cfg.ylim,'Color',colorblindA,'LineWidth',6)
-    plot(cfg.xlim,[0 0],'Color','k')
-    for pp=2:3
-      highlight=logical(powfb{pp,ff}.plvmaskL(17,:));
-      begsample = find(diff([0 highlight 0])== 1);
-      endsample = find(diff([0 highlight 0])==-1)-1;
-      for ii=1:length(begsample)
-        begx=powfb{pp,ff}.time(begsample(ii));
-        begy=powfb{pp,ff}.time(endsample(ii));
-        if pp==2
-          plot([begx begy], [cfg.ylim(2)-.04 cfg.ylim(2)-.04],'Color',colorblindT,'LineWidth',6)
-        elseif pp==3
-          plot([begx begy], [cfg.ylim(2)-.02 cfg.ylim(2)-.02],'Color',colorblindA,'LineWidth',6)
-        end
-      end
-    end % pp
-    axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
-    %     legend('Null','Tactile','Auditory')
-  end % ff
-end % cg
-print(40,[fdir 'plv_UniNul_FC_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(40+100,[fdir 'plv_UniNul_FC_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
-print(50,[fdir 'plv_UniNul_OP_' num2str(ll) '_theta' '.eps'],'-depsc2')
-print(50+100,[fdir 'plv_UniNul_OP_' num2str(ll) '_alpbet' '.eps'],'-depsc2')
-
-
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Multisensory interaction
 
 load(['freqstat_sleep' num2str(sleep) '.mat']);  % see eeg_freqanalysis_ANOVA.m
@@ -303,11 +309,11 @@ chanplot_beta{3}=freqstat_TPA_MSPN_1wayANOVA_beta.label(find(mean(freqstat_TPA_M
 
 chanplot_theta_itc{1}=plvstat_TPA_MSPN_1wayANOVA_theta.label(find(mean(plvstat_TPA_MSPN_1wayANOVA_theta.mask,3)));
 
-for ll=soalist
-% for ll=[1 3 4 5 6]
-% for ll=4
+% for ll=soalist
+  % for ll=[1 3 4 5 6]
+for ll=7
   close all
-%   clear grave* stat* tmp*
+  %   clear grave* stat* tmp*
   clear tmp*
   load([edir 'statsgrave_TFR_cond' num2str(ll) num2str(tt) num2str(ss) num2str(sleep) '_iter' num2str(iter) '_trialkc' num2str(trialkc) '_usetr' num2str(usetr) '_mcseed' num2str(mcseed) '_itc' '.mat']);
   %   baseline1=[tacbasemax(ll) tacbasemax(ll)+.08];
@@ -328,16 +334,19 @@ for ll=soalist
   gravelo_tacPaud_comb1_beta=ft_selectdata(cfg,gravelo_tacPaud_comb1);
   gravelo_tacMSpN_comb1_beta=ft_selectdata(cfg,gravelo_tacMSpN_comb1);
   gravelo_TPA_MSPN_comb1_beta=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
-
   
-  if 0
-    for xlimind=1:2
+  
+  if 0 % yes need this for graphabs
+    for xlimind=1:3
       if xlimind==1
         xlimxlim=[-.1 1.15];
         purpose='ica'; % main figure alongside ICA
       elseif xlimind==2
         xlimxlim=[-.6 1.8];
-        purpose='within';  % supplemntary figure
+        purpose='within';  % supplementary figure
+      elseif xlimind==3
+        xlimxlim=[-.1 1.15];
+        purpose='graphabs';  % graphical abstract (see inside plottfr too)
       end
       % Plotting Power
       tfrsaveOT{ll} = plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,stattl_mc_comb1_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir,'mask');
@@ -369,11 +378,11 @@ for ll=soalist
   plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot_theta_itc,stattimwin,soades,fdir,'mask');
   plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,xlimxlim,purpose,statstructuse,'theta','plvabs',ll,tacbasemax,plotallmask,chanplot_theta_itc,stattimwin,soades,fdir,'mask_tw1');
   
-    % power
+  % power
   if plottfrflag
     clear pow*
     
-%     plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,[-.6 1.8],stattl_mc_comb2_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
+    %     plottfr(gravelo_TPA_MSPN_comb1_theta,gravelo_tacPaud_comb1_theta,gravelo_tacMSpN_comb1_theta,[-.6 1.8],stattl_mc_comb2_theta,'theta','powspctrm',ll,tacbasemax,plotallmask,chanplot,stattimwin,soades,fdir)
     
     cfg=[];
     tmpA=ft_selectdata(cfg,gravelo_TPA_MSPN_comb1);
@@ -539,11 +548,11 @@ for ll=soalist
       
       if exist('timeTacThetaTFR_AT70') && exist('timeTacThetaTFR_TA70')
         timeTacThetaTFR_Diff=mean([timeTacThetaTFR_AT70 timeTacThetaTFR_TA70]);
-%         timeTacThetaTFR_Uni=mean([timeTacThetaTfr timeAudThetaTfr]);
+        %         timeTacThetaTFR_Uni=mean([timeTacThetaTfr timeAudThetaTfr]);
         for pp=1:3,
           peakthetaTFR_Diff(pp,ll)=nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff)),1);
           peakthetaTFR_Diff_range(pp,ll)=nanmean(nanmean(powfb{pp,1}.avg(chpl{1},[dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff-.02):dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Diff+.02)]),1),2);
-%           peakthetaTFR_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Uni)),1);
+          %           peakthetaTFR_Uni(pp,ll) =nanmean(powfb{pp,1}.avg(chpl{1},dsearchn(powfb{pp,1}.time',timeTacThetaTFR_Uni)),1);
         end
       end
       
@@ -551,7 +560,7 @@ for ll=soalist
       for pp=1:3,
         peakAlphaTFR_Diff(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-40:end-10),1),2); % 900-1200ms
         peakAlphaTFR_Diff_short(pp,ll)=nanmean(nanmean(powfb{pp,2}.avg(chpl{2},end-27:end-23),1),2); % 1030-1070ms
-%         peakalphaTFR_Tac(pp,ll) =nanmean(powfb{pp,2}.avg(chpl{2},dsearchn(powfb{pp,2}.time',timeTacAlpbet)),1);
+        %         peakalphaTFR_Tac(pp,ll) =nanmean(powfb{pp,2}.avg(chpl{2},dsearchn(powfb{pp,2}.time',timeTacAlpbet)),1);
       end
       
     end %peak
@@ -679,7 +688,7 @@ for ll=soalist
         axis([cfg.xlim(1) cfg.xlim(2) cfg.ylim(1) cfg.ylim(2)])
         if cg==3
           legend('A+T','MS+N','Difference')
-%           legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
+          %           legend('Sum Unisensory','MultSens + Null','SumUnisens - MultsensNull')
         end
       end % ff
     end % cg
@@ -700,7 +709,7 @@ for ll=soalist
         peakthetaPLV_Uni_range(pp,ll) =nanmean(nanmean(powfb{pp,1}.avg(chpl{1},[dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni-.02):dsearchn(powfb{pp,1}.time',timeThetaPLV_Uni+.02)]),1),2);
       end
     end % peak
-  
+    
     
   end %plvplotflag
   
@@ -777,8 +786,8 @@ plotlegsummarybars(data,figind,figname,starind,yminmax)
 % % set(ph(2),'FaceColor',coloruse(10,:))
 % % subplot(2,1,2);ph=bar(peakthetaTFR_Uni(3,soalist),0.3);ylim([-0.2 2.1])
 % % set(ph(1),'FaceColor',coloruse(5,:))
-% 
-% 
+%
+%
 % figure(58);  % preferred
 % subplot(2,1,1);ph=bar(peakAlphaTFR_Diff(1:2,soalist)');ylim([-0.7 2.3])
 % set(ph(1),'FaceColor',coloruse(1,:))
@@ -799,7 +808,7 @@ plotlegsummarybars(data,figind,figname,starind,yminmax)
 % % set(ph(2),'FaceColor',coloruse(10,:))
 % % subplot(2,1,2);ph=bar(peakalphaTFR_Tac(3,soalist),0.3);ylim([-0.7 2.1])
 % % set(ph(1),'FaceColor',coloruse(5,:))
-% 
+%
 % figure(60);
 % subplot(2,1,1);ph=bar(peakthetaPLV_Uni(1:2,soalist)');ylim([-0.07 0.37])
 % set(ph(1),'FaceColor',coloruse(1,:))
@@ -814,7 +823,7 @@ plotlegsummarybars(data,figind,figname,starind,yminmax)
 % set(gca,'XTickLabelRotation',45)
 % set(gca,'FontSize',18)
 % print(60,[fdir 'plv_theta_peak.eps'],'-depsc')
-% 
+%
 % % line lots to match ERP now instead
 % try close(57); end;
 % figure(57);
@@ -840,8 +849,8 @@ plotlegsummarybars(data,figind,figname,starind,yminmax)
 % legend('A+T','MS+N','Difference')
 % ylabel('Theta Power (uV^2)')
 % print(57,[fdir 'TFP_condDiff_theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
-% 
-% 
+%
+%
 % try close(58); end;
 % figure(58);
 % x=[-.6 -.35 -.1 0 .1 .35 .6];
@@ -866,8 +875,8 @@ plotlegsummarybars(data,figind,figname,starind,yminmax)
 % legend('A+T','MS+N','Difference')
 % ylabel('Alpha/Beta Power (uV^2)')
 % print(58,[fdir 'TFP_condDiff_alpha_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
-% 
-% 
+%
+%
 % try close(59); end;
 % figure(59);
 % x=[-.6 -.35 -.1 0 .1 .35 .6];
@@ -917,7 +926,7 @@ for ll=3
   cfg.comment='no';
   
   cfg.parameter='powspctrm';
-%   cfg.xlim=[timeTacThetaTFR_Diff-.1 timeTacThetaTFR_Diff+.1];
+  %   cfg.xlim=[timeTacThetaTFR_Diff-.1 timeTacThetaTFR_Diff+.1];
   cfg.xlim=[timeTacThetaTFR_Diff-.02 timeTacThetaTFR_Diff+.02];
   cfg.zlim=[-1.1 1.1];
   cfg.highlightchannel   =  chanplot{1};
@@ -926,16 +935,16 @@ for ll=3
   print(120+ll,[fdir 'TFP_topoDiff_Theta_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
   
   cfg.parameter='powspctrm';
-%   cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-40 end-10]);
+  %   cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-40 end-10]);
   cfg.xlim=gravelo_TPA_MSPN_comb1.time([end-27 end-23]);
   cfg.zlim=[-2.5 2.5];
   cfg.highlightchannel   =  chanplot{2};
   figure(130+ll);
   ft_topoplotTFR(cfg,grdiff_alpha);
   print(130+ll,[fdir 'TFP_topoDiff_Alpha_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
-
+  
   cfg.parameter='plvabs';
-%   cfg.xlim=[timeThetaPLV_Uni-.03 timeThetaPLV_Uni+.03];
+  %   cfg.xlim=[timeThetaPLV_Uni-.03 timeThetaPLV_Uni+.03];
   cfg.xlim=[timeThetaPLV_Uni-.02 timeThetaPLV_Uni+.02];
   cfg.zlim=[-.2 .2];
   cfg.highlightchannel   =  chanplot{1};
