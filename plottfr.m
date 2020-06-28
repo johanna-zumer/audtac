@@ -179,6 +179,34 @@ if ll==1
       end
   end
 end
+switch band
+  case 'theta'
+    switch param
+      case 'powspctrm'
+        switch purpose
+          case {'ica' 'within'}
+            masktime_tmp=masktime{1};
+            clear masktime
+            masktime{1}=masktime_tmp(1:45);
+            masktime{2}=masktime_tmp(46:end);
+          case 'graphabs'
+            if ll==7
+              masktime{1}=11:48;
+            elseif ll==3
+              masktime{1}; % keep as is
+            end
+        end
+      case 'plvabs'
+        switch purpose
+          case 'graphabs'
+            if ll==7
+              masktime{1}=masktime{1}(1:27); % this reduces to .07-.33 (or effectively 0-.26) to match AT70
+            elseif ll==3
+              masktime{1}; % keep as is
+            end
+        end
+    end
+end
 if ll==9
   baseline2=[-.5 -.5+.08];
 else
