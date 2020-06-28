@@ -1,94 +1,96 @@
 % brain-behaviour correlations
-clear all
-close all
-if ispc
-  edir='D:\audtac\eeg_data\';
-  esdir='D:\audtac\source_data\';
-  ddir='D:\audtac\legomagic\diaries\';
-  bdir='D:\audtac\behav_data\';
-  sdir='D:\audtac\spss_stuff\';
-  fdir='D:\audtac\figs\';
-  mdir='D:\audtac\structural_MRI\';
-  pdir='D:\audtac\polhemus\';
-else
-  [~,hostname]=system('hostname');
-  if ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % either COLLES-151401 or LES-LINUX_FS3
-    edir='/home/zumerj/audtac/eeg_data/';
-    esdir='/home/zumerj/audtac/source_data/';
-    ddir='/home/zumerj/audtac/legomagic/diaries/';
-    bdir='/home/zumerj/audtac/behav_data/';
-    sdir='/home/zumerj/audtac/spss_stuff/';
-    fdir='/home/zumerj/audtac/figs/';
-    mdir='/home/zumerj/audtac/structural_MRI/';
-    pdir='/home/zumerj/audtac/polhemus/';
-  else % assume on VM linux of psychl-132432
-    edir='/mnt/hgfs/D/audtac/eeg_data/';
-    esdir='/mnt/hgfs/D/audtac/source_data/';
-    ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
-    bdir='/mnt/hgfs/D/audtac/behav_data/';
-    sdir='/mnt/hgfs/D/audtac/spss_stuff/';
-    fdir='/mnt/hgfs/D/audtac/figs/';
-    mdir='/mnt/hgfs/D/audtac/structural_MRI/';
-    pdir='/mnt/hgfs/D/audtac/polhemus/';
-  end
-end
-cd(edir)
+% clear all
+% close all
+% if ispc
+%   edir='D:\audtac\eeg_data\';
+%   esdir='D:\audtac\source_data\';
+%   ddir='D:\audtac\legomagic\diaries\';
+%   bdir='D:\audtac\behav_data\';
+%   sdir='D:\audtac\spss_stuff\';
+%   fdir='D:\audtac\figs\';
+%   mdir='D:\audtac\structural_MRI\';
+%   pdir='D:\audtac\polhemus\';
+% else
+%   [~,hostname]=system('hostname');
+%   if ~isempty(strfind(hostname,'les')) | ~isempty(strfind(hostname,'LES')) % either COLLES-151401 or LES-LINUX_FS3
+%     edir='/home/zumerj/audtac/eeg_data/';
+%     esdir='/home/zumerj/audtac/source_data/';
+%     ddir='/home/zumerj/audtac/legomagic/diaries/';
+%     bdir='/home/zumerj/audtac/behav_data/';
+%     sdir='/home/zumerj/audtac/spss_stuff/';
+%     fdir='/home/zumerj/audtac/figs/';
+%     mdir='/home/zumerj/audtac/structural_MRI/';
+%     pdir='/home/zumerj/audtac/polhemus/';
+%   else % assume on VM linux of psychl-132432
+%     edir='/mnt/hgfs/D/audtac/eeg_data/';
+%     esdir='/mnt/hgfs/D/audtac/source_data/';
+%     ddir='/mnt/hgfs/D/audtac/legomagic/diaries/';
+%     bdir='/mnt/hgfs/D/audtac/behav_data/';
+%     sdir='/mnt/hgfs/D/audtac/spss_stuff/';
+%     fdir='/mnt/hgfs/D/audtac/figs/';
+%     mdir='/mnt/hgfs/D/audtac/structural_MRI/';
+%     pdir='/mnt/hgfs/D/audtac/polhemus/';
+%   end
+% end
+% cd(edir)
+% 
+% % sub{100}='p01'; 
+% sub{1}='e01'; 
+% sub{2}='e02'; 
+% sub{3}='e03'; 
+% sub{4}='e04'; 
+% %%%  above is pilot, below is real
+% sub{5}='e05'; 
+% sub{6}='e06'; 
+% sub{7}='e07'; 
+% sub{8}='e08'; 
+% sub{9}='e09';
+% sub{10}='e10';
+% sub{11}='e11';
+% sub{12}='e12';
+% sub{13}='e13';
+% sub{14}='e14';
+% sub{15}='e15';
+% sub{16}='e16';
+% sub{17}='e17';
+% sub{18}='e18';
+% sub{19}='e19';
+% sub{20}='e20';
+% sub{21}='e21';
+% sub{22}='e22';
+% sub{23}='e23';
+% sub{24}='e24';
+% sub{25}='e25';
+% sub{26}='e26';
+% sub{27}='e27';
+% sub{28}='e28';
+% sub{29}='e29';
+% sub{30}='e30';
+% sub{31}='e31';
+% sub{32}='e32';
+% 
+% if ispc
+%   warning off
+%   rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
+%   rmpath(genpath('D:\fieldtrip_svn\'))
+%   rmpath(genpath('D:\fieldtrip_git\'))
+%   warning on
+%   addpath('D:\fieldtrip_git\')
+% else
+%   rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
+%   rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
+%   addpath('/mnt/hgfs/D/fieldtrip_svn/')
+% end
+% which ft_defaults.m
+% ft_defaults;
+% load([edir 'iikeep.mat'])
+% soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
 
-% sub{100}='p01'; 
-sub{1}='e01'; 
-sub{2}='e02'; 
-sub{3}='e03'; 
-sub{4}='e04'; 
-%%%  above is pilot, below is real
-sub{5}='e05'; 
-sub{6}='e06'; 
-sub{7}='e07'; 
-sub{8}='e08'; 
-sub{9}='e09';
-sub{10}='e10';
-sub{11}='e11';
-sub{12}='e12';
-sub{13}='e13';
-sub{14}='e14';
-sub{15}='e15';
-sub{16}='e16';
-sub{17}='e17';
-sub{18}='e18';
-sub{19}='e19';
-sub{20}='e20';
-sub{21}='e21';
-sub{22}='e22';
-sub{23}='e23';
-sub{24}='e24';
-sub{25}='e25';
-sub{26}='e26';
-sub{27}='e27';
-sub{28}='e28';
-sub{29}='e29';
-sub{30}='e30';
-sub{31}='e31';
-sub{32}='e32';
-
-if ispc
-  warning off
-  rmpath(genpath('D:\matlab\spm8\external\fieldtrip\'))
-  rmpath(genpath('D:\fieldtrip_svn\'))
-  rmpath(genpath('D:\fieldtrip_git\'))
-  warning on
-  addpath('D:\fieldtrip_git\')
-else
-  rmpath(genpath('/mnt/hgfs/D/matlab/spm8/external/fieldtrip/'))
-  rmpath(genpath('/mnt/hgfs/D/fieldtrip_svn/'))
-  addpath('/mnt/hgfs/D/fieldtrip_svn/')
-end
-which ft_defaults.m
-ft_defaults;
-load([edir 'iikeep.mat'])
-soades=[-.5 nan -.07 -.02 0 .02 .07 nan .5];
+eeg_legomagic_preamble
 soalist= [1 3 4 5 6 7 9 10 11 12]; % MS conditions, Nul, Aud, Tac
 condcode=[1 nan 3 4 5 6 7 nan 9 0  -1 -2]; % MS conditions, Nul, Aud, Tac
+cd(ddir)
 
-%%  RT analysis
 cd(ddir)
 
 sleep=0;
@@ -100,11 +102,14 @@ end
 
 iiuse=[10:18 20:32]; % added Sept 2018; use all possible
 
+%%  RT analysis
+
 % rtsrall=nan(1,10);
 % diffms=nan(1,max(iiuse));
 % pcb=nan(1,max(iiuse));
 
 bbind=1;
+rm_outliers=0; % flag of whether to remove outliers (changed based on EurJN review)
 % the 10 columns of 'rtsr' are: [Talone Aalone Nul 1 3 4 5 6 7 9]
 for ii=iiuse
   load([sub{ii} '_audtac.mat'],'r*');
@@ -115,10 +120,14 @@ for ii=iiuse
       rt{ll,tt,ii}=rrts(find(rsoareal(tt-1,:)==condcode(ll)));
       numnan(1,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
       % added 12 July, 2018
-%       rt{ll,tt,ii}(1)=nan; % remove first trial of block, not of stim cond
-      rt{ll,tt,ii}(find(rt{ll,tt,ii}<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
+      %       rt{ll,tt,ii}(1)=nan; % remove first trial of block, not of stim cond
+      if rm_outliers
+        rt{ll,tt,ii}(find(rt{ll,tt,ii}<.1))=nan; % anticipatory? (or fault with computing timetouch?);   % Throwing out trials < 100ms
+      end
       numnan(2,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
-      rt{ll,tt,ii}(find(rt{ll,tt,ii}>1))=nan; % asleep?   % Throwing out trials greater than 1s
+      if rm_outliers
+        rt{ll,tt,ii}(find(rt{ll,tt,ii}>1))=nan; % asleep?   % Throwing out trials greater than 1s
+      end
       numnan(3,ll,bbind)=length(find(isnan(rt{ll,tt,ii})));
       numtot(ll,bbind)=length(rt{ll,tt,ii});
       % end add
@@ -230,7 +239,8 @@ for ii=iiuse
   clear rtime_touch
 end % ii
 % save([ddir 'rt_allsubj.mat'],'rt*','fg*','G*');
-save([ddir 'rt_allsubj22.mat'],'rt*','fg*','G*','num*');
+% save([ddir 'rt_allsubj22.mat'],'rt*','fg*','G*','num*'); % rm_outliers would be 1
+save([ddir 'rt_allsubj22_rmoutliers' num2str(rm_outliers) '.mat'],'rt*','fg*','G*','num*');
 return
 
 % added Sept 2018; using rt*22.mat
@@ -257,9 +267,9 @@ mean(reshape(squeeze(numnan(3,[1 3 4 5 6 7 9 11 12],:)),[1 9*22])./reshape(squee
 std(reshape(squeeze(numnan(3,[1 3 4 5 6 7 9 11 12],:)),[1 9*22])./reshape(squeeze(numtot([1 3 4 5 6 7 9 11 12],:)),[1 9*22]))/sqrt(22)
 
 
-%% 
+%% % OLD!  see below
 % load([ddir 'rt_allsubj.mat'],'rt_med')
-load([ddir 'rt_allsubj22.mat'],'rt_med')
+load([ddir 'rt_allsubj22.mat'],'rt_med')  % OLD!  see below
 tt=3;
 numsubj=size(rt_med,3);
 subuse=3:numsubj;
@@ -333,6 +343,126 @@ ylabel('Redundant Target Effect (s)')
 
 print(4,[fdir 'rt_med_Xlog_RTE.png'],'-dpng')
 
+%% New for EurJoN
+
+% Note that the RTE values reported in paper are from: 
+load([ddir 'rt_allsubj.mat'])
+nanmean(rt_msMminshiftuni(:,3,:),3)
+nanstd(rt_msMminshiftuni(:,3,:),[],3)/sqrt(24)
+
+% scatter plots and also rm_outlier=0
+addpath(genpath('C:\Bham_PSYCHL132432_D\Matlab\plotting_tools'))
+load([ddir 'rt_allsubj22_rmoutliers0.mat'],'rt_med') 
+load([ddir 'rt_allsubj22.mat'],'rt_med')  
+tt=3;
+numsubj=size(rt_med,3);
+subuse=3:numsubj;
+numuse=length(subuse);
+
+colorblindD  =[204 101 0]/256;
+colorblindApT=[5 165 255]/256;
+colorblindMpN=[0 59 179]/256;
+colorblindT  =[255 51 166]/256;
+colorblindA  =[0 158 115]/256;
+colorblindM  =[0 0 0]/256;
+colorblindN  =[128 128 128]/256;
+
+rt_med_tt3_subuse=squeeze(rt_med(:,tt,subuse));
+[bb,sortb]=sort(rt_med_tt3_subuse(5,:));
+
+c = linspace(1,10,numuse);
+
+figure(5);
+scatter(-.8*ones(1,numuse),rt_med_tt3_subuse(11,sortb),[],c,'LineWidth',2);hold on;
+scatter(-.6*ones(1,numuse),rt_med_tt3_subuse(1,sortb),[],c,'LineWidth',2);hold on;
+scatter(-.35*ones(1,numuse),rt_med_tt3_subuse(3,sortb),[],c,'LineWidth',2);hold on;
+scatter(-.1*ones(1,numuse),rt_med_tt3_subuse(4,sortb),[],c,'LineWidth',2);hold on;
+scatter(0*ones(1,numuse),rt_med_tt3_subuse(5,sortb),[],c,'LineWidth',2);hold on;
+scatter(.1*ones(1,numuse),rt_med_tt3_subuse(6,sortb),[],c,'LineWidth',2);hold on;
+scatter(.35*ones(1,numuse),rt_med_tt3_subuse(7,sortb),[],c,'LineWidth',2);hold on;
+scatter(.6*ones(1,numuse),rt_med_tt3_subuse(9,sortb),[],c,'LineWidth',2);hold on;
+scatter(.8*ones(1,numuse),rt_med_tt3_subuse(12,sortb),[],c,'LineWidth',2);hold on;
+h1=errorbar([-.8 ],nanmean(squeeze(rt_med([11],tt,subuse)),1),nanstd(squeeze(rt_med([11],tt,subuse)),[],1)/sqrt(numuse-1),'x','Color','k','LineWidth',3);
+hold on;
+h2=errorbar([.8 ],nanmean(squeeze(rt_med([12],tt,subuse)),1),nanstd(squeeze(rt_med([12],tt,subuse)),[],1)/sqrt(numuse-1),'x','Color','k','LineWidth',3);
+hold on;
+h3=errorbar([-.6 -.35 -.1 0 .1 .35 .6],nanmean(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),2),nanstd(squeeze(rt_med([1 3 4 5 6 7 9],tt,subuse)),[],2)/sqrt(numuse-1),'x','Color','k','LineWidth',3);
+hold on;
+axis([-1 1 .16 .42])
+set(gca,'Xtick',[-.8 -.6 -.35 -.1 0 .1 .35 .6 .8])
+set(gca,'XTickLabel',{'A' '-500' '-70' '-20' '0' '20' '70' '500' 'T'})
+xlabel('A alone |--  AT Asynchrony (ms)  --| T alone')
+ylabel('Reaction time (s)')
+print(5,[fdir 'rt_med_scatter_colXlog.png'],'-dpng')
+print(5,[fdir 'rt_med_scatter_colXlog.eps'],'-painters','-depsc')
+
+% Violin plots
+figure(6)
+plot([-.6 -.35 -.1 0 .1 .35 .6 ],mean(rt_med_tt3_subuse([1 3 4 5 6 7 9],:),2),'k')
+hold on;
+dh=distributionPlot({rt_med_tt3_subuse(11,sortb)',rt_med_tt3_subuse(1,sortb)',rt_med_tt3_subuse(3,sortb)',rt_med_tt3_subuse(4,sortb)',rt_med_tt3_subuse(5,sortb)',rt_med_tt3_subuse(6,sortb)',rt_med_tt3_subuse(7,sortb)',rt_med_tt3_subuse(9,sortb)',rt_med_tt3_subuse(12,sortb)'},'addSpread',true,'showMM',2,'histOpt',1,'xValues',[-.8 -.6 -.35 -.1 0 .1 .35 .6 .8],'distWidth',.5,'color',[.5 .5 .5]);
+set(gca,'Xtick',[-.8 -.6 -.35 -.1 0 .1 .35 .6 .8])
+set(gca,'XTickLabel',{'A' '-500' '-70' '-20' '0' '20' '70' '500' 'T'})
+xlabel('A alone |--  AT Asynchrony (ms)  --| T alone')
+ylabel('Reaction time (s)')
+print(6,[fdir 'rt_med_distplotViolin_colXlog.png'],'-dpng')
+print(6,[fdir 'rt_med_distplotViolin_colXlog.eps'],'-painters','-depsc')
+
+
+%% Race model (borrowed from rt_legomagic_proc_part1.m)
+addpath('C:\Bham_PSYCHL132432_D\Matlab\RaceModel')
+load([ddir 'rt_allsubj22_rmoutliers0.mat'])
+tt=3;
+
+buse=0;
+for ii=iiuse
+  buse=buse+1;
+  clear rt rt_race
+  load([sub{ii} '_audtac.mat'],'r*');
+  for ll=fliplr(soalist)
+    rt_seq{ll}=rrts(find(rsoaseq==condcode(ll)));
+    rt{ll}=rrts(find(rsoareal(tt-1,:)==condcode(ll)));
+    rt_race{ll}=rt{ll};
+    rt_race{ll}(find(isnan(rt{ll})))=10+0.1*randn(1,length(find(isnan(rt{ll})))); % maximum trial length plus a bit of variation for probability distributions
+    rt_race{ll}(find(rt_race{ll}<0.003))=10+0.1*randn(1,length(find(rt_race{ll}<0))); 
+  end
+  
+  nul=rt_race{10};
+  aud=rt_race{11};
+  tac=rt_race{12};
+  ms1=rt_race{1};
+  ms3=rt_race{3};
+  ms4=rt_race{4};
+  ms5=rt_race{5};
+  ms6=rt_race{6};
+  ms7=rt_race{7};
+  ms9=rt_race{9};
+  
+
+  % Modified RaceModel so that plotflag is also the figure handle, and
+  % further input for subplot
+  [Xp, Yp, Zp1(:,buse), Bp1(:,buse), Wp1(:,buse), B1p1(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac)+500,round(1000*aud),    round(1000*ms1),round(1000*nul),[.1:.1:1],1,[4 6 buse]);
+  [Xp, Yp, Zp3(:,buse), Bp3(:,buse), Wp3(:,buse), B1p3(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac)+70, round(1000*aud),    round(1000*ms3),round(1000*nul),[.1:.1:1],3,[4 6 buse]);
+  [Xp, Yp, Zp4(:,buse), Bp4(:,buse), Wp4(:,buse), B1p4(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac)+20, round(1000*aud),    round(1000*ms4),round(1000*nul),[.1:.1:1],4,[4 6 buse]);
+  [Xp, Yp, Zp5(:,buse), Bp5(:,buse), Wp5(:,buse), B1p5(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac),    round(1000*aud),    round(1000*ms5),round(1000*nul),[.1:.1:1],5,[4 6 buse]);
+  [Xp, Yp, Zp6(:,buse), Bp6(:,buse), Wp6(:,buse), B1p6(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac),    round(1000*aud)+20, round(1000*ms6),round(1000*nul),[.1:.1:1],6,[4 6 buse]);
+  [Xp, Yp, Zp7(:,buse), Bp7(:,buse), Wp7(:,buse), B1p7(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac),    round(1000*aud)+70, round(1000*ms7),round(1000*nul),[.1:.1:1],7,[4 6 buse]);
+  [Xp, Yp, Zp9(:,buse), Bp9(:,buse), Wp9(:,buse), B1p9(:,buse)] = RaceModel_guess_killTwinCorrection(round(1000*tac),    round(1000*aud)+500,round(1000*ms9),round(1000*nul),[.1:.1:1],9,[4 6 buse]);
+end
+
+hh=nan(10,9);pp=nan(10,9);
+[hh(:,1),pp(:,1),ci{1},rmstats{1}]=ttest(B1p1',Bp1','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,3),pp(:,3),ci{3},rmstats{3}]=ttest(B1p3',Bp3','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,4),pp(:,4),ci{4},rmstats{4}]=ttest(B1p4',Bp4','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,5),pp(:,5),ci{5},rmstats{5}]=ttest(B1p5',Bp5','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,6),pp(:,6),ci{6},rmstats{6}]=ttest(B1p6',Bp6','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,7),pp(:,7),ci{7},rmstats{7}]=ttest(B1p7',Bp7','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+[hh(:,9),pp(:,9),ci{9},rmstats{9}]=ttest(B1p9',Bp9','tail','left'); % left-tail means Zp-Bp is negative (that MS Z was faster than Race model B)
+
+% plot of % of participants who violate race model
+figure(100);imagesc([mean(B1p1-Bp1<0,2) mean(B1p3-Bp3<0,2) mean(B1p4-Bp4<0,2) mean(B1p5-Bp5<0,2) mean(B1p6-Bp6<0,2) mean(B1p7-Bp7<0,2) mean(B1p9-Bp9<0,2)])
+caxis([0 1]);
+set(get(100,'Children'),'XTickLabel',{'AT500' 'AT70' 'AT20' 'AT0' 'TA20' 'TA70' 'TA500'})
 
 
 %% Analyse RT
