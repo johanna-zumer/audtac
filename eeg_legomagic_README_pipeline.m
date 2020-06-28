@@ -65,7 +65,7 @@ eeg_freqanalysis_sensor1 % calls eeg_legomagic_trialSelection2_wakeSleep_sepTacA
 eeg_freqanalysis_unisensory % Unisensory stats and plotting
 eeg_freqanalysis_stats % main T-stat 
 eeg_freqanalysis_ANOVA % ANOVA across conditions
-eeg_freqanalysis_plotLines % plots time courses of band-specific results
+eeg_freqanalysis_plotLines % plots time courses and topos of band-specific results
 eeg_freqanalysis_phaseTime0 % phase at time zero plays a role? % see also eeg_legomagic_power_phase_bins
 
 % % Obsolete
