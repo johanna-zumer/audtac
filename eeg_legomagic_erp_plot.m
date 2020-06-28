@@ -30,6 +30,7 @@ mcseed=13;
 usetr=0;
 plotallmask=1; % =0 means each subplot will use significane mask relevant for those sensors & time plotted only
 % =1 means each subplot will use mask relevant for all sensors even those not plotted.
+graphabs=1; % = 0 for normal plotting, =1 for graphical abstract (EJN)
 
 stim1st= [-.5 nan -.07 -.02 0   0   0 nan  0];
 stim2nd= [  0 nan    0    0 0 .02 .07 nan .5];
@@ -38,11 +39,22 @@ if sleep
   iter=11;
   ss=12;
   trialkc=0;
+  keyboard
+  load ANOVA_sleep1_ERP.mat
 else
   iter=27;  % previous result; final way (easier!)
   %   iter=31;  % smart sampling
   ss=10;
   trialkc=-1;
+  load ANOVA_sleep0_ERP.mat
+  clustermat=stat_TPA_MSPN_1wayANOVA.posclusterslabelmat;
+  clustermat(clustermat>=3)=0;  
+  reltimepoints=find(mean(clustermat)>.2);
+  diffpoints=find(diff(reltimepoints)>1)
+  erp_anova_tw1=reltimepoints(1:89);
+  erp_anova_tw2=reltimepoints(91:185);
+  erp_anova_tw3=reltimepoints(189:239);
+  erp_anova_tw4=reltimepoints(240:end);
 end
 
 if iterflag
@@ -121,7 +133,6 @@ if incondflag==1 % for within-condition
   topozlimdiff=[-5 5];
   lineylim=[-5 8];
 elseif incondflag==2
-  load ANOVA_sleep0_ERP.mat
   timwin=[-0.5 1];
   topozlim=[-5 5];
   topozlimdiff=[-3 3];
@@ -135,11 +146,12 @@ end
 
 timeadd=max(0,soades);
 
+%%
 close all
 clear tmp*
 clear grind_TPA_MSPN
-for ll=soalist
-% for ll=[6 7 9]
+% for ll=soalist
+for ll=[3 4 5 9]
   cfg=[];
   cfg.operation='subtract';
   cfg.parameter='individual';
@@ -358,6 +370,7 @@ for ll=soalist
     %     subplot(1,2,cg)
     figure(ll+10*(cg+1))
     ft_singleplotER(cfg,tmpu1,tmpm10,tmpd5);
+    cfg2=[];cfg2.channel=cfg.channel;cfg2.avgoverchan='yes';tmpd5_tc{ll,cg}=ft_selectdata(cfg2,tmpd5);
     hold on;plot(tmpn2.time,0,'k');
     set(gca,'XTick',[-.6:.1:1.1])
     set(gca,'XTickLabel',{ '' '-0.5' '' ' ' '' ' ' '0' ' ' '' ' ' '' '0.5 ' '' ' ' ''  ' ' '1.0' ' '})
@@ -459,32 +472,44 @@ for ll=soalist
     cfg.highlight='on';
     cfg.highlightsize=12;
     cfg.xlim=[tmpd5.time(masktime(1)) tmpd5.time(masktime(end))];
+    if graphabs  % this can be =1 or =2 for early or late window of middle asynchronies
+      switch ll
+        case 3
+          cfg.xlim=[.14 .22];
+        case 7
+          cfg.xlim=[.21 .29]; % this is .14 to .22, but with .7 corrected for of xaxis.          
+        case {4, 5}
+          if graphabs==1
+            cfg.xlim=[.07 .17];
+          elseif graphabs==2
+            cfg.xlim=[.37 .4];
+          end
+        case 6
+          if graphabs==1
+            cfg.xlim=[.09 .19]; % this is .07 to .17, but with .2 corrected for of xaxis.          
+          elseif graphabs==2
+            cfg.xlim=[.39 .42];  % this is .37 to .40, but with .2 corrected for of xaxis.          
+          end
+      end
+    end
     cfg.comment='no';
-    %     if ll==3
-    %       cfg.xlim=[.1 .35];
-    %     elseif ll==4
-    %       cfg.xlim=[.06 .42];
-    %     elseif ll==5
-    %       cfg.xlim=[-.04 .36];
-    %     elseif ll==6
-    %       cfg.xlim=[.1 .44];
-    %     end
 %     sigchannels=tmpd5.label(find(ceil(mean(tmpd5.mask(:,dsearchn(tmpd5.time',cfg.xlim(1)):dsearchn(tmpd5.time',cfg.xlim(2))),2))));
     sigchannels=tmpd5.label(find(ceil(mean(statt_mc{ll,tt,ss}.mask,2))));
     cfg.highlightchannel=sigchannels;
     figure(100+ll);
     ft_topoplotER(cfg,tmpu1);
-    print(100+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(100+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    print(100+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.png'],'-dpng')
+    print(100+ll,[fdir 'erp_topoU_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.eps'],'-painters','-depsc')
     figure(110+ll);
     ft_topoplotER(cfg,tmpm10);
-    print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.png'],'-dpng')
+    print(110+ll,[fdir 'erp_topoM_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.eps'],'-painters','-depsc')
     figure(120+ll);
     cfg.zlim=topozlimdiff;
+    cfg.colorbar='yes';
     ft_topoplotER(cfg,tmpd5);
-    print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
-    print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.png'],'-dpng')
+    print(120+ll,[fdir 'erp_topoDiff_' num2str(ll) num2str(tt) num2str(ss) '_graphabs' num2str(graphabs) '.eps'],'-painters','-depsc')
     erpsave{ll}.topo{1}=mean(tmpd5.avg(:,nearest(tmpd5.time,cfg.xlim(1)):nearest(tmpd5.time,cfg.xlim(2))),2);
     
     %     figure(50+ll);
@@ -529,6 +554,7 @@ for ll=soalist
     cfg.highlightsize=12;
     cfg.comment='no';
     cfg.zlim=topozlimdiff;
+    cfg.colorbar='yes';
     
     cfg.xlim=[erp_anova_tw1(1) erp_anova_tw1(end)]/1000+stim2nd(ll);
     cfg.highlightchannel=erp_anova_chan1;
@@ -536,6 +562,8 @@ for ll=soalist
     ft_topoplotER(cfg,tmpd5);
     print(220+ll,[fdir 'erp_topoDiff_ANOVAtw1_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(220+ll,[fdir 'erp_topoDiff_ANOVAtw1_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    cfg1=[];    cfg1.avgovertime='yes';
+    cfg1.latency=cfg.xlim;tmpd5_forcorr_tw1{ll}=ft_selectdata(cfg1,tmpd5);
     
     cfg.xlim=[erp_anova_tw2(1) erp_anova_tw2(end)]/1000+stim2nd(ll);
     cfg.highlightchannel=erp_anova_chan2;
@@ -543,6 +571,7 @@ for ll=soalist
     ft_topoplotER(cfg,tmpd5);
     print(230+ll,[fdir 'erp_topoDiff_ANOVAtw2_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(230+ll,[fdir 'erp_topoDiff_ANOVAtw2_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    cfg1.latency=cfg.xlim;tmpd5_forcorr_tw2{ll}=ft_selectdata(cfg1,tmpd5);
     
     cfg.xlim=[erp_anova_tw3(1) erp_anova_tw3(end)]/1000+stim2nd(ll);
     cfg.highlightchannel=erp_anova_chan3;
@@ -550,6 +579,7 @@ for ll=soalist
     ft_topoplotER(cfg,tmpd5);
     print(240+ll,[fdir 'erp_topoDiff_ANOVAtw3_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(240+ll,[fdir 'erp_topoDiff_ANOVAtw3_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
+    cfg1.latency=cfg.xlim;tmpd5_forcorr_tw3{ll}=ft_selectdata(cfg1,tmpd5);
 
     cfg.xlim=[erp_anova_tw4(1) erp_anova_tw4(end)]/1000+stim2nd(ll);
     cfg.highlightchannel=erp_anova_chan4;
@@ -558,13 +588,19 @@ for ll=soalist
     ft_topoplotER(cfg,tmpd5);
     print(250+ll,[fdir 'erp_topoDiff_ANOVAtw4_' num2str(ll) num2str(tt) num2str(ss) '.png'],'-dpng')
     print(250+ll,[fdir 'erp_topoDiff_ANOVAtw4_' num2str(ll) num2str(tt) num2str(ss) '.eps'],'-painters','-depsc')
-elseif sleep==1
+    cfg1.latency=cfg.xlim;tmpd5_forcorr_tw4{ll}=ft_selectdata(cfg1,tmpd5);
+  elseif sleep==1
     disp('fix me')
     keyboard
   end
 
 end
 
+if sleep==0
+  save tmpd5_forcorr.mat tmpd5_forcorr_tw* tmpd5_tc
+end
+
+%%
 keyboard
 for ll=soalist,erpsave{ll}.label=statt_allmc{ll,tt,ss}.label;end
 save erpsave.mat erpsave*
