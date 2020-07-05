@@ -6,7 +6,7 @@ eeg_legomagic_preamble
 soadesc={'Aud first by 500ms' '' 'Aud first by 70ms' 'Aud first by 20ms' 'Simultaneous' 'Tac first by 20ms' 'Tac first by 70ms' '' 'Tac first by 500ms'};
 plotflag=0;
 printflag=0;
-statsflag=1;
+statsflag=0;
 medsplitstatsflag=0;
 loadprevstatsflag=0;
 tacnulmsaudstatsflag=0;
@@ -68,7 +68,7 @@ figind=1;
 for ll=soalist
   %       for ll=[5]
   %   for tt=1:4
-  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed P_* H_* STATS_* featind* *trlkeep* pK* minfind
+  clearvars -except ll tt sub edir ddir ii* sleep *flag figind soa* chanuse* stat* grave*T* grind_*save plv iter* usetr trial* synch* ftver mcseed P_* H_* STATS_* featind* *trlkeep* pK* kcdist min* max* pA* hA*
   
   %     if ll==1 | ll==9
   %       subuse=8:32;
@@ -98,9 +98,6 @@ for ll=soalist
   subuse=subuseall; % reset to all for each sleep stage
   
   for ii=subuseall
-    if ii>=27
-      keyboard
-    end
     %           for ii=[8 9]
     cd([edir sub{ii} ])
     %   load(['tlock_diffs_' sub{ii} '.mat']);
@@ -279,6 +276,10 @@ for ll=soalist
           kcdist{ll,subuseind}.A.trial=squeeze(tlock_audKc2nd{ll+40}.trial);
           kcdist{ll,subuseind}.T.trial=squeeze(tlock_tacKc2nd{ll+20}.trial);
           kcdist{ll,subuseind}.N.trial=squeeze(tlock_nulKc2nd{ll+50}.trial);
+          kcdist{ll,subuseind}.AT.time=squeeze(tlock_tacKc2nd{ll}.time);
+          kcdist{ll,subuseind}.A.time=squeeze(tlock_audKc2nd{ll+40}.time);
+          kcdist{ll,subuseind}.T.time=squeeze(tlock_tacKc2nd{ll+20}.time);
+          kcdist{ll,subuseind}.N.time=squeeze(tlock_nulKc2nd{ll+50}.time);
 %           kcdist{ll,subuseind}.Aaud=squeeze(tlock_audKcaud{ll+40}.trial);
         end
         
@@ -923,25 +924,35 @@ for ll=soalist
   nsub_nKD_nSD=length(tlock_tacMSpN_nKD_nSD_each);
   
   if sleep  % KLdiv stuff
-    keyboard
       for nn=1:nsub
-        minATpN(nn,:)=min(squeeze(kcdist{ll,nn}.ATpN.trial));
-        minAT(nn,:)=min(kcdist{ll,nn}.AT.trial);
-        minA(nn,:)=min(kcdist{ll,nn}.A.trial);
-        minT(nn,:)=min(kcdist{ll,nn}.T.trial);
-        minN(nn,:)=min(kcdist{ll,nn}.N.trial);
-        minApT(nn,:)=min(squeeze(kcdist{ll,nn}.ApT.trial));
-        maxATpN(nn,:)=max(squeeze(kcdist{ll,nn}.ATpN.trial));
-        maxAT(nn,:)=max(kcdist{ll,nn}.AT.trial);
-        maxA(nn,:)=max(kcdist{ll,nn}.A.trial);
-        maxT(nn,:)=max(kcdist{ll,nn}.T.trial);
-        maxN(nn,:)=max(kcdist{ll,nn}.N.trial);
-        maxApT(nn,:)=max(squeeze(kcdist{ll,nn}.ApT.trial));
+        minATpN(ll,nn,:)=min(squeeze(kcdist{ll,nn}.ATpN.trial));
+        minAT(ll,nn,:)=min(kcdist{ll,nn}.AT.trial);
+        minA(ll,nn,:)=min(kcdist{ll,nn}.A.trial);
+        minT(ll,nn,:)=min(kcdist{ll,nn}.T.trial);
+        minN(ll,nn,:)=min(kcdist{ll,nn}.N.trial);
+        minApT(ll,nn,:)=min(squeeze(kcdist{ll,nn}.ApT.trial));
+        
+        maxATpN(ll,nn,:)=max(squeeze(kcdist{ll,nn}.ATpN.trial));
+        maxAT(ll,nn,:)=max(kcdist{ll,nn}.AT.trial);
+        maxA(ll,nn,:)=max(kcdist{ll,nn}.A.trial);
+        maxT(ll,nn,:)=max(kcdist{ll,nn}.T.trial);
+        maxN(ll,nn,:)=max(kcdist{ll,nn}.N.trial);
+        maxApT(ll,nn,:)=max(squeeze(kcdist{ll,nn}.ApT.trial));
         %       meanAaud(nn,:)=mean(kcdist{ll,nn}.Aaud.trial);
+
+        [minATmean(ll,nn),mindATmean(ll,nn)]=min(mean(kcdist{ll,nn}.AT.trial));
+        [minAmean(ll,nn),mindAmean(ll,nn)]=min(mean(kcdist{ll,nn}.A.trial));
+        [minTmean(ll,nn),mindTmean(ll,nn)]=min(mean(kcdist{ll,nn}.T.trial));
+        [minNmean(ll,nn),mindNmean(ll,nn)]=min(mean(kcdist{ll,nn}.N.trial));
+        
+        meanATpNandApT(ll,nn,:)=mean([mean(squeeze(kcdist{ll,nn}.ATpN.trial)); mean(squeeze(kcdist{ll,nn}.ApT.trial))]);
+
       end
+      [hATvsT(ll),pATvsT(ll)]=ttest(mindATmean(ll,:),mindTmean(ll,:));
+      [hATvsA(ll),pATvsA(ll)]=ttest(mindATmean(ll,:),mindAmean(ll,:));
     if minfind==1
-      minATpNandApT(ll,nn,:)=mean([mean(squeeze(kcdist{ll,nn}.ATpN.trial)); mean(squeeze(kcdist{ll,nn}.ApT.trial))]);
-      save([edir 'Kcmintime.mat'],'minATpNandApT');
+      save([edir 'Kcmintime.mat'],'meanATpNandApT','mind*','kcdist');
+      % see eeg_legomagic_Kcmintime.m
       %       minallcond=min([mean(minATpN); mean(minAT); mean(minA); mean(minT); mean(minN); mean(minApT)]);
       %       maxallcond=max([maxATpN maxAT maxA maxT maxN maxApT]);
       %       lolim(ll)=10*floor(minallcond(mind(ll))/10);
@@ -952,11 +963,12 @@ for ll=soalist
       continue
     elseif minfind==2
 %       [mn,mind(ll)]=min(mean(minATpNandApT,1));  % find time point with minimal value for avg of ATpN and ApT across all subjects
-      load([edir 'Kclim.mat']);
-      lolim_final=min(lolim);
-      hilim_final=max(hilim);
-      lolim_use=lolim_final;
-      hilim_use=hilim_final;
+      load([edir 'Kcmintime.mat']);
+      anova1(mindATmean([1 3 4 5 6 7 9],:));  % p=0.3165
+      anova1([mindATmean([1 3 4 5 6 7 9],:); mindAmean(5,:); mindTmean(5,:)]); %p=.1096
+      mean(mean(mindATmean([1 3 4 5 6 7 9],:)')); % %9.7217
+      mean(mean([mindATmean([1 3 4 5 6 7 9],:); mindAmean(5,:); mindTmean(5,:)]')); % 9.667
+      % conclusion: okay to 
     end
     for nn=1:nsub
       kcdist{ll,nn}.ATpN_ApT_KLdiv=computeAT_KLdiv(kcdist{ll,nn}.ATpN.trial(:,mind(ll)),kcdist{ll,nn}.ApT.trial(:,mind(ll)),lolim_use:10:hilim_use,1e-9);
