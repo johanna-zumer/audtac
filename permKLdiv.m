@@ -1,7 +1,8 @@
-function kldiv_sort=permKLdiv(data1,data2,lolim,hilim)
+function kldiv_sort=permKLdiv(data1,data2,edges,added)
 % gives sorted 100 KLdiv values from permutation distribution
 
-trialvals1=[data1; data2]; % ntr x 2
+randomseed_ft(13);
+trialvals1=[data1, data2]; % ntr x 2
 numtr=size(trialvals1,1);
 for np=1:100  % number of permutations
   permlabel=round(rand(1,numtr));
@@ -12,6 +13,6 @@ for np=1:100  % number of permutations
       permtrialvals(nt,:)=trialvals1(nt,:);
     end
   end
-  kldiv(np)=computeAT_KLdiv(permtrialvals(:,1),permtrialvals(:,2),lolim:10:hilim,1e-9);
+  kldiv(np)=computeAT_KLdiv(permtrialvals(:,1),permtrialvals(:,2),edges,added,0);
 end
 kldiv_sort=sort(kldiv);
