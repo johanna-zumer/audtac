@@ -1,4 +1,5 @@
 function eeg_legomagic_Kcmintime
+% eeg_legomagic_preamble  % often called at beginning to set paths etc.
 
 nsub=19;
 load([edir 'Kcmintime.mat']);

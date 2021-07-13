@@ -42,6 +42,8 @@ concat_stim_files  % updated on 20 March, 2015 to process response-no-EEG sessio
 
 %% then independent paths for ERP and TFR
 
+eeg_legomagic_preamble  % often called at beginning to set paths etc.
+
 % % OLD for recreating awake-alone results in october 2014 (although
 % unforutnately slightly modified to match newer way of doing it). top
 % section is modified but bottom (stats and figures) is not modified as
